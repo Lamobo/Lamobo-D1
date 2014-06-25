@@ -1,0 +1,51 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{font:normal 12px  "宋体"; line-height:22px; color:#000;margin:0;padding:0; }
+div, ul, li, ol, p, h1, h2, h3, h4, h5, h6, table, form, a, img, input,dl,dd,dt,span{
+	margin: 0px;
+	padding: 0px;
+	list-style-type: none; 
+}
+img{border:0;}
+ a{color:#000 ; text-decoration: none;}
+.fleft{ float:left;}
+.fright{float:right;}
+.clear{ clear:both;} 
+.pad100{padding:0 100px;}
+
+.main{width:960px;margin:20px auto;background:#F0F0F0;border:1px solid  #999}
+.main_left{ width:200px; line-height:28px;height:550px;border-right:1px solid   #999 ; background: #D2D2D2 ;}
+.main_right{ width:754px;padding:2px; }
+.sidenav {margin:2px; text-align:center;}
+.sidenav p{ background: url(../images/line.png) bottom center no-repeat;padding:3px 0;}
+.sidenav p.main_title,.main_right .title{ background: url(../images/tbg.png) no-repeat; height:32px; line-height:32px; color:#fff; font: bold 14px ; border-bottom:none;}
+.sidenav p.on{ background: url(../images/onbg.png) center no-repeat;}
+
+.main_right .title{ text-align:center; background:url(../images/tbg_r.png) repeat-x ;}
+.tablist{margin:20px auto;}
+.tablist input, select{ border:1px solid #999; height:22px;width:260px}
+.tablist input.checkbox{border:0; width: auto}
+input.btn{ background:url(../images/btn.png) no-repeat;width:78px;height:30px;border:0; cursor: pointer;font:normal 13px 微软雅黑;}
+.btn2{ background:url(../images/btn_l.png) no-repeat;width:140px; height:36px;color:#fff;border:0; cursor: pointer;font:normal 13px 微软雅黑;}
+.listdiv{border:1px solid #999;height:200px; overflow:auto;width:90%;margin:10px auto;}
+.wlist{}
+.wlist tr.title td{border-right:1px solid #999;border-bottom:1px solid #999; background: #CCC; background-image:none;height:20px; line-height:20px;color:#000;}
+.wlist td{border-bottom:1px solid 
+#ccc;border-right:1px solid #ccc;}
+
+
+
+.noborder input{border:0;width:auto; vertical-align:middle}
+
+.timerbox {border:1px solid #999; position:relative;width:80%;margin:20px auto;padding:15px 20px 5px 20px; text-align:left}
+.timerspan{ display:inline-block; background:#F0F0F0; position:absolute;left:40px;top:-6px;padding:0 5px;font:bold 13px ""}
+
+.timerbox  .week select{width:400px;border:1px solid #ccc;}
+.timerbox select{width:200px;}
+
+
+
+
+
+

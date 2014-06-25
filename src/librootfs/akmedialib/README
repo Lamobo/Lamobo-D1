@@ -1,0 +1,3 @@
+This directory contain several libraries and header files for anyka linux platform's multimedia acceleration.
+For application development, copy "lib" and "include" directories to "/usr" of your sysroot directory.
+For running, copy "lib" and "share" directories to "/usr" directory of your root file system.

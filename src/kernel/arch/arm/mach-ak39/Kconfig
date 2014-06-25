@@ -1,0 +1,73 @@
+# linux/arch/arm/mach-ak39/Kconfig
+#
+# Copyright 2013 Anaka Microelectronics
+#
+# Licensed under GPLv2
+ 
+# define CPU TYPE FLAGS 
+config CPU_AK3910
+	bool
+config CPU_AK3916
+	bool
+config CPU_AK3918
+	bool
+
+# Machine support
+choice
+	prompt "ANYKA AK39xx boards"
+	default ARCH_SDK3910
+	depends on ARCH_AK39
+
+config ARCH_SDK3910
+	bool "SDK3910"
+	depends on ARCH_AK39
+	select CPU_AK3910
+	help
+	  Say Y here if you are using the SDK3910(Athena v2 borad) on chip AK3910
+
+config ARCH_AIMER39_AK3916
+	bool "Aimer39 AK3916 board"
+	depends on ARCH_AK39
+	select CPU_AK3916
+	help
+	  Say Y here if you are using the Aimer39_AK3916_MB_v1.0.0 board on chip AK3916
+
+config ARCH_AIMER39_AK3918
+	bool "Aimer39 AK3918 board"
+	depends on ARCH_AK39
+	select CPU_AK3918
+	help
+	  Say Y here if you are using the Aimer39_AK3918_MB_v1.0.0 board on chip AK3918
+
+endchoice
+
+# aisc cpufreq set
+config ASIC_FREQ_VALUE
+	int "Config asic frequency(if asic>100MHz asic=vclk; else asic=vclk/2)"
+	range 45000000 120000000
+	default 90000000
+	depends on ARCH_AK39
+	help
+	  config ak39xx asic frequency when the kernel uncompress.
+	  note: vclk be equal to even asic.
+
+# power managerment
+comment "Power management"
+config AK39_PM
+	bool "ak39 Power Management support"
+	depends on PM && ARCH_AK39
+	help
+	Say Y here if you want support power management for AK39.
+
+config AK39_CPUFREQ
+	bool "ak39 Frequency scaling support"
+	depends on CPU_FREQ && ARCH_AK39
+	help
+	  Say Y here, CPU Frequency scaling support for AK39 SoC CPUs.
+
+# chip extra controller lib
+config AK39_PWM_TIMER
+	bool "ak39 PWM/Timer Control support"
+	depends on ARCH_AK39
+	help
+	  Say Y here if you want support pwm control.

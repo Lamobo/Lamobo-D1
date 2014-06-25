@@ -1,0 +1,4 @@
+header-y += fha.h
+header-y += anyka_types.h
+header-y += nand_list.h
+

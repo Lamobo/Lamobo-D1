@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# mount jffs2 file-system. 
+/bin/mount -t jffs2 /dev/mtdblock2 /etc/jffs2
+# note: can't recommend running other app before `mount` command.
+/usr/bin/tcpsvd 0 21 ftpd /mnt &
+
+/usr/bin/telnetd
+ntpd -p 218.75.4.130
+/etc/init.d/monitor.sh &
+/etc/jffs2/service.sh &
+

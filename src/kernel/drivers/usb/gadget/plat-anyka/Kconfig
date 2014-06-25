@@ -1,0 +1,37 @@
+config USB_GADGET_AKUDC_PRODUCER
+	bool "Anyka usb device Port for PRODUCER"
+	depends on ARCH_AK39
+	select USB_GADGET_DUALSPEED
+	help
+	  Anyka USB-OTG device support for producer
+
+if USB_GADGET_AKUDC_PRODUCER
+config USB_AKUDC_PRODUCER
+	tristate
+	default y
+endif
+
+config USB_GADGET_AKUDC
+	bool "Anyka usb device Port"
+	depends on ARCH_AK39
+	select USB_GADGET_DUALSPEED
+	help
+	  Anyka USB-OTG gadget device support
+
+config USB_AKUDC
+	tristate "udc driver support(usb-otg)"
+	depends on USB_GADGET_AKUDC
+	default USB_GADGET
+	help
+	  udc driver in ak39xx platfrom
+
+config USB_AKUDC_DEBUG_FS
+	bool "Debugging information files (DEVELOPMENT)"
+	depends on USB_AKUDC
+	help
+	  Some of the drivers in the "gadget" framework can expose debugging information 
+	  in files such as /proc/driver/udc (for a peripheral controller).  The information in these
+	  files may help when you're troubleshooting or bringing up a driver on a new board.
+
+	  Enable these files by choosing "Y" here.  If in doubt, or to conserve kernel memory, say "N".
+

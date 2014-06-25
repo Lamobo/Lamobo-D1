@@ -1,0 +1,15 @@
+# arch/arm/plat-anyka/Kconfig
+#
+# Copyright 2012 Anaka Microelectronics
+#
+# Licensed under GPLv2
+
+config PLAT_ANYKA
+	bool
+	depends on ARCH_AK39
+	default y
+	help
+	  Base platform code for ak39xx chips common device
+
+# low-level serial option nodes
+

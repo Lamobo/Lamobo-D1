@@ -1,0 +1,82 @@
+# ALSA ARM drivers
+
+menuconfig SND_ARM
+	bool "ARM sound devices"
+	depends on ARM
+	default y
+	help
+	  Support for sound devices specific to ARM architectures.
+	  Drivers that are implemented on ASoC can be found in
+	  "ALSA for SoC audio support" section.
+
+if SND_ARM
+
+config SND_AK_PCM
+   tristate "Anyka ADC/DAC sound driver"
+   select SND_PCM
+   help
+	  ALSA sound driver fo the AK ADC/DAC.
+	  
+choice
+	prompt "Select codec"
+	depends on SND_AK_PCM
+
+config CODEC_AK39
+	bool "AK39 internal codec"
+	depends on SND_AK_PCM
+	help
+	  ak39 SoC audio codec.
+	  	  
+endchoice
+	  	  
+choice
+	prompt "HP/Speaker switch mode"
+	depends on SND_AK_PCM
+	
+config SPKHP_SWITCH_AUTO
+	bool "auto switch in audio driver(default, for both linux and android)"
+
+config SPKHP_SWITCH_MIXER
+	bool "notify,but not switch in audio driver(with ALSA lib amixer)"
+
+config SPKHP_SWITCH_UEVENT
+	bool "detect HP by UEVENT(only for android)"
+	
+endchoice
+
+config SUPPORT_AEC
+	bool "Support Accoustic Echo Cancllation"
+	depends on SND_AK_PCM
+	help
+		Support Accoustic Echo Cancllation.
+	  	  
+config SND_ARMAACI
+	tristate "ARM PrimeCell PL041 AC Link support"
+	depends on ARM_AMBA
+	select SND_PCM
+	select SND_AC97_CODEC
+
+config SND_PXA2XX_PCM
+	tristate
+	select SND_PCM
+
+config SND_PXA2XX_LIB
+	tristate
+	select SND_AC97_CODEC if SND_PXA2XX_LIB_AC97
+
+config SND_PXA2XX_LIB_AC97
+	bool
+
+config SND_PXA2XX_AC97
+	tristate "AC97 driver for the Intel PXA2xx chip"
+	depends on ARCH_PXA
+	select SND_PXA2XX_PCM
+	select SND_AC97_CODEC
+	select SND_PXA2XX_LIB
+	select SND_PXA2XX_LIB_AC97
+	help
+	  Say Y or M if you want to support any AC97 codec attached to
+	  the PXA2xx AC97 interface.
+
+endif	# SND_ARM
+

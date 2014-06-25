@@ -1,0 +1,26 @@
+config USB_ANYKA_HCD
+	bool "Anyka on-chip HCD support"
+	depends on USB && ARCH_AK39
+	help
+	  Enable support for the ANYKA on-chip HCD, It is support full speed and high speed
+
+config USB_AKOTG_HS_HCD
+	tristate "USB(otg) High-Speed HCD support"
+	depends on USB_ANYKA_HCD
+	help
+	  The ANYKA chips inner USB otg high speed host controllers. Enable this
+	  option if your board has this chip. If unsure, say N.
+	  
+	  This driver does not support isochronous transfers.
+	  
+	  To compile this driver as a module, choose M here: the
+	  module will be called otg-hs.
+
+config USB_AKOTG_DMA
+    bool "USB(otg) support for DMA transfer"
+	depends on USB_AKOTG_HS_HCD
+	help
+	  Say 'Y' to turn on dma support for anyka otg host.
+	  
+	  If no need, say N.
+

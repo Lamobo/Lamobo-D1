@@ -1,0 +1,64 @@
+[global]
+title                          = IP Camera
+welcome                        = IP Camera
+
+
+[ethernet]
+dhcp                           = 1
+ipaddr                         = 192.168.1.8
+netmask                        = 255.255.0.0
+gateway                        = 192.168.1.1
+firstdns                       = 208.208.208.208
+backdns                        = 108.108.108.108
+
+
+[wireless]
+ssid                           = TP-LINK
+mode                           = Infra
+security                       = WPA/WPA2 PSK
+password                       = 12345678
+running                        = softap
+
+[softap]
+s_ssid						   = ak39
+s_password					   = 12345678	
+
+[video]
+format1						   = h264
+dpi1						   = 720
+kbps1						   = 1800
+kbps_mode1					   = static_kbps
+group1						   = 15
+fps1						   = 30
+format2						   = mjpeg
+dpi2						   = qvga
+kbps2						   = 300
+kbps_mode2					   = static_kbps
+quality						   = 5
+group2						   = 15
+fps2						   = 30
+video_kbps					   = 1
+
+[picture]
+video_index					   = 1
+el_hz						   = 50
+osd_name					   = 
+osd_place					   = left_up
+osd_time					   = hide
+
+[recoder]
+video_index					   = 1
+length						   = 2
+time						   = 1
+
+[user]
+name                           = admin
+passwd                         = admin
+root_name					   = admin
+root_passwd					   = *123456789*
+
+[system]
+serverip					   = 192.168.1.101
+serveradd 					   = www.baidu.com
+port 						   = 5220
+

@@ -1,0 +1,42 @@
+config SENSOR_GC0308
+	tristate "gc0308 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a gc0308 sensor driver
+	  
+config SENSOR_OV2643
+	tristate "ov2643 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a ov2643 sensor driver
+	  
+config SENSOR_OV7725
+	tristate "ov7725 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a ov7725 sensor driver
+	  
+config SENSOR_HM1375
+	tristate "hm1375 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a hm1375 sensor driver
+	  
+config SENSOR_OV9712
+	tristate "ov9712 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a ov9712 sensor driver
+	  
+config SENSOR_OV2710
+	tristate "ov2710 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a ov2710 sensor driver
+
+config SENSOR_AR0130
+	tristate "ar0130 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a ar0130 sensor driver
+
