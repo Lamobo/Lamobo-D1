@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Recent SQLite News</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+<h2>Recent News</h2>
+
+<a name="2010_jan_06"></a><h3>2010-Jan-06 - <a href="releaselog/3_6_22.html">Version 3.6.22</a></h3><p>
+  SQLite <a href="releaselog/3_6_22.html">version 3.6.22</a> is a bug-fix release.  Two bugs have been fixed
+  that might cause incorrect query results.  
+  <ul>
+  <li>Ticket <a href="http://www.sqlite.org/src/info/31338dca7e">31338dca7e</a>
+  describes a
+  problem with queries that have a WHERE clause of the form (x AND y) OR z
+  where x and z come from one table of a join and y comes from a different
+  table.
+  <li> Ticket <a href="http://www.sqlite.org/src/info/eb5548a849">eb5548a849</a>
+  describes
+  a problem where the use of the CAST operator in the WHERE clause can lead
+  to incorrect results if the column being cast to a new datatype is also
+  used in the same WHERE clause without being cast.
+  </ul>
+  Both bugs are obscure,
+  but because they could arise in an application after deployment, it is
+  recommended that all applications upgrade SQLite to version 3.6.22.</p>
+
+<p>  This release also includes other minor bug fixes and performance
+  enhancements, especially in the <a href="fts3.html">FTS3</a> extension.
+</p><hr width="50%"><a name="2009_dec_07"></a><h3>2009-Dec-07 - <a href="releaselog/3_6_21.html">Version 3.6.21</a></h3><p>
+  SQLite <a href="releaselog/3_6_21.html">version 3.6.21</a> focuses on performance optimization.  For
+  a certain set of traces, this version uses 12% fewer CPU instructions
+  than the previous release (as measured by valgrind).  In addition, the
+  <a href="fts3.html">FTS3</a> extension has been through an extensive cleanup and rework and
+  the <a href="c3ref/profile.html">sqlite3_trace()</a> interface has been modified to insert 
+  <a href="lang_expr.html#varparam">bound parameter</a> values into its output.
+</p><hr width="50%"><a name="2009_nov_04"></a><h3>2009-Nov-04 - <a href="releaselog/3_6_20.html">Version 3.6.20</a></h3><p>
+  SQLite <a href="releaselog/3_6_20.html">version 3.6.20</a> is a general maintenance release.  The
+  query planner has been enhanced to work better with bound parameters
+  in LIKE and GLOB operators and in range constraints and various minor
+  bugs have been fixed.  Upgrading from 3.6.19 is optional.
+</p><hr width="50%"><a name="2009_oct_14"></a><h3>2009-Oct-14 - <a href="releaselog/3_6_19.html">Version 3.6.19</a></h3><p>
+  SQLite <a href="releaselog/3_6_19.html">version 3.6.19</a> adds native support for
+  <a href="foreignkeys.html">foreign key constraints</a>, including deferred constraints and
+  cascading deletes.  Enforcement of foreign keys is disabled by
+  default for backwards compatibility and must be turned on using
+  the <a href="pragma.html#pragma_foreign_keys">foreign_keys pragma</a>.</p>
+
+<p>  Version 3.6.19 also adds support for the
+  <a href="lang_expr.html#isisnot">IS and IS NOT operators</a>.  Formerly, SQLite (as most
+  other SQL database engines) supported IS NULL and IS NOT NULL.  The
+  IS and IS NOT operators are generalizations that allow the right-hand
+  side to be an arbitrary expression.  IS and IS NOT work the same as
+  == (equals) and != (not equals) except that with IS and IS NOT the
+  NULL values compare equal to one another.
+</p><hr width="50%"><a name="2009_sep_11"></a><h3>2009-Sep-11 - <a href="releaselog/3_6_18.html">Version 3.6.18</a></h3><p>
+  Beginning with this release, the SQLite source code is tracked and
+  managed using the <a href="http://www.fossil-scm.org/">Fossil</a>
+  distributed configuration management system.  SQLite was previously
+  versioned using CVS.  The entire CVS history has been imported into
+  Fossil.  The older CVS repository remains on the website but is not
+  read-only.</p>
+
+<p>  There are two major enhancements in SQLite version 3.6.18.  The first
+  is a series or refinements to the query planner that help SQLite to
+  choose better plans for joins where in the past it was selecting suboptimal
+  query plans.  The <a href="compile.html#enable_stat2">SQLITE_ENABLE_STAT2</a> compile-time option has been
+  added to cause SQLite to collect histogram data on indices when the
+  <a href="lang_analyze.html">ANALYZE</a> command is run.  The use of histograms improve the query
+  planning performance even more.</p>
+
+<p>  The second major enhancement is that SQLite now support recursive
+  triggers.  The older non-recursive behavior of triggers is still the
+  default behavior.  Recursive triggers are activated using the
+  <a href="pragma.html#pragma_recursive_triggers">recursive_triggers pragma</a>.  In addition to allowing triggers to
+  call themselves (either directly or indirectly) the new capability
+  also fires DELETE triggers on rows that are removed from a table
+  as a result of <a href="lang_conflict.html">REPLACE</a> conflict resolution processing.</p>
+
+<p>  Non-recursive triggers are still the default behavior since this
+  is least likely to cause problems for existing applications.  However,
+  we anticipate that triggers will become
+  recursive by default beginning with release 3.7.0.  At that point,
+  applications that want to continue using the older non-recursive
+  trigger behavior will need to use the <a href="pragma.html#pragma_recursive_triggers">recursive_triggers pragma</a>
+  to disable recursive triggers.</p>
+
+<p>  This version of SQLite also contains bug fixes, though none of the
+  bugs are serious and all are obscure, so upgrading is optional.</p>
+
+<p>  The SQLite core continues to have <a href="testing.html#coverage">100% branch test coverage</a>
+  and so despite the many changes in this release, the developers 
+  believe that this version of SQLite is stable and ready for production
+  use.
+</p><hr width="50%"><a name="2009_aug_10"></a><h3>2009-Aug-10 - <a href="releaselog/3_6_17.html">Version 3.6.17</a></h3><p>
+  This is a monthly maintenance release with a focus of bug fixes,
+  performance improvements, and increased test coverage.  This is the
+  first release of SQLite since <a href="testing.html#coverage">100% branch test coverage</a>
+  was achieved on the SQLite core.  </p>
+
+<p>  In addition, a new interface <a href="c3ref/strnicmp.html">sqlite3_strnicmp()</a> is provided for the
+  convenience of extension writers.</p>
+
+<p>  None of the bugs fixed in this release are serious.  All bugs are
+  obscure.  Upgrading is optional.
+</p><hr width="50%"><a name="2009_july_25"></a><h3>2009-July-25 - 100% Branch Test Coverage</h3><p>
+  A subset of the <a href="th3.html">TH3</a> test suite was measured by gcov to provide
+  <a href="testing.html#coverage">100% branch test coverage</a> over the SQLite core
+  (exclusive of the VFS backend and of extensions such as FTS3 and RTREE)
+  when compiled for SuSE 10.1 Linux on x86.  The SQLite developers pledge
+  to maintain branch test coverage at 100% in all future releases.
+  Ongoing work will strive for 100% branch test coverage on the 
+  operating-system backends and extensions as well.
+</p><hr width="50%"><a name="2009_jun_27"></a><h3>2009-Jun-27 - <a href="releaselog/3_6_16.html">Version 3.6.16</a></h3><p>
+  SQLite <a href="releaselog/3_6_16.html">version 3.6.16</a> is another general maintenance relase containing
+  performance and robustness enhancements.  A single notable bug was fixed
+  (<a href="http://www.sqlite.org/cvstrac/tktview?tn=3929">ticket #3929</a>).  This bug cause cause INSERT or UPDATE statements to fail
+  on indexed tables that have AFTER triggers that modify the same table and
+  index.
+</p><hr width="50%"><a name="2009_jun_15"></a><h3>2009-Jun-15 - <a href="releaselog/3_6_15.html">Version 3.6.15</a></h3><p>
+  SQLite <a href="releaselog/3_6_15.html">version 3.6.15</a> is a general maintenance release containing
+  performance and robustness enhancements and fixes for various obscure
+  bugs.  
+</p><hr width="50%"><a name="2009_may_25"></a><h3>2009-May-25 - <a href="releaselog/3_6_14_2.html">Version 3.6.14.2</a></h3><p>
+  SQLite <a href="releaselog/3_6_14_2.html">version 3.6.14.2</a> fixes an obscure bug in the code generator
+  (<a href="http://www.sqlite.org/cvstrac/tktview?tn=3879"><a href="http://www.sqlite.org/cvstrac/tktview?tn=3879">ticket #3879</a></a>)
+  section of SQLite which can potentially cause incorrect query results.
+  The changes from the prior release consist of only this one bug fix,
+  check-in <a href="http://www.sqlite.org/cvstrac/chngview?cn=6676">[6676]</a>
+  and a change to the version number text.</p>
+
+<p>  The bug was introduced in version 3.6.14.  It is recommended that
+  users of version 3.6.14 and 3.6.14.1 upgrade to this release.  Applications
+  are unlikely to hit this bug, but since it is difficult to predict which
+  applications might hit it and which might not, we recommend that all
+  users of 3.6.14 and 3.5.14.1 upgrade to this release.
+</p><hr width="50%"><a name="2009_may_19"></a><h3>2009-May-19 - <a href="releaselog/3_6_14_1.html">Version 3.6.14.1</a></h3><p>
+  SQLite <a href="releaselog/3_6_14_1.html">version 3.6.14.1</a> is a patch release to <a href="releaselog/3_6_14.html">version 3.6.14</a> with
+  minimal changes that fixes three bugs.  Upgrading is only necessary 
+  for users who are impacted by one or more of those bugs.
+</p><hr width="50%"><a name="2009_may_07"></a><h3>2009-May-07 - <a href="releaselog/3_6_14.html">Version 3.6.14</a></h3><p>
+  SQLite <a href="releaselog/3_6_14.html">version 3.6.14</a> provides new performance enhancements in
+  the btree and pager layers and in the query optimizer.  Certain
+  workloads can be as much as twice as fast as the previous release,
+  though 10% faster is a more typical result.</p>
+
+<p>  Queries against <a href="vtab.html">virtual tables</a> that contain OR and IN operators
+  in the WHERE clause are now able to use indexing.</p>
+
+<p>  A new optional <a href="asyncvfs.html">asynchronous I/O backend</a> is available for
+  unix and windows.  The asynchronous backend gives the illusion of faster
+  response time by pushing slow write operations into a background thread.
+  The tradeoff for faster response time is that more memory is required
+  (to hold the content of the pending writes) and if a power failure or
+  program crash occurs, some transactions that appeared to have committed
+  might end up being rolled back upon restart.</p>
+
+<p>  This release also contains many minor bug fixes, documentation enhancements,
+  new test cases, and cleanups and simplifications to the source code.</p>
+
+<p>  There is no compelling reason to upgrade from versions 3.6.12 or
+  3.6.13 if those prior versions are working.  Though many users may
+  benefit from the improved performance.
+</p><hr width="50%">
+
+<a href="oldnews.html">Old news...</a>
+

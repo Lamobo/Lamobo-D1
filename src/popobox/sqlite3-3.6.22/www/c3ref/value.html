@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Dynamically Typed Value Object</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Dynamically Typed Value Object</h2><blockquote><pre>typedef struct Mem sqlite3_value;
+</pre></blockquote><p>
+SQLite uses the sqlite3_value object to represent all values
+that can be stored in a database table. SQLite uses dynamic typing
+for the values it stores.  Values stored in sqlite3_value objects
+can be integers, floating point values, strings, BLOBs, or NULL.</p>
+
+<p>An sqlite3_value object may be either "protected" or "unprotected".
+Some interfaces require a protected sqlite3_value.  Other interfaces
+will accept either a protected or an unprotected sqlite3_value.
+Every interface that accepts sqlite3_value arguments specifies
+whether or not it requires a protected sqlite3_value.</p>
+
+<p>The terms "protected" and "unprotected" refer to whether or not
+a mutex is held.  A internal mutex is held for a protected
+sqlite3_value object but no mutex is held for an unprotected
+sqlite3_value object.  If SQLite is compiled to be single-threaded
+(with <a href="../compile.html#threadsafe">SQLITE_THREADSAFE=0</a> and with <a href="../c3ref/threadsafe.html">sqlite3_threadsafe()</a> returning 0)
+or if SQLite is run in one of reduced mutex modes
+<a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_SINGLETHREAD</a> or <a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MULTITHREAD</a>
+then there is no distinction between protected and unprotected
+sqlite3_value objects and they can be used interchangeably.  However,
+for maximum code portability it is recommended that applications
+still make the distinction between between protected and unprotected
+sqlite3_value objects even when not strictly required.</p>
+
+<p>The sqlite3_value objects that are passed as parameters into the
+implementation of <a href="../c3ref/create_function.html">application-defined SQL functions</a> are protected.
+The sqlite3_value object returned by
+<a href="../c3ref/column_blob.html">sqlite3_column_value()</a> is unprotected.
+Unprotected sqlite3_value objects may only be used with
+<a href="../c3ref/result_blob.html">sqlite3_result_value()</a> and <a href="../c3ref/bind_blob.html">sqlite3_bind_value()</a>.
+The <a href="../c3ref/value_blob.html">sqlite3_value_type()</a> family of
+interfaces require protected sqlite3_value objects.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

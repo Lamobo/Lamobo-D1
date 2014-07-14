@@ -1,0 +1,239 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite TH3</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+
+<h1 align="center">TH3: SQLite Test Harness #3</h1>
+
+<h2>1.0 Overview</h2>
+
+<p>SQLite Test Harness #3 (hereafter "TH3") is one of
+<a href="testing.html#harnesses">three test harnesses</a> used for testing SQLite.
+TH3 is designed to meet the following objectives:</p>
+
+<ul>
+<li><p> TH3 will work on embedded platforms that lack the support
+     infrastructure of workstations.</p></li>
+
+<li><p> TH3 will test SQLite in an as-deployed configuration, without the
+     need to enable special test hooks in the core SQLite library. </p></li>
+
+<li><p> TH3 will test SQLite's response to out-of-memory errors, disk I/O
+     errors, and power loss during transaction commit. </p></li>
+
+<li><p> TH3 will test SQLite in a variety of configurations (UTF8 vs UTF16,
+     different pages sizes, varying journal modes, etc.) </p></li>
+
+<li><p> TH3 will achieve 100% branch test coverage. </p></li>
+</ul>
+
+<p>TH3 is intended for validation testing.
+Though it could be used for testing during development and debugging,
+TH3 is not designed for that purpose.
+The original TCL-based test suite for SQLite will continue to serve
+as the primary platform for development and debug testing.
+The reason that TH3 exists is that it meets other objectives that are
+difficult to achieve with the TCL-based tests.</p>
+
+<h2>2.0 Operation</h2>
+
+<p>TH3 is a test program generator.  The output of TH3 is a program
+written in ANSI-C and intended to be
+linked against the SQLite library under test.  The generated test
+program is compiled and run on the target platform in order to verify
+correct operation of SQLite on that platform.</p>
+
+<p>The inputs to TH3 are test modules written in C or SQL and
+small configuration
+files that determine how to initialize SQLite.  The
+TH3 package includes hundreds of test
+modules and dozens of configuration files.  New modules and configurations
+can be added to customize TH3 for specialized applications.
+Each time TH3 is run, it reads
+a subset of the available test modules and configuration files to generate
+a custom C program that performs all of the specified tests under all
+configurations.  A complete test of SQLite normally involves running
+TH3 multiple times to generate multiple test programs covering different
+aspects of SQLite's operation, then linking all test programs against
+a common SQLite library and running them separately on the target platform.
+SQLite will be found to work if all test programs pass.</p>
+
+<p>There are no arbitrary limits in TH3.  One could generate a
+single test program that contained all test modules and configuration files.
+However, such a test program might be too large to deploy on embedded
+platforms.  Hence, TH3 provides the ability to break the library of test
+modules up into smaller, more easily digested pieces.</p>
+
+<p>Each individual test module might contain dozens, hundreds, or thousands
+of separate tests.  The test modules can be written in C or as scripts of
+SQL.
+Test modules done in SQL are very easy to write and
+the test modules written in C are not as nearly as cumbersome 
+to write as one might suppose.  The TH3
+system provides high-level interfaces that simplify test writing.
+A typical C-language test case in TH3 might contains slightly more syntax that 
+the corresponding TCL-script test, but the difference is not that great.
+The test modules written as SQL contain special comments that define
+the boundaries and operation of each test case and the expected results.</p>
+
+<p>Each test module file contains a header which describes the circumstances
+under which the test is valid.  For a particular configuration, only those
+modules that are compatible with the configuration are run.  </p>
+
+<h2>3.0 Generating A Test Program</h2>
+
+<p>The TH3 program generator is a TCL script named "<tt>mkth3.tcl</tt>".
+To generate a test program, one has merely to run this script and supply
+the names of files containing test modules and configurations on the
+command line.  TH3 does not force any specific names for test modules
+or configuration files, but it is customary to use suffixes "<tt>.test</tt>"
+and "<tt>.cfg</tt>".  With these conventions, one might generate a
+test program as follows:</p>
+
+<blockquote><pre>
+tclsh mkth3.tcl *.test *.cfg &gt;testprog1.c
+</pre></blockquote>
+
+<p>The output from the mkth3.tcl script is a C program that contains
+everything needed to run the tests - everything that is except for
+the SQLite library itself.  The generated test program contains 
+implementations for all of the support interfaces used by the test
+modules and it contains the <tt>main()</tt> routine that drives the
+tests.  To convert the test program into a working executable, simply
+compile it against SQLite:</p>
+
+<blockquote><pre>
+cc -o testprog1 testprog1.c sqlite3.c
+</pre></blockquote>
+
+<p>The compilation step shown immediately above is merely representative.
+In a working installation, one would normally want
+to specify optimization parameters and compile-time switches on the
+compiler command line.</p>
+
+<p>Once the test program is generated, it is run with no arguments to
+perform the tests.  Progress information as well as error diagnostics
+appear on standard output.  The program returns zero if there are no
+errors and non-zero if any problems were detected.</p>
+
+<h2>4.0 Test Coverage</h2>
+
+<p>Using one particular subset of the available TH3 test modules (the "cov1"
+tests) SQLite obtained 
+<a href="testing.html#coverage">100% branch test coverage</a> and 100% <a href="testing.html#mcdc">MC/DC</a> as measured
+by <a href="http://gcc.gnu.org/onlinedocs/gcc/Gcov.html">gcov</a>
+on SuSE Linux 10.1 on x86 hardware on 2009-07-25.  The SQLite developers 
+are committed to maintaining 100% branch coverage and MC/DC for all 
+future releases of SQLite.</p>
+
+<p>The cov1 test set used to obtain 100% branch test coverage are only a
+subset of the tests currently implemented using TH3.  New test modules are
+added on a regular basis.</p>
+
+<h2>5.0 TH3 License</h2>
+
+<p>SQLite itself is in the <a href="copyright.html">public domain</a> and
+can be used for any purpose.  But TH3 is proprietary and requires a license.
+Members of the <a href="consortium.html">SQLite Consortium</a> get free and unlimited access to TH3.
+Others can contact the SQLite developers for information on how to obtain
+a license to access and use TH3.</p>
+
+<p>Licensees of TH3 are given read access to the software configuration
+management system used to manage TH3 and so can download the latest version
+of TH3 (or any historical version) whenever they like.</p>
+
+<p>Even though open-source users do not have direct access to TH3, all
+users of SQLite benefit from TH3 indirectly since each version of SQLite is
+validated by TH3 prior to release.  So anyone using an official release
+of SQLite can deploy their application with the confidence of knowing that
+it has been tested using TH3.  They simply cannot rerun those tests
+themselves without purchasing a TH3 license.</p>
+

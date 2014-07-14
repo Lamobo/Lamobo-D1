@@ -1,0 +1,1172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>The Virtual Table Mechanism Of SQLite</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+<h1 align="center">The Virtual Table Mechanism Of SQLite</h1>
+
+
+<h2>1.0 Introduction</h2>
+
+<p>A virtual table is an object that is registered with an open SQLite
+<a href="c3ref/sqlite3.html">database connection</a>. From the perspective of an SQL statement,
+the virtual table object looks like any other table or view. 
+But behind the scenes, queries from and updates to a virtual table
+invoke callback methods on the virtual table object instead of
+reading and writing to the database file.
+
+<p>The virtual table mechanism allows an application to publish
+interfaces that are accessible from SQL statements as if they were
+tables. SQL statements can in general do anything to a
+virtual table that they can do to a real table, with the following
+exceptions:
+
+<p>
+<ul>
+<li> One cannot create a trigger on a virtual table.
+<li> One cannot create additional indices on a virtual table. 
+     (Virtual tables can have indices but that must be built into
+     the virtual table implementation.  Indices cannot be added
+     separately using <a href="lang_createindex.html">CREATE INDEX</a> statements.)
+<li> One cannot run <a href="lang_altertable.html">ALTER TABLE ... ADD COLUMN</a>
+     commands against a virtual table.
+</ul>
+
+<p>Particular virtual table implementations might impose additional
+constraints. For example, some virtual implementations might provide
+read-only tables. Or some virtual table implementations might allow
+<a href="lang_insert.html">INSERT</a> or <a href="lang_delete.html">DELETE</a> but not <a href="lang_update.html">UPDATE</a>.  Or some virtual table implementations
+might limit the kinds of UPDATEs that can be made.
+
+<p>A virtual table might represent an in-memory data structures. 
+Or it might represent a view of data on disk that is not in the
+SQLite format. Or the application might compute the content of the 
+virtual table on demand.
+
+<p>Here are some postulated uses for virtual tables:
+
+<ul>
+<li> A full-text search interface
+<li> Spatial indices using R-Trees
+<li> Read and/or write the content of a comma-separated value (CSV)
+     file
+<li> Access to the filesystem of the host computer
+<li> Enabling SQL manipulation of data in statistics packages like R
+</ul>
+
+<h3>1.1 Usage</h3>
+
+<p>A virtual table is created using using a <a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a> statement.
+This statement creates a table with a particular name and associates the
+table with a "module".
+
+<blockquote><pre>
+   CREATE VIRTUAL TABLE tablename USING modulename;
+</pre></blockquote>
+
+<p>One can also provide comma-separated arguments to the module following 
+the module name:
+
+<blockquote><pre>
+   CREATE VIRTUAL TABLE tablename USING modulename(arg1, arg2, ...);
+</pre></blockquote>
+
+<p>The format of the arguments to the module is very general. Each argument 
+can consist of keywords, string literals, identifiers, numbers, and 
+punctuation. The arguments are passed as written (as text) into the
+<a href="vtab.html#xcreate">constructor method</a> of the virtual table implementation 
+when the virtual 
+table is created and that constructor is responsible for parsing and 
+interpreting the arguments. The argument syntax is sufficiently general 
+that a virtual table implementation can, if it wants to, interpret its
+arguments as column definitions in an ordinary <a href="lang_createtable.html">CREATE TABLE</a> statement. 
+The implementation could also impose some other interpretation on the 
+arguments.
+
+<p>Once a virtual table has been created, it can be used like any other 
+table with the exceptions noted above and imposed by specific virtual
+table implementations. A virtual table is destroyed using the ordinary
+<a href="lang_droptable.html">DROP TABLE</a> syntax.
+
+<h2>2.2 Implementation</h2>
+
+<p>Several new C-level objects are used by the virtual table implementation:
+
+<blockquote><pre>
+  typedef struct sqlite3_vtab sqlite3_vtab;
+  typedef struct sqlite3_index_info sqlite3_index_info;
+  typedef struct sqlite3_vtab_cursor sqlite3_vtab_cursor;
+  typedef struct sqlite3_module sqlite3_module;
+</pre></blockquote>
+
+<p>The <a href="c3ref/module.html">sqlite3_module</a> structure defines a module object used to implement
+a virtual table. Think of a module as a class from which one can 
+construct multiple virtual tables having similar properties. For example,
+one might have a module that provides read-only access to 
+comma-separated-value (CSV) files on disk. That one module can then be
+used to create several virtual tables where each virtual table refers
+to a different CSV file.
+
+<p>The module structure contains methods that are invoked by SQLite to
+perform various actions on the virtual table such as creating new
+instances of a virtual table or destroying old ones, reading and
+writing data, searching for and deleting, updating, or inserting rows. 
+The module structure is explained in more detail below.
+
+<p>Each virtual table instance is represented by an <a href="c3ref/vtab.html">sqlite3_vtab</a> structure. 
+The sqlite3_vtab structure looks like this:
+
+<blockquote><pre>
+  struct sqlite3_vtab {
+    const sqlite3_module *pModule;
+    int nRef;
+    char *zErrMsg;
+  };
+</pre></blockquote>
+
+<p>Virtual table implementations will normally subclass this structure 
+to add additional private and implementation-specific fields. 
+The nRef field is used internally by the SQLite core and should not 
+be altered by the virtual table implementation. The virtual table 
+implementation may pass error message text to the core by putting 
+an error message string in zErrMsg.
+Space to hold this error message string must be obtained from an
+SQLite memory allocation function such as <a href="c3ref/mprintf.html">sqlite3_mprintf()</a> or
+<a href="c3ref/free.html">sqlite3_malloc()</a>.
+Prior to assigning a new value to zErrMsg, the virtual table 
+implementation must free any preexisting content of zErrMsg using 
+<a href="c3ref/free.html">sqlite3_free()</a>. Failure to do this will result in a memory leak. 
+The SQLite core will free and zero the content of zErrMsg when it 
+delivers the error message text to the client application or when 
+it destroys the virtual table. The virtual table implementation only 
+needs to worry about freeing the zErrMsg content when it overwrites 
+the content with a new, different error message.
+
+<p>The <a href="c3ref/vtab_cursor.html">sqlite3_vtab_cursor</a> structure represents a pointer to a specific
+row of a virtual table. This is what an sqlite3_vtab_cursor looks like:
+
+<blockquote><pre>
+  struct sqlite3_vtab_cursor {
+    sqlite3_vtab *pVtab;
+  };
+</pre></blockquote>
+
+<p>Once again, practical implementations will likely subclass this 
+structure to add additional private fields.
+
+<p>The <a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a> structure is used to pass information into
+and out of the xBestIndex method of the module that implements a 
+virtual table.
+
+<p>Before a <a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a> statement can be run, the module 
+specified in that statement must be registered with the database 
+connection. This is accomplished using either of the <a href="c3ref/create_module.html">sqlite3_create_module()</a>
+or <a href="c3ref/create_module.html">sqlite3_create_module_v2()</a> interfaces:
+
+<blockquote><pre>
+  int sqlite3_create_module(
+    sqlite3 *db,               /* SQLite connection to register module with */
+    const char *zName,         /* Name of the module */
+    const sqlite3_module *,    /* Methods for the module */
+    void *                     /* Client data for xCreate/xConnect */
+  );
+  int sqlite3_create_module_v2(
+    sqlite3 *db,               /* SQLite connection to register module with */
+    const char *zName,         /* Name of the module */
+    const sqlite3_module *,    /* Methods for the module */
+    void *,                    /* Client data for xCreate/xConnect */
+    void(*xDestroy)(void*)     /* Client data destructor function */
+  );
+</pre></blockquote>
+
+<p>The <a href="c3ref/create_module.html">sqlite3_create_module()</a> and <a href="c3ref/create_module.html">sqlite3_create_module_v2()</a>
+routines associates a module name with 
+an <a href="c3ref/module.html">sqlite3_module</a> structure and a separate client data that is specific 
+to each module.  The only difference between the two create_module methods
+is that the _v2 method includes an extra parameter that specifies a
+destructor for client data pointer.  The module structure is what defines
+the behavior of a virtual table.  The module structure looks like this:
+
+<blockquote><pre>  
+  struct sqlite3_module {
+    int iVersion;
+    int (*xCreate)(sqlite3*, void *pAux,
+                 int argc, char **argv,
+                 sqlite3_vtab **ppVTab,
+                 char **pzErr);
+    int (*xConnect)(sqlite3*, void *pAux,
+                 int argc, char **argv,
+                 sqlite3_vtab **ppVTab,
+                 char **pzErr);
+    int (*xBestIndex)(sqlite3_vtab *pVTab, sqlite3_index_info*);
+    int (*xDisconnect)(sqlite3_vtab *pVTab);
+    int (*xDestroy)(sqlite3_vtab *pVTab);
+    int (*xOpen)(sqlite3_vtab *pVTab, sqlite3_vtab_cursor **ppCursor);
+    int (*xClose)(sqlite3_vtab_cursor*);
+    int (*xFilter)(sqlite3_vtab_cursor*, int idxNum, const char *idxStr,
+                  int argc, sqlite3_value **argv);
+    int (*xNext)(sqlite3_vtab_cursor*);
+    int (*xEof)(sqlite3_vtab_cursor*);
+    int (*xColumn)(sqlite3_vtab_cursor*, sqlite3_context*, int);
+    int (*xRowid)(sqlite3_vtab_cursor*, sqlite_int64 *pRowid);
+    int (*xUpdate)(sqlite3_vtab *, int, sqlite3_value **, sqlite_int64 *);
+    int (*xBegin)(sqlite3_vtab *pVTab);
+    int (*xSync)(sqlite3_vtab *pVTab);
+    int (*xCommit)(sqlite3_vtab *pVTab);
+    int (*xRollback)(sqlite3_vtab *pVTab);
+    int (*xFindFunction)(sqlite3_vtab *pVtab, int nArg, const char *zName,
+                       void (**pxFunc)(sqlite3_context*,int,sqlite3_value**),
+                       void **ppArg);
+    int (*Rename)(sqlite3_vtab *pVtab, const char *zNew);
+  };
+</pre></blockquote>
+
+<p>The module structure defines all of the methods for each virtual 
+table object. The module structure also contains the iVersion field which
+defines the particular edition of the module table structure. Currently, 
+iVersion is always 1, but in future releases of SQLite the module structure 
+definition might be extended with additional methods and in that case 
+the iVersion value will be increased.
+
+<p>The rest of the module structure consists of methods used to implement
+various features of the virtual table. Details on what each of these 
+methods do are provided in the sequel.
+
+<h3>1.3 Virtual Tables And Shared Cache</h3>
+
+<p>Prior to SQLite <a href="releaselog/3_6_17.html">version 3.6.17</a>, the virtual table mechanism assumes 
+that each <a href="c3ref/sqlite3.html">database connection</a> kept
+its own copy of the database schema. Hence, the virtual table mechanism
+could not be used in a database that has <a href="sharedcache.html">shared cache mode</a> enabled. 
+The <a href="c3ref/create_module.html">sqlite3_create_module()</a> interface would return an error if 
+<a href="sharedcache.html">shared cache mode</a> is enabled.  That restriction was relaxed
+beginning with SQLite <a href="releaselog/3_6_17.html">version 3.6.17</a>.
+
+<h3>1.4 Creating New Virtual Table Implementations</h3>
+
+<p>Follow these steps to create your own virtual table:
+
+<p>
+<ol>
+<li> Write all necessary methods.
+<li> Create an instance of the <a href="c3ref/module.html">sqlite3_module</a> structure containing pointers
+     to all the methods from step 1.
+<li> Register your <a href="c3ref/module.html">sqlite3_module</a> structure using one of the
+     <a href="c3ref/create_module.html">sqlite3_create_module()</a> or <a href="c3ref/create_module.html">sqlite3_create_module_v2()</a> interfaces.
+<li> Run a <a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a> command that specifies the new module in 
+     the USING clause. 
+</ol>
+
+<p>The only really hard part is step 1. You might want to start with an 
+existing virtual table implementation and modify it to suit your needs.
+There are several virtual table implementations in the SQLite source tree 
+(for testing purposes). You might use one of those as a guide. Locate 
+these test virtual table implementations by searching 
+for "sqlite3_create_module".
+
+<p>You might also want to implement your new virtual table as a 
+<a href="c3ref/load_extension.html">loadable extension</a>.
+
+<h2>2.0 Virtual Table Methods</h2>
+
+<a name="xcreate"></a>
+
+<h3>2.1 The xCreate Method</h3>
+
+<blockquote><pre>
+  int (*xCreate)(sqlite3 *db, void *pAux,
+               int argc, char **argv,
+               sqlite3_vtab **ppVTab,
+               char **pzErr);
+</pre></blockquote>
+
+<p>This method is called to create a new instance of a virtual table 
+in response to a <a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a> statement. 
+The db parameter is a pointer to the SQLite <a href="c3ref/sqlite3.html">database connection</a> that 
+is executing the <a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a> statement. 
+The pAux argument is the copy of the client data pointer that was the 
+fourth argument to the <a href="c3ref/create_module.html">sqlite3_create_module()</a> or
+<a href="c3ref/create_module.html">sqlite3_create_module_v2()</a> call that registered the 
+<a href="c3ref/module.html">virtual table module</a>. 
+The argv parameter is an array of argc pointers to null terminated strings. 
+The first string, argv[0], is the name of the module being invoked.   The
+module name is the name provided as the second argument to 
+<a href="c3ref/create_module.html">sqlite3_create_module()</a> and as the argument to the USING clause of the
+<a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a> statement that is running.
+The second, argv[1], is the name of the database in which the new virtual table is being created. The database name is "main" for the primary database, or
+"temp" for TEMP database, or the name given at the end of the <a href="lang_attach.html">ATTACH</a>
+statement for attached databases.  The third element of the array, argv[2], 
+is the name of the new virtual table, as specified following the TABLE
+keyword in the <a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a> statement.
+If present, the fourth and subsquent strings in the argv[] array report 
+the arguments to the module name in the <a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a> statement.
+
+<p>The job of this method is to construct the new virtual table object
+(an <a href="c3ref/vtab.html">sqlite3_vtab</a> object) and return a pointer to it in *ppVTab.
+
+<p>As part of the task of creating a new <a href="c3ref/vtab.html">sqlite3_vtab</a> structure, this 
+method <u>must</u> invoke <a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a> to tell the SQLite 
+core about the columns and datatypes in the virtual table. 
+The <a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a> API has the following prototype:
+
+<blockquote><pre>
+    int sqlite3_declare_vtab(sqlite3 *db, const char *zCreateTable)
+</pre></blockquote>
+
+<p>The first argument to <a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a> must be the same 
+<a href="c3ref/sqlite3.html">database connection</a> pointer as the first parameter to this method.
+The second argument to <a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a> must a zero-terminated 
+UTF-8 string that contains a well-formed <a href="lang_createtable.html">CREATE TABLE</a> statement that 
+defines the columns in the virtual table and their data types. 
+The name of the table in this CREATE TABLE statement is ignored, 
+as are all constraints. Only the column names and datatypes matter.
+The CREATE TABLE statement string need not to be 
+held in persistent memory.  The string can be
+deallocated and/or reused as soon as the <a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a>
+routine returns.
+
+<p>If a column datatype contains the special keyword "HIDDEN"
+(in any combination of upper and lower case letters) then that keyword
+it is omitted from the column datatype name and the column is marked 
+as a hidden column internally. 
+A hidden column differs from a normal column in three respects:
+
+<p>
+<ul>
+<li> Hidden columns are not listed in the dataset returned by 
+     "<a href="pragma.html#pragma_table_info">PRAGMA table_info</a>",
+<li> Hidden columns are not included in the expansion of a "*"
+     expression in the result set of a <a href="lang_select.html">SELECT</a>, and
+<li> Hidden columns are not included in the implicit column-list 
+     used by an <a href="lang_insert.html">INSERT</a> statement that lacks an explicit column-list. 
+</ul>
+
+<p>For example, if the following SQL is passed to <a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a>:
+
+<blockquote><pre>
+   CREATE TABLE x(a HIDDEN VARCHAR(12), b INTEGER, c INTEGER Hidden);
+</pre></blockquote>
+
+<p>Then the virtual table would be created with two hidden columns,
+and with datatypes of "VARCHAR(12)" and "INTEGER".
+
+<p>The xCreate method need not initialize the pModule, nRef, and zErrMsg
+fields of the <a href="c3ref/vtab.html">sqlite3_vtab</a> object.  The SQLite core will take care of 
+that chore.
+
+<p>The xCreate must should return <a href="c3ref/c_abort.html">SQLITE_OK</a> if it is successful in 
+creating the new virtual table, or <a href="c3ref/c_abort.html">SQLITE_ERROR</a> if it is not successful.
+If not successful, the <a href="c3ref/vtab.html">sqlite3_vtab</a> structure must not be allocated. 
+An error message may optionally be returned in *pzErr if unsuccessful.
+Space to hold the error message string must be allocated using
+an SQLite memory allocation function like 
+<a href="c3ref/free.html">sqlite3_malloc()</a> or <a href="c3ref/mprintf.html">sqlite3_mprintf()</a> as the SQLite core will
+attempt to free the space using <a href="c3ref/free.html">sqlite3_free()</a> after the error has
+been reported up to the application.
+
+<p>The xCreate method is required for every virtual table implementation, 
+though the xCreate and <a href="vtab.html#xconnect">xConnect</a> pointers of the <a href="c3ref/module.html">sqlite3_module</a> object
+may point to the same function the virtual table does not need to initialize
+backing store.
+
+<a name="xconnect"></a>
+
+<h3>2.2 The xConnect Method</h3>
+
+<blockquote><pre>
+  int (*xConnect)(sqlite3*, void *pAux,
+               int argc, char **argv,
+               sqlite3_vtab **ppVTab,
+               char **pzErr);
+</pre></blockquote>
+
+<p>The xConnect method is very similar to <a href="vtab.html#xcreate">xCreate</a>. 
+It has the same parameters and constructs a new <a href="c3ref/vtab.html">sqlite3_vtab</a> structure 
+just like xCreate. 
+And it must also call <a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a> like xCreate.
+
+<p>The difference is that xConnect is called to establish a new 
+connection to an existing virtual table whereas xCreate is called 
+to create a new virtual table from scratch.
+
+<p>The xCreate and xConnect methods are only different when the
+virtual table has some kind of backing store that must be initialized 
+the first time the virtual table is created. The xCreate method creates 
+and initializes the backing store. The xConnect method just connects 
+to an existing backing store.
+
+<p>As an example, consider a virtual table implementation that 
+provides read-only access to existing comma-separated-value (CSV)
+files on disk. There is no backing store that needs to be created 
+or initialized for such a virtual table (since the CSV files already 
+exist on disk) so the xCreate and xConnect methods will be identical 
+for that module.
+
+<p>Another example is a virtual table that implements a full-text index. 
+The xCreate method must create and initialize data structures to hold 
+the dictionary and posting lists for that index. The xConnect method,
+on the other hand, only has to locate and use an existing dictionary 
+and posting lists that were created by a prior xCreate call.
+
+<p>The xConnect method must return <a href="c3ref/c_abort.html">SQLITE_OK</a> if it is successful 
+in creating the new virtual table, or <a href="c3ref/c_abort.html">SQLITE_ERROR</a> if it is not 
+successful. If not successful, the <a href="c3ref/vtab.html">sqlite3_vtab</a> structure must not be 
+allocated. An error message may optionally be returned in *pzErr if 
+unsuccessful. 
+Space to hold the error message string must be allocated using
+an SQLite memory allocation function like 
+<a href="c3ref/free.html">sqlite3_malloc()</a> or <a href="c3ref/mprintf.html">sqlite3_mprintf()</a> as the SQLite core will
+attempt to free the space using <a href="c3ref/free.html">sqlite3_free()</a> after the error has
+been reported up to the application.
+
+<p>The xConnect method is required for every virtual table implementation, 
+though the <a href="vtab.html#xcreate">xCreate</a> and xConnect pointers of the <a href="c3ref/module.html">sqlite3_module</a> object
+may point to the same function the virtual table does not need to initialize
+backing store.
+
+<a name="xbestindex"></a>
+
+<h3>2.3 The xBestIndex Method</h3>
+
+<p>SQLite uses the xBestIndex method of a virtual table module to determine
+the best way to access the virtual table. 
+The xBestIndex method has a prototype like this:
+
+<blockquote><pre>
+  int (*xBestIndex)(sqlite3_vtab *pVTab, sqlite3_index_info*);
+</pre></blockquote>
+
+<p>The SQLite core communicates with the xBestIndex method by filling 
+in certain fields of the <a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a> structure and passing a 
+pointer to that structure into xBestIndex as the second parameter. 
+The xBestIndex method fills out other fields of this structure which
+forms the reply. The <a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a> structure looks like this:
+
+<blockquote><pre>
+  struct sqlite3_index_info {
+    /* Inputs */
+    const int nConstraint;     /* Number of entries in aConstraint */
+    const struct sqlite3_index_constraint {
+       int iColumn;              /* Column on left-hand side of constraint */
+       unsigned char op;         /* Constraint operator */
+       unsigned char usable;     /* True if this constraint is usable */
+       int iTermOffset;          /* Used internally - xBestIndex should ignore */
+    } *const aConstraint;      /* Table of WHERE clause constraints */
+    const int nOrderBy;        /* Number of terms in the ORDER BY clause */
+    const struct sqlite3_index_orderby {
+       int iColumn;              /* Column number */
+       unsigned char desc;       /* True for DESC.  False for ASC. */
+    } *const aOrderBy;         /* The ORDER BY clause */
+
+    /* Outputs */
+    struct sqlite3_index_constraint_usage {
+      int argvIndex;           /* if >0, constraint is part of argv to xFilter */
+      unsigned char omit;      /* Do not code a test for this constraint */
+    } *const aConstraintUsage;
+    int idxNum;                /* Number used to identify the index */
+    char *idxStr;              /* String, possibly obtained from sqlite3_malloc */
+    int needToFreeIdxStr;      /* Free idxStr using sqlite3_free() if true */
+    int orderByConsumed;       /* True if output is already ordered */
+    double estimatedCost;      /* Estimated cost of using this index */
+  };
+</pre></blockquote>
+
+<p>In addition, there are some defined constants:
+
+<blockquote><pre>
+  #define SQLITE_INDEX_CONSTRAINT_EQ    2
+  #define SQLITE_INDEX_CONSTRAINT_GT    4
+  #define SQLITE_INDEX_CONSTRAINT_LE    8
+  #define SQLITE_INDEX_CONSTRAINT_LT    16
+  #define SQLITE_INDEX_CONSTRAINT_GE    32
+  #define SQLITE_INDEX_CONSTRAINT_MATCH 64
+</pre></blockquote>
+
+<p>The SQLite core calls the xBestIndex method when it is compiling a query
+that involves a virtual table. In other words, SQLite calls this method 
+when it is running <a href="c3ref/prepare.html">sqlite3_prepare()</a> or the equivalent. 
+By calling this method, the 
+SQLite core is saying to the virtual table that it needs to access 
+some subset of the rows in the virtual table and it wants to know the
+most efficient way to do that access. The xBestIndex method replies 
+with information that the SQLite core can then use to conduct an 
+efficient search of the virtual table.
+
+<p>While compiling a single SQL query, the SQLite core might call 
+xBestIndex multiple times with different settings in <a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a>.
+The SQLite core will then select the combination that appears to 
+give the best performance.
+
+<p>Before calling this method, the SQLite core initializes an instance 
+of the <a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a> structure with information about the
+query that it is currently trying to process. This information 
+derives mainly from the WHERE clause and ORDER BY or GROUP BY clauses 
+of the query, but also from any ON or USING clauses if the query is a 
+join. The information that the SQLite core provides to the xBestIndex 
+method is held in the part of the structure that is marked as "Inputs". 
+The "Outputs" section is initialized to zero.
+
+<p>The information in the <a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a> structure is ephemeral
+and may be overwritten or deallocated as soon as the xBestIndex method
+returns.  If the xBestIndex method needs to remember any part of the
+<a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a> structure, it should make a copy.  Care must be
+take to store the copy in a place where it will be deallocated, such
+as in the idxStr field with needToFreeIdxStr set to 1.
+
+<p>Note that xBestIndex will always be called before <a href="vtab.html#xfilter">xFilter</a>, since
+the idxNum and idxStr outputs from xBestIndex are required inputs to
+xFilter.  However, there is no guarantee that xFilter will be called
+following a successful xBestIndex.  
+
+<p>The xBestIndex method is required for every virtual table implementation.
+
+<h4>2.3.1 Inputs</h4>
+
+<p>The main thing that the SQLite core is trying to communicate to 
+the virtual table is the constraints that are available to limit 
+the number of rows that need to be searched. The aConstraint[] array 
+contains one entry for each constraint. There will be exactly 
+nConstraint entries in that array.
+
+<p>Each constraint will correspond to a term in the WHERE clause
+or in a USING or ON clause that is of the form
+
+<blockquote>
+     column  OP  EXPR
+</blockquote>
+
+<p>Where "column" is a column in the virtual table, OP is an operator 
+like "=" or "<", and EXPR is an arbitrary expression. So, for example,
+if the WHERE clause contained a term like this:
+
+<blockquote><pre>
+     a = 5
+</pre></blockquote>
+
+<p>Then one of the constraints would be on the "a" column with 
+operator "=" and an expression of "5". Constraints need not have a
+literal representation of the WHERE clause. The query optimizer might
+make transformations to the 
+WHERE clause in order to extract as many constraints 
+as it can. So, for example, if the WHERE clause contained something 
+like this:
+
+<blockquote><pre>
+     x BETWEEN 10 AND 100 AND 999>y
+</pre></blockquote>
+
+<p>The query optimizer might translate this into three separate constraints:
+
+<blockquote><pre>
+     x >= 10
+     x <= 100
+     y < 999
+</pre></blockquote>
+
+<p>For each constraint, the aConstraint[].iColumn field indicates which 
+column appears on the left-hand side of the constraint.
+The first column of the virtual table is column 0. 
+The rowid of the virtual table is column -1. 
+The aConstraint[].op field indicates which operator is used. 
+The SQLITE_INDEX_CONSTRAINT_* constants map integer constants 
+into operator values.
+Columns occur in the order they were defined by the call to
+<a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a> in the <a href="vtab.html#xcreate">xCreate</a> or <a href="vtab.html#xconnect">xConnect</a> method.
+Hidden columns are counted when determining the column index.
+
+<p>The aConstraint[] array contains information about all constraints 
+that apply to the virtual table. But some of the constraints might
+not be usable because of the way tables are ordered in a join. 
+The xBestIndex method must therefore only consider constraints 
+that have a aConstraint[].usable flag which is true.
+
+<p>In addition to WHERE clause constraints, the SQLite core also 
+tells the xBestIndex method about the ORDER BY clause. 
+(In an aggregate query, the SQLite core might put in GROUP BY clause 
+information in place of the ORDER BY clause information, but this fact
+should not make any difference to the xBestIndex method.) 
+If all terms of the ORDER BY clause are columns in the virtual table, 
+then nOrderBy will be the number of terms in the ORDER BY clause 
+and the aOrderBy[] array will identify the column for each term 
+in the order by clause and whether or not that column is ASC or DESC.
+
+<h4>2.3.2 Outputs</h4>
+
+<p>Given all of the information above, the job of the xBestIndex 
+method it to figure out the best way to search the virtual table.
+
+<p>The xBestIndex method fills the idxNum and idxStr fields with 
+information that communicates an indexing strategy to the <a href="vtab.html#xfilter">xFilter</a> 
+method. The information in idxNum and idxStr is arbitrary as far 
+as the SQLite core is concerned. The SQLite core just copies the 
+information through to the <a href="vtab.html#xfilter">xFilter</a> method. Any desired meaning can 
+be assigned to idxNum and idxStr as long as xBestIndex and xFilter 
+agree on what that meaning is.
+
+<p>The idxStr value may be a string obtained from an SQLite
+memory allocation function such as <a href="c3ref/mprintf.html">sqlite3_mprintf()</a>. 
+If this is the case, then the needToFreeIdxStr flag must be set to 
+true so that the SQLite core will know to call <a href="c3ref/free.html">sqlite3_free()</a> on 
+that string when it has finished with it, and thus avoid a memory leak.
+
+<p>If the virtual table will output rows in the order specified by 
+the ORDER BY clause, then the orderByConsumed flag may be set to 
+true. If the output is not automatically in the correct order 
+then orderByConsumed must be left in its default false setting. 
+This will indicate to the SQLite core that it will need to do a 
+separate sorting pass over the data after it comes out of the virtual table.
+
+<p>The estimatedCost field should be set to the estimated number
+of disk access operations required to execute this query against 
+the virtual table. The SQLite core will often call xBestIndex 
+multiple times with different constraints, obtain multiple cost
+estimates, then choose the query plan that gives the lowest estimate.
+
+<p>The aConstraintUsage[] array contains one element for each of 
+the nConstraint constraints in the inputs section of the 
+<a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a> structure. 
+The aConstraintUsage[] array is used by xBestIndex to tell the 
+core how it is using the constraints.
+
+<p>The xBestIndex method may set aConstraintUsage[].argvIndex 
+entries to values greater than one. 
+Exactly one entry should be set to 1, another to 2, another to 3, 
+and so forth up to as many or as few as the xBestIndex method wants. 
+The EXPR of the corresponding constraints will then be passed 
+in as the argv[] parameters to xFilter.
+
+<p>For example, if the aConstraint[3].argvIndex is set to 1, then 
+when xFilter is called, the argv[0] passed to xFilter will have 
+the EXPR value of the aConstraint[3] constraint.
+
+<p>By default, the SQLite core double checks all constraints on 
+each row of the virtual table that it receives. If such a check 
+is redundant, the xBestFilter method can suppress that double-check by 
+setting aConstraintUsage[].omit.
+
+<a name="xdisconnect"></a>
+
+<h3>2.4 The xDisconnect Method</h3>
+
+<blockquote><pre>
+  int (*xDisconnect)(sqlite3_vtab *pVTab);
+</pre></blockquote>
+
+<p>This method releases a connection to a virtual table. 
+Only the <a href="c3ref/vtab.html">sqlite3_vtab</a> object is destroyed.
+The virtual table is not destroyed and any backing store 
+associated with the virtual table persists. 
+
+This method undoes the work of <a href="vtab.html#xconnect">xConnect</a>.
+
+<p>This method is a destructor for a connection to the virtual table.
+Constrast this method with <a href="vtab.html#sqlite3_module.xDestroy">xDestroy</a>.  The xDestroy is a destructor
+for the entire virtual table.
+
+<p>The xDestroy method is required for every virtual table implementation,
+though it is acceptable for the <a href="vtab.html#xdisconnect">xDisconnect</a> and xDestroy methods to be
+the same function if that makes sense for the particular virtual table.
+
+<a name="sqlite3_module.xDestroy"></a>
+
+<h3>2.5 The xDestroy Method</h3>
+
+<blockquote><pre>
+  int (*xDestroy)(sqlite3_vtab *pVTab);
+</pre></blockquote>
+
+<p>This method releases a connection to a virtual table, just like 
+the <a href="vtab.html#xdisconnect">xDisconnect</a> method, and it also destroys the underlying 
+table implementation. This method undoes the work of <a href="vtab.html#xcreate">xCreate</a>.
+
+<p>The <a href="vtab.html#xdisconnect">xDisconnect</a> method is called whenever a database connection
+that uses a virtual table is closed. The xDestroy method is only 
+called when a <a href="lang_droptable.html">DROP TABLE</a> statement is executed against the virtual table.
+
+<p>The xDisconnect method is required for every virtual table implementation,
+though it is acceptable for the xDisconnect and <a href="vtab.html#sqlite3_module.xDestroy">xDestroy</a> methods to be
+the same function if that makes sense for the particular virtual table.
+
+<a name="xopen"></a>
+
+<h3>2.6 The xOpen Method</h3>
+
+<blockquote><pre>
+  int (*xOpen)(sqlite3_vtab *pVTab, sqlite3_vtab_cursor **ppCursor);
+</pre></blockquote>
+
+<p>The xOpen method creates a new cursor used for accessing (read and/or
+writing) a virtual table.  A successful invocation of this method 
+will allocate the memory for the <a href="c3ref/vtab_cursor.html">sqlite3_vtab_cursor</a> (or a subclass),
+initialize the new object, and make *ppCursor point to the new object.
+The successful call then returns <a href="c3ref/c_abort.html">SQLITE_OK</a>.
+
+<p>For every successful call to this method, the SQLite core will
+later invoke the <a href="vtab.html#xclose">xClose</a> method to destroy 
+the allocated cursor.
+
+<p>The xOpen method need not initialize the pVtab field of the
+<a href="c3ref/vtab_cursor.html">sqlite3_vtab_cursor</a> structure.  The SQLite core will take care
+of that chore automatically.
+
+<p>A virtual table implementation must be able to support an arbitrary
+number of simultaneously open cursors.
+
+<p>When initially opened, the cursor is in an undefined state.
+The SQLite core will invoke the <a href="vtab.html#xfilter">xFilter</a> method
+on the cursor prior to any attempt to position or read from the cursor.
+
+<p>The xOpen method is required for every virtual table implementation.
+
+<a name="xclose"></a>
+
+<h3>2.7 The xClose Method</h3>
+
+<blockquote><pre>
+  int (*xClose)(sqlite3_vtab_cursor*);
+</pre></blockquote>
+
+<p>The xClose method closes a cursor previously opened by 
+<a href="vtab.html#xopen">xOpen</a>. 
+The SQLite core will always call xClose once for each cursor opened 
+using xOpen.
+
+<p>This method must release all resources allocated by the
+corresponding xOpen call. The routine will not be called again even if it
+returns an error.  The SQLite core will not use the
+<a href="c3ref/vtab_cursor.html">sqlite3_vtab_cursor</a> again after it has been closed.
+
+<p>The xClose method is required for every virtual table implementation.
+
+<a name="xeof"></a>
+
+<h3>2.8 The xEof Method</h3>
+
+<blockquote><pre>
+  int (*xEof)(sqlite3_vtab_cursor*);
+</pre></blockquote>
+
+<p>The xEof method must return false (zero) if the specified cursor 
+currently points to a valid row of data, or true (non-zero) otherwise. 
+This method is called by the SQL engine immediately after each 
+<a href="vtab.html#xfilter">xFilter</a> and <a href="vtab.html#xnext">xNext</a> invocation.
+
+<p>The xEof method is required for every virtual table implementation.
+
+<a name="xfilter"></a>
+
+<h3>2.9 The xFilter Method</h3>
+
+<blockquote><pre>
+  int (*xFilter)(sqlite3_vtab_cursor*, int idxNum, const char *idxStr,
+                int argc, sqlite3_value **argv);
+</pre></blockquote>
+
+<p>This method begins a search of a virtual table. 
+The first argument is a cursor opened by <a href="vtab.html#xopen">xOpen</a>. 
+The next two argument define a particular search index previously 
+choosen by <a href="vtab.html#xbestindex">xBestIndex</a>. The specific meanings of idxNum and idxStr 
+are unimportant as long as xFilter and xBestIndex agree on what 
+that meaning is.
+
+<p>The xBestIndex function may have requested the values of 
+certain expressions using the aConstraintUsage[].argvIndex values 
+of the <a href="c3ref/c_index_constraint_eq.html">sqlite3_index_info</a> structure. 
+Those values are passed to xFilter using the argc and argv parameters.
+
+<p>If the virtual table contains one or more rows that match the
+search criteria, then the cursor must be left point at the first row.
+Subsequent calls to <a href="vtab.html#xeof">xEof</a> must return false (zero).
+If there are no rows match, then the cursor must be left in a state 
+that will cause the <a href="vtab.html#xeof">xEof</a> to return true (non-zero).
+The SQLite engine will use
+the <a href="vtab.html#xcolumn">xColumn</a> and <a href="vtab.html#xrowid">xRowid</a> methods to access that row content.
+The <a href="vtab.html#xnext">xNext</a> method will be used to advance to the next row.
+
+<p>This method must return <a href="c3ref/c_abort.html">SQLITE_OK</a> if successful, or an sqlite 
+<a href="c3ref/c_abort.html">error code</a> if an error occurs.
+
+<p>The xFilter method is required for every virtual table implementation.
+
+<a name="xnext"></a>
+
+<h3>2.10 The xNext Method</h3>
+
+<blockquote><pre>
+  int (*xNext)(sqlite3_vtab_cursor*);
+</pre></blockquote>
+
+<p>The xNext method advances a <a href="c3ref/vtab_cursor.html">virtual table cursor</a>
+to the next row of a result set initiated by <a href="vtab.html#xfilter">xFilter</a>. 
+If the cursor is already pointing at the last row when this 
+routine is called, then the cursor no longer points to valid 
+data and a subsequent call to the <a href="vtab.html#xeof">xEof</a> method must return true (non-zero). 
+If the cursor is successfully advanced to another row of content, then
+subsequent calls to <a href="vtab.html#xeof">xEof</a> must return false (zero).
+
+<p>This method must return <a href="c3ref/c_abort.html">SQLITE_OK</a> if successful, or an sqlite 
+<a href="c3ref/c_abort.html">error code</a> if an error occurs.
+
+<p>The xNext method is required for every virtual table implementation.
+
+<a name="xcolumn"></a>
+
+<h3>2.11 The xColumn Method</h3>
+
+<blockquote><pre>
+  int (*xColumn)(sqlite3_vtab_cursor*, sqlite3_context*, int N);
+</pre></blockquote>
+
+<p>The SQLite core invokes this method in order to find the value for 
+the N-th column of the current row. N is zero-based so the first column 
+is numbered 0. 
+The xColumn method may return its result back to SQLite using one of the
+following interface:
+
+<p>
+<ul>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_blob()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_double()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_int()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_int64()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_null()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_text()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_text16()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_text16le()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_text16be()</a>
+<li> <a href="c3ref/result_blob.html">sqlite3_result_zeroblob()</a>
+</ul>
+</p>
+
+<p>If the xColumn method implementation calls none of the functions above,
+then the value of the column defaults to an SQL NULL.
+
+<p>To raise an error, the xColumn method should use one of the result_text() 
+methods to set the error message text, then return an appropriate
+<a href="c3ref/c_abort.html">error code</a>.  The xColumn method must return <a href="c3ref/c_abort.html">SQLITE_OK</a> on success.
+
+<p>The xColumn method is required for every virtual table implementation.
+
+<a name="xrowid"></a>
+
+<h3>2.12 The xRowid Method</h3>
+
+<blockquote><pre>
+  int (*xRowid)(sqlite3_vtab_cursor *pCur, sqlite_int64 *pRowid);
+</pre></blockquote>
+
+<p>A successful invocation of this method will cause *pRowid to be
+filled with the <a href="lang_createtable.html#rowid">rowid</a> of row that the
+<a href="c3ref/vtab_cursor.html">virtual table cursor</a> pCur is currently pointing at.
+This method returns <a href="c3ref/c_abort.html">SQLITE_OK</a> on success.
+It returns an appropriate <a href="c3ref/c_abort.html">error code</a> on failure.</p>
+
+<p>The xRowid method is required for every virtual table implementation.
+
+<a name="xupdate"></a>
+
+<h3>2.13 The xUpdate Method</h3>
+
+<blockquote><pre>
+  int (*xUpdate)(
+    sqlite3_vtab *pVTab,
+    int argc,
+    sqlite3_value **argv,
+    sqlite_int64 *pRowid
+  );
+</pre></blockquote>
+
+<p>All changes to a virtual table are made using the xUpdate method.
+This one method can be used to insert, delete, or update.
+
+<p>The argc parameter specifies the number of entries in the argv array. 
+The value of argc will be 1 for a pure delete operation or N+2 for an insert
+or replace or update where N is the number of columns in the table.  
+In the previous sentence, N includes any hidden columns.
+
+<p>Every argv entry will have a non-NULL value in C but may contain the 
+SQL value NULL.  In other words, it is always true that
+<tt>argv&#91;i&#93;!=0</tt> for <b>i</b> between 0 and <tt>argc-1</tt>.
+However, it might be the case that
+<tt>sqlite3_value_type(argv&#91;i&#93;)==SQLITE_NULL</tt>.
+
+<p>The argv[0] parameter is the <a href="lang_createtable.html#rowid">rowid</a> of a row in the virtual table 
+to be deleted. If argv[0] is an SQL NULL, then no deletion occurs.
+
+<p>The argv[1] parameter is the rowid of a new row to be inserted 
+into the virtual table. If argv[1] is an SQL NULL, then the implementation 
+must choose a rowid for the newly inserted row. Subsequent argv[] 
+entries contain values of the columns of the virtual table, in the 
+order that the columns were declared. The number of columns will
+match the table declaration that the <a href="vtab.html#xconnect">xConnect</a> or <a href="vtab.html#xcreate">xCreate</a> method made 
+using the <a href="c3ref/declare_vtab.html">sqlite3_declare_vtab()</a> call.  All hidden columns are included.
+
+<p>When doing an insert without a rowid (argc>1, argv[1] is an SQL NULL), the 
+implementation must set *pRowid to the rowid of the newly inserted row; 
+this will become the value returned by the <a href="c3ref/last_insert_rowid.html">sqlite3_last_insert_rowid()</a>
+function. Setting this value in all the other cases is a harmless no-op;
+the SQLite engine ignores the *pRowid return value if argc==1 or 
+argv[1] is not an SQL NULL.
+
+<p>Each call to xUpdate will fall into one of cases shown below.
+Not that references to <b>argv&#91;i&#93</b> mean the SQL value
+held within the argv&#91;i&#93; object, not the argv&#91;i&#93;
+object itself.
+
+<blockquote>
+<dl>
+<dt><b>argc = 1</b>
+<dd><p>The single row with rowid equal to argv[0] is deleted. No insert occurs.
+
+<dt><b>argc > 1 <br> argv[0] = NULL</b>
+<dd><p>A new row is inserted with a rowid argv[1] and column values in
+       argv[2] and following.  If argv[1] is an SQL NULL,
+       the a new unique rowid is generated automatically.
+
+<dt><b>argc > 1 <br> argv[0] &ne; NULL <br> argv[0] = argv[1]</b>
+<dd><p>The row with rowid argv[0] is updated with new values 
+       in argv[2] and following parameters.
+
+<dt><b>argc > 1 <br> argv[0] &ne; NULL <br> argv[0] &ne; argv[1]</b>
+<dd><p> The row with rowid argv[0] is updated with rowid argv[1] 
+and new values in argv[2] and following parameters. This will occur 
+when an SQL statement updates a rowid, as in the statement:
+<blockquote>
+   <a href="lang_update.html">UPDATE</a> table SET rowid=rowid+1 WHERE ...; 
+</blockquote>
+</dl>
+</blockquote>
+
+<p>The xUpdate method must return <a href="c3ref/c_abort.html">SQLITE_OK</a> if and only if it is
+successful.  If a failure occurs, the xUpdate must return an appropriate
+<a href="c3ref/c_abort.html">error code</a>.  On a failure, the pVTab->zErrMsg element may optionally
+be replaced with error message text stored in memory allocated from SQLite 
+using functions such as <a href="c3ref/mprintf.html">sqlite3_mprintf()</a> or <a href="c3ref/free.html">sqlite3_malloc()</a>.
+
+<p>If the xUpdate method violates some constraint of the virtual table
+(including, but not limited to, attempting to store a value of the wrong 
+datatype, attempting to store a value that is too
+large or too small, or attempting to change a read-only value) then the
+xUpdate must fail with an appropriate <a href="c3ref/c_abort.html">error code</a>.
+
+<p>There might be one or more <a href="c3ref/vtab_cursor.html">sqlite3_vtab_cursor</a> objects open and in use 
+on the virtual table instance and perhaps even on the row of the virtual
+table when the xUpdate method is invoked.  The implementation of
+xUpdate must be prepared for attempts to delete or modify rows of the table
+out from other existing cursors.  If the virtual table cannot accommodate
+such changes, the xUpdate method must return an <a href="c3ref/c_abort.html">error code</a>.
+
+<p>The xUpdate method is optional.
+If the xUpdate pointer in the <a href="c3ref/module.html">sqlite3_module</a> for a virtual table
+is a NULL pointer, then the virtual table is read-only.
+
+
+<a name="xfindfunction"></a>
+
+<h3>2.14 The xFindFunction Method</h3>
+
+<blockquote><pre>
+  int (*xFindFunction)(
+    sqlite3_vtab *pVtab,
+    int nArg,
+    const char *zName,
+    void (**pxFunc)(sqlite3_context*,int,sqlite3_value**),
+    void **ppArg
+  );
+</pre></blockquote>
+
+<p>This method is called during <a href="c3ref/prepare.html">sqlite3_prepare()</a> to give the virtual
+table implementation an opportunity to overload functions. 
+This method may be set to NULL in which case no overloading occurs.
+
+<p>When a function uses a column from a virtual table as its first 
+argument, this method is called to see if the virtual table would 
+like to overload the function. The first three parameters are inputs: 
+the virtual table, the number of arguments to the function, and the 
+name of the function. If no overloading is desired, this method
+returns 0. To overload the function, this method writes the new 
+function implementation into *pxFunc and writes user data into *ppArg 
+and returns 1.
+
+<p>Note that infix functions (<a href="lang_expr.html#like">LIKE</a>, <a href="lang_expr.html#glob">GLOB</a>, <a href="lang_expr.html#regexp">REGEXP</a>, and <a href="lang_expr.html#match">MATCH</a>) reverse 
+the order of their arguments. So "like(A,B)" is equivalent to "B like A". 
+For the form "B like A" the B term is considered the first argument 
+to the function. But for "like(A,B)" the A term is considered the 
+first argument.
+
+<p>The function pointer returned by this routine must be valid for
+the lifetime of the <a href="c3ref/vtab.html">sqlite3_vtab</a> object given in the first parameter.
+
+<a name="xBegin"></a>
+
+<h3>2.15 The xBegin Method</h3>
+
+<blockquote><pre>
+  int (*xBegin)(sqlite3_vtab *pVTab);
+</pre></blockquote>
+
+<p>This method begins a transaction on a virtual table.
+This is method is optional.  The xBegin pointer of <a href="c3ref/module.html">sqlite3_module</a>
+may be NULL.
+
+<p>This method is always followed by one call to either the
+<a href="vtab.html#xcommit">xCommit</a> or <a href="vtab.html#xrollback">xRollback</a> method.  Virtual table transactions do
+not nest, so the xBegin method will not be invoked more than once
+on a single virtual table
+without an intervening call to either <a href="vtab.html#xcommit">xCommit</a> or <a href="vtab.html#xrollback">xRollback</a>.
+Multiple calls to other methods can and likely will occur in between
+the xBegin and the corresponding <a href="vtab.html#xcommit">xCommit</a> or <a href="vtab.html#xrollback">xRollback</a>.
+
+<a name="xsync"></a>
+
+<h3>2.16 The xSync Method</h3>
+
+<blockquote><pre>
+  int (*xSync)(sqlite3_vtab *pVTab);
+</pre></blockquote>
+
+
+<p>This method signals the start of a two-phase commit on a virtual
+table.
+This is method is optional.  The xSync pointer of <a href="c3ref/module.html">sqlite3_module</a>
+may be NULL.
+
+<p>This method is only invoked after call to the <a href="vtab.html#xBegin">xBegin</a> method and
+prior to an <a href="vtab.html#xcommit">xCommit</a> or <a href="vtab.html#xrollback">xRollback</a>.  In order to implement two-phase
+commit, the xSync method on all virtual tables is invoked prior to
+invoking the <a href="vtab.html#xcommit">xCommit</a> method on any virtual table.  If any of the 
+xSync methods fail, the entire transaction is rolled back.
+
+<a name="xcommit"></a>
+
+<h3>2.17 The xCommit Method</h3>
+
+<blockquote><pre>
+  int (*xCommit)(sqlite3_vtab *pVTab);
+</pre></blockquote>
+
+<p>This method causes a virtual table transaction to commit.
+This is method is optional.  The xCommit pointer of <a href="c3ref/module.html">sqlite3_module</a>
+may be NULL.
+
+<p>A call to this method always follows a prior call to <a href="vtab.html#xBegin">xBegin</a> and
+<a href="vtab.html#xsync">xSync</a>.
+
+
+<a name="xrollback"></a>
+
+<h3>2.18 The xRollback Method</h3>
+
+<blockquote><pre>
+  int (*xRollback)(sqlite3_vtab *pVTab);
+</pre></blockquote>
+
+<p>This method causes a virtual table transaction to rollback.
+This is method is optional.  The xRollback pointer of <a href="c3ref/module.html">sqlite3_module</a>
+may be NULL.
+
+<p>A call to this method always follows a prior call to <a href="vtab.html#xBegin">xBegin</a>.
+
+
+<a name="xrename"></a>
+
+<h3>2.19 The xRename Method</h3>
+
+<blockquote><pre>
+  int (*xRename)(sqlite3_vtab *pVtab, const char *zNew);
+</pre></blockquote>
+
+<p>This method provides notification that the virtual table implementation
+that the virtual table will be given a new name. 
+If this method returns <a href="c3ref/c_abort.html">SQLITE_OK</a> then SQLite renames the table.
+If this method returns an <a href="c3ref/c_abort.html">error code</a> then the renaming is prevented.
+
+<p>The xRename method is required for every virtual table implementation.
+

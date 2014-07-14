@@ -1,0 +1,5 @@
+usr/include/*.h
+usr/lib/libsqlite3.a
+usr/lib/libsqlite3.so
+usr/lib/libsqlite3.la
+usr/lib/pkgconfig/sqlite3.pc

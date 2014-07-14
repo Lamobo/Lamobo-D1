@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Query Language: Aggregate Functions</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>Aggregate Functions</h2>
+
+<p>
+The aggregate functions shown below are available by default.  Additional
+aggregate functions written in C may be added using the 
+<a href="c3ref/create_function.html">sqlite3_create_function()</a></a>
+API.</p>
+
+<p>
+In any aggregate function that takes a single argument, that argument
+can be preceded by the keyword DISTINCT.  In such cases, duplicate
+elements are filtered before being passed into the aggregate function.
+For example, the function "count(distinct X)" will return the number
+of distinct values of column X instead of the total number of non-null
+values in column X.
+</p>
+
+<table border=0 cellpadding=10>
+<tr><td valign="top" align="right" width="120">avg(<i>X</i>)</td><td valign="top"><a name="avg"></a>
+
+  The avg() function
+  returns the average value of all non-NULL <i>X</i> within a
+  group.  String and BLOB values that do not look like numbers are
+  interpreted as 0.
+  The result of avg() is always a floating point value as long as
+  at there is at least one non-NULL input even if all
+  inputs are integers.  The result of avg() is NULL if and only if
+  there are no non-NULL inputs.  
+</td></tr><tr><td valign="top" align="right" width="120">count(<i>X</i>)<br></br>count(*)</td><td valign="top"><a name="count"></a>
+
+  The count(X) function returns
+  a count of the number of times
+  that <i>X</i> is not NULL in a group.  The count(*) function
+  (with no arguments) returns the total number of rows in the group.
+</td></tr><tr><td valign="top" align="right" width="120">group_concat(<i>X</i>)<br></br>group_concat(<i>X</i>,<i>Y</i>)</td><td valign="top"><a name="groupconcat"></a>
+
+  The group_concat() function returns
+  a string which is the concatenation of
+  all non-NULL values of <i>X</i>.  If parameter <i>Y</i> is present then
+  is is used as the separator
+  between instances of <i>X</i>.  A comma (",") is used as the separator
+  if <i>Y</i> is omitted.  The order of the concatenated elements is
+  arbitrary.
+</td></tr><tr><td valign="top" align="right" width="120">max(<i>X</i>)</td><td valign="top"><a name="maxggunc"></a>
+
+  The max() aggregate function
+  returns the maximum value of all values in the group.
+  The maximum value is the value that would be returned last in an
+  ORDER BY on the same column.  Aggregate max() returns NULL 
+  if and only if there are no non-NULL values in the group.
+</td></tr><tr><td valign="top" align="right" width="120">min(<i>X</i>)</td><td valign="top"><a name="minggunc"></a>
+
+  The min() aggregate function
+  returns the minimum non-NULL value of all values in the group.
+  The minimum value is the first non-NULL value that would appear
+  in an ORDER BY of the column.
+  Aggregate min() returns NULL if and only if there are no non-NULL
+  values in the group.
+</td></tr><tr><td valign="top" align="right" width="120">sum(<i>X</i>)<br></br>total(<i>X</i>)</td><td valign="top"><a name="sumunc"></a>
+
+  The sum() aggregate function
+  returns sum of all non-NULL values in the group.
+  If there are no non-NULL input rows then sum() returns
+  NULL but total() returns 0.0.
+  NULL is not normally a helpful result for the sum of no rows
+  but the SQL standard requires it and most other
+  SQL database engines implement sum() that way so SQLite does it in the
+  same way in order to be compatible.   The non-standard total() function
+  is provided as a convenient way to work around this design problem
+  in the SQL language.</p>
+
+  <p>The result of total() is always a floating point value.
+  The result of sum() is an integer value if all non-NULL inputs are integers.
+  If any input to sum() is neither an integer or a NULL
+  then sum() returns a floating point value
+  which might be an approximation to the true sum.</p>
+
+  <p>Sum() will throw an "integer overflow" exception if all inputs
+  are integers or NULL
+  and an integer overflow occurs at any point during the computation.
+  Total() never throws an integer overflow.
+</td></tr>
+</table>
+
+

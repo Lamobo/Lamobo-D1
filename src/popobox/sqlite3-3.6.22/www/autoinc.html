@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Autoincrement</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+<h1>SQLite Autoincrement</h1>
+
+
+<p>
+In SQLite, every row of every table has an 64-bit signed integer <a href="lang_createtable.html#rowid">ROWID</a>.
+The ROWID for each row is unique among all rows in the same table.
+</p>
+
+<p>
+You can access the ROWID of an SQLite table using one the special column
+names ROWID, _ROWID_, or OID.
+Except if you declare an ordinary table column to use one of those special
+names, then the use of that name will refer to the declared column not
+to the internal ROWID.
+</p>
+
+<p>
+If a table contains a column of type <a href="lang_createtable.html#rowid">INTEGER PRIMARY KEY</a>, then that
+column becomes an alias for the ROWID.  You can then access the ROWID
+using any of four different names, the original three names described above
+or the name given to the <a href="lang_createtable.html#rowid">INTEGER PRIMARY KEY</a> column.  All these names are
+aliases for one another and work equally well in any context.
+</p>
+
+<p>
+When a new row is inserted into an SQLite table, the ROWID can either
+be specified as part of the INSERT statement or it can be assigned
+automatically by the database engine.  To specify a ROWID manually,
+just include it in the list of values to be inserted.  For example:
+</p>
+
+<blockquote><pre>
+CREATE TABLE test1(a INT, b TEXT);
+INSERT INTO test1(rowid, a, b) VALUES(123, 5, 'hello');
+</pre></blockquote>
+
+<p>
+If no ROWID is specified on the insert, or if the specified ROWID has a value
+of NULL, then an appropriate ROWID is created
+automatically.  The usual algorithm is to give the newly created row
+a ROWID that is one larger than the largest ROWID in the table prior
+to the insert.  If the table is initially empty, then a ROWID of 1 is
+used.  If the largest ROWID is equal to the largest possible integer
+(9223372036854775807) then the database
+engine starts picking candidate ROWIDs at random until it finds one
+that is not previously used.
+If no unused ROWID can be found after a reasonable number of attempts,
+the insert operation fails with an <a href="c3ref/c_abort.html">SQLITE_FULL</a> error.
+</p>
+
+<p>
+The normal ROWID selection algorithm described above
+will generate monotonically increasing
+unique ROWIDs as long as you never use the maximum ROWID value and you never
+delete the entry in the table with the largest ROWID. 
+If you ever delete rows or if you ever create a row with the maximum possible
+ROWID, then ROWIDs from previously deleted rows might be reused when creating
+new rows and newly created ROWIDs might not be in strictly accending order.
+</p>
+
+
+<h2>The AUTOINCREMENT Keyword</h2>
+
+<p>
+If a column has the type INTEGER PRIMARY KEY AUTOINCREMENT then a slightly
+different ROWID selection algorithm is used.  
+The ROWID chosen for the new row is at least one larger than the largest ROWID
+that has ever before existed in that same table.  If the table has never
+before contained any data, then a ROWID of 1 is used.  If the table
+has previously held a row with the largest possible ROWID, then new INSERTs
+are not allowed and any attempt to insert a new row will fail with an
+SQLITE_FULL error.
+</p>
+
+<p>
+SQLite keeps track of the largest ROWID that a table has ever held using
+the special SQLITE_SEQUENCE table.  The SQLITE_SEQUENCE table is created
+and initialized automatically whenever a normal table that contains an
+AUTOINCREMENT column is created.  The content of the SQLITE_SEQUENCE table
+can be modified using ordinary UPDATE, INSERT, and DELETE statements.
+But making modifications to this table will likely perturb the AUTOINCREMENT
+key generation algorithm.  Make sure you know what you are doing before
+you undertake such changes.
+</p>
+
+<p>
+The behavior implemented by the AUTOINCREMENT keyword is subtly different
+from the default behavior.  With AUTOINCREMENT, rows with automatically
+selected ROWIDs are guaranteed to have ROWIDs that have never been used
+before by the same table in the same database.  And the automatically generated
+ROWIDs are guaranteed to be monotonically increasing.  These are important
+properties in certain applications.  But if your application does not
+need these properties, you should probably stay with the default behavior
+since the use of AUTOINCREMENT requires additional work to be done
+as each row is inserted and thus causes INSERTs to run a little slower.
+</p>
+
+<p>Note that "monotonically increasing" does not imply that the ROWID always
+increases by exactly one.  One is the usual increment.  However, if an
+insert fails due to (for example) a uniqueness constraint, the ROWID of
+the failed insertion attempt might not be reused on subsequent inserts,
+resulting in gaps in the ROWID sequence.  AUTOINCREMENT guarantees that
+automatically chosen ROWIDs will be increasing but not that they will be
+sequential.</p>
+

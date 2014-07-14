@@ -1,0 +1,244 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>OS Interface Object</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>OS Interface Object</h2><blockquote><pre>typedef struct sqlite3_vfs sqlite3_vfs;
+struct sqlite3_vfs {
+  int iVersion;            /* Structure version number */
+  int szOsFile;            /* Size of subclassed sqlite3_file */
+  int mxPathname;          /* Maximum file pathname length */
+  sqlite3_vfs *pNext;      /* Next registered VFS */
+  const char *zName;       /* Name of this virtual file system */
+  void *pAppData;          /* Pointer to application-specific data */
+  int (*xOpen)(sqlite3_vfs*, const char *zName, sqlite3_file*,
+               int flags, int *pOutFlags);
+  int (*xDelete)(sqlite3_vfs*, const char *zName, int syncDir);
+  int (*xAccess)(sqlite3_vfs*, const char *zName, int flags, int *pResOut);
+  int (*xFullPathname)(sqlite3_vfs*, const char *zName, int nOut, char *zOut);
+  void *(*xDlOpen)(sqlite3_vfs*, const char *zFilename);
+  void (*xDlError)(sqlite3_vfs*, int nByte, char *zErrMsg);
+  void (*(*xDlSym)(sqlite3_vfs*,void*, const char *zSymbol))(void);
+  void (*xDlClose)(sqlite3_vfs*, void*);
+  int (*xRandomness)(sqlite3_vfs*, int nByte, char *zOut);
+  int (*xSleep)(sqlite3_vfs*, int microseconds);
+  int (*xCurrentTime)(sqlite3_vfs*, double*);
+  int (*xGetLastError)(sqlite3_vfs*, int, char *);
+  /* New fields may be appended in figure versions.  The iVersion
+  ** value will increment whenever this happens. */
+};
+</pre></blockquote><p>
+An instance of the sqlite3_vfs object defines the interface between
+the SQLite core and the underlying operating system.  The "vfs"
+in the name of the object stands for "virtual file system".</p>
+
+<p>The value of the iVersion field is initially 1 but may be larger in
+future versions of SQLite.  Additional fields may be appended to this
+object when the iVersion value is increased.  Note that the structure
+of the sqlite3_vfs object changes in the transaction between
+SQLite version 3.5.9 and 3.6.0 and yet the iVersion field was not
+modified.</p>
+
+<p>The szOsFile field is the size of the subclassed <a href="../c3ref/file.html">sqlite3_file</a>
+structure used by this VFS.  mxPathname is the maximum length of
+a pathname in this VFS.</p>
+
+<p>Registered sqlite3_vfs objects are kept on a linked list formed by
+the pNext pointer.  The <a href="../c3ref/vfs_find.html">sqlite3_vfs_register()</a>
+and <a href="../c3ref/vfs_find.html">sqlite3_vfs_unregister()</a> interfaces manage this list
+in a thread-safe way.  The <a href="../c3ref/vfs_find.html">sqlite3_vfs_find()</a> interface
+searches the list.  Neither the application code nor the VFS
+implementation should use the pNext pointer.</p>
+
+<p>The pNext field is the only field in the sqlite3_vfs
+structure that SQLite will ever modify.  SQLite will only access
+or modify this field while holding a particular static mutex.
+The application should never modify anything within the sqlite3_vfs
+object once the object has been registered.</p>
+
+<p>The zName field holds the name of the VFS module.  The name must
+be unique across all VFS modules.</p>
+
+<p>SQLite will guarantee that the zFilename parameter to xOpen
+is either a NULL pointer or string obtained
+from xFullPathname().  SQLite further guarantees that
+the string will be valid and unchanged until xClose() is
+called. Because of the previous sentence,
+the <a href="../c3ref/file.html">sqlite3_file</a> can safely store a pointer to the
+filename if it needs to remember the filename for some reason.
+If the zFilename parameter is xOpen is a NULL pointer then xOpen
+must invent its own temporary name for the file.  Whenever the
+xFilename parameter is NULL it will also be the case that the
+flags parameter will include <a href="../c3ref/c_open_create.html">SQLITE_OPEN_DELETEONCLOSE</a>.</p>
+
+<p>The flags argument to xOpen() includes all bits set in
+the flags argument to <a href="../c3ref/open.html">sqlite3_open_v2()</a>.  Or if <a href="../c3ref/open.html">sqlite3_open()</a>
+or <a href="../c3ref/open.html">sqlite3_open16()</a> is used, then flags includes at least
+<a href="../c3ref/c_open_create.html">SQLITE_OPEN_READWRITE</a> | <a href="../c3ref/c_open_create.html">SQLITE_OPEN_CREATE</a>.
+If xOpen() opens a file read-only then it sets *pOutFlags to
+include <a href="../c3ref/c_open_create.html">SQLITE_OPEN_READONLY</a>.  Other bits in *pOutFlags may be set.</p>
+
+<p>SQLite will also add one of the following flags to the xOpen()
+call, depending on the object being opened:</p>
+
+<p><ul>
+<li>  <a href="../c3ref/c_open_create.html">SQLITE_OPEN_MAIN_DB</a>
+<li>  <a href="../c3ref/c_open_create.html">SQLITE_OPEN_MAIN_JOURNAL</a>
+<li>  <a href="../c3ref/c_open_create.html">SQLITE_OPEN_TEMP_DB</a>
+<li>  <a href="../c3ref/c_open_create.html">SQLITE_OPEN_TEMP_JOURNAL</a>
+<li>  <a href="../c3ref/c_open_create.html">SQLITE_OPEN_TRANSIENT_DB</a>
+<li>  <a href="../c3ref/c_open_create.html">SQLITE_OPEN_SUBJOURNAL</a>
+<li>  <a href="../c3ref/c_open_create.html">SQLITE_OPEN_MASTER_JOURNAL</a>
+</ul></p>
+
+<p>The file I/O implementation can use the object type flags to
+change the way it deals with files.  For example, an application
+that does not care about crash recovery or rollback might make
+the open of a journal file a no-op.  Writes to this journal would
+also be no-ops, and any attempt to read the journal would return
+SQLITE_IOERR.  Or the implementation might recognize that a database
+file will be doing page-aligned sector reads and writes in a random
+order and set up its I/O subsystem accordingly.</p>
+
+<p>SQLite might also add one of the following flags to the xOpen method:</p>
+
+<p><ul>
+<li> <a href="../c3ref/c_open_create.html">SQLITE_OPEN_DELETEONCLOSE</a>
+<li> <a href="../c3ref/c_open_create.html">SQLITE_OPEN_EXCLUSIVE</a>
+</ul></p>
+
+<p>The <a href="../c3ref/c_open_create.html">SQLITE_OPEN_DELETEONCLOSE</a> flag means the file should be
+deleted when it is closed.  The <a href="../c3ref/c_open_create.html">SQLITE_OPEN_DELETEONCLOSE</a>
+will be set for TEMP  databases, journals and for subjournals.</p>
+
+<p>The <a href="../c3ref/c_open_create.html">SQLITE_OPEN_EXCLUSIVE</a> flag is always used in conjunction
+with the <a href="../c3ref/c_open_create.html">SQLITE_OPEN_CREATE</a> flag, which are both directly
+analogous to the O_EXCL and O_CREAT flags of the POSIX open()
+API.  The SQLITE_OPEN_EXCLUSIVE flag, when paired with the
+SQLITE_OPEN_CREATE, is used to indicate that file should always
+be created, and that it is an error if it already exists.
+It is <i>not</i> used to indicate the file should be opened
+for exclusive access.</p>
+
+<p>At least szOsFile bytes of memory are allocated by SQLite
+to hold the  <a href="../c3ref/file.html">sqlite3_file</a> structure passed as the third
+argument to xOpen.  The xOpen method does not have to
+allocate the structure; it should just fill it in.  Note that
+the xOpen method must set the sqlite3_file.pMethods to either
+a valid <a href="../c3ref/io_methods.html">sqlite3_io_methods</a> object or to NULL.  xOpen must do
+this even if the open fails.  SQLite expects that the sqlite3_file.pMethods
+element will be valid after xOpen returns regardless of the success
+or failure of the xOpen call.</p>
+
+<p>The flags argument to xAccess() may be <a href="../c3ref/c_access_exists.html">SQLITE_ACCESS_EXISTS</a>
+to test for the existence of a file, or <a href="../c3ref/c_access_exists.html">SQLITE_ACCESS_READWRITE</a> to
+test whether a file is readable and writable, or <a href="../c3ref/c_access_exists.html">SQLITE_ACCESS_READ</a>
+to test whether a file is at least readable.   The file can be a
+directory.</p>
+
+<p>SQLite will always allocate at least mxPathname+1 bytes for the
+output buffer xFullPathname.  The exact size of the output buffer
+is also passed as a parameter to both  methods. If the output buffer
+is not large enough, <a href="../c3ref/c_abort.html">SQLITE_CANTOPEN</a> should be returned. Since this is
+handled as a fatal error by SQLite, vfs implementations should endeavor
+to prevent this by setting mxPathname to a sufficiently large value.</p>
+
+<p>The xRandomness(), xSleep(), and xCurrentTime() interfaces
+are not strictly a part of the filesystem, but they are
+included in the VFS structure for completeness.
+The xRandomness() function attempts to return nBytes bytes
+of good-quality randomness into zOut.  The return value is
+the actual number of bytes of randomness obtained.
+The xSleep() method causes the calling thread to sleep for at
+least the number of microseconds given.  The xCurrentTime()
+method returns a Julian Day Number for the current date and time.</p>
+
+<p></p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

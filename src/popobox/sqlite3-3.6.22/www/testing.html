@@ -1,0 +1,746 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>How SQLite Is Tested</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+
+
+
+<h1 align="center">How SQLite Is Tested</h1>
+
+<h2>1.0 Introduction</h2>
+
+<p>The reliability and robustness of SQLite is achieved in part
+by thorough and careful testing.</p>
+
+<p>As of <a href="releaselog/3_6_19.html">version 3.6.19</a> (all statistics in the report are against that
+release of SQLite),
+the SQLite library consists of approximately
+65.7 KSLOC of C code.
+(KSLOC means thousands of "Source Lines Of Code" or, in other words,
+lines of code excluding blank lines and comments.)
+By comparison, the project has
+690 times as much
+test code and test scripts - 
+45409.7 KSLOC.</p>
+
+<h3>1.1 Executive Summary</h3>
+
+<ul>
+<li> Three independently developed test harnesses
+<li> 100% branch test coverage in an as-deployed configuration
+<li> Millions and millions of test cases
+<li> Out-of-memory tests
+<li> I/O error tests
+<li> Crash and power loss tests
+<li> Fuzz tests
+<li> Boundary value tests
+<li> Regression tests
+<li> Malformed database tests
+<li> Extensive use of assert() and run-time checks
+<li> Valgrind analysis
+</ul>
+
+<a name="harnesses"></a>
+
+<h2>2.0 Test Harnesses</h2>
+
+<p>There are three independent test harnesses used for testing the 
+core SQLite library.
+Each test harness is designed, maintained, and managed separately
+from the others.
+</p>
+
+<ol>
+<li><p>
+<a name="tcl"></a>
+
+The <b>TCL Tests</b> are the oldest set of tests for SQLite.  
+The TCL tests are contained in the same source tree as the
+SQLite core and like the SQLite core are in the public domain.  The
+TCL tests are the primary tests used during development.
+The TCL tests are written using the 
+<a href="http://www.tcl.tk/">TCL scripting language</a>.
+The TCL test harness itself consists of 14.6 KSLOC 
+of C code used to create the TCL interface.  The test scripts are contained
+in 511 files totaling 
+7.9MB in size.  There are
+24866 distinct test cases, but many of the test
+cases are parameterized and run multiple times (with different parameters)
+so that on a full test run, about 2.2 million 
+separate tests are performed and provide 
+99.50% statement and
+97.41% branch test coverage.
+</p>
+</li>
+
+<li><p>
+The <b><a href="th3.html">TH3</a></b> test harness is a set of proprietary tests, written in
+C that provide 100% branch test coverage (and 100% MC/DC test coverage) to
+the core SQLite library.  The TH3 tests are designed to run
+on embedded and specialized platforms that would not easily support
+TCL or other workstation services.  TH3 tests use only the published 
+SQLite interfaces.  TH3 is free to <a href="consortium.html">SQLite Consortium</a> members 
+and is available by license to others.  TH3 consists of about
+23.7 MB or 340.8 KSLOC
+of C code implementing 12287 distinct test cases.
+TH3 tests are heavily parameterized, though, so a full test runs
+about 1.4 million different test
+instances.  Additional information on TH3 is
+<a href="th3.html">available separately</a>.</p></li>
+
+<li><p>
+<a name="slt"></a>
+
+The <a href="http://www.sqlite.org/sqllogictest"><b>SQL Logic Test</b></a>
+or SLT test harness is used to run huge numbers
+of SQL statements against both SQLite and several other SQL database engines
+and verify that they all get the same answers.  SLT currently compares
+SQLite against PostgreSQL, MySQL, Microsoft SQL Server, and Oracle 10g.
+SLT runs 7.2 million queries comprising
+1.12GB of test data.
+</p></li>
+</ol>
+
+<p>All of the tests above must run successfully, on multiple platforms
+and under multiple compile-time configurations,
+before each release of SQLite.</p>
+
+<p>Prior to each check-in to the SQLite source tree, developers
+typically run a subset (called "veryquick") of the Tcl tests
+consisting of about 
+42.1 thousand test cases
+and covering
+97.23% of the core SQLite source code statements.
+The veryquick tests covers everything except the anomaly, fuzz, and 
+soak tests.  The idea behind the veryquick tests are that they are
+sufficient to catch most errors, but also run in only a few minutes
+instead of a few hours.</p>
+
+<h2>3.0 Anomaly Testing</h2>
+
+<p>Anomaly tests are tests designed to verify the correct behavior
+of SQLite when something goes wrong.  It is (relatively) easy to build
+an SQL database engine that behaves correctly on well-formed inputs
+on a fully functional computer.  It is more difficult to build a system
+that responses sanely to invalid inputs and continues to function following
+system malfunctions.  The anomaly tests are designed to verify the latter
+behavior.</p>
+
+<h3>3.1 Out-Of-Memory Testing</h3>
+
+<p>SQLite, like all SQL database engines, makes extensive use of
+malloc()  (See the separate report on
+<a href="malloc.html">dynamic memory allocation in SQLite</a> for
+additional detail.)
+On servers and workstations, malloc() never fails in practice and so correct
+handling of out-of-memory (OOM) errors is not particularly important.
+But on embedded devices, OOM errors are frightenly common and since
+SQLite is frequently used on embedded devices, it is important that
+SQLite be able to gracefully handle OOM errors.</p>
+
+<p>OOM testing is accomplished by simulating OOM errors.
+SQLite allows an application to substitute an alternative malloc()
+implementation using the <a href="c3ref/config.html">sqlite3_config</a>(<a href="c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MALLOC</a>,...)
+interface.  The TCL and TH3 test harnesses are both capable of
+inserting a modified version of malloc() that can be rigged to fail 
+after a certain number of allocations.  These instrumented mallocs
+can be set to fail only once and then start working again, or to
+continue failing after the first failure.  OOM tests are done in a
+loop.  On the first iteration of the loop, the instrumented malloc
+is rigged to fail on the first allocation.  Then some SQLite operation
+is carried out and checks are done to make sure SQLite handled the
+OOM error correctly.  Then the time-to-failure counter
+on the instrumented malloc is increased by one and the test is
+repeated.  The loop continues until the entire operation runs to
+completion without ever encountering a simulated OOM failure.
+Tests like this are run twice, once with the instrumented malloc
+set to fail only once, and again with the instrumented malloc set
+to fail continuously after the first failure.</p>
+
+<h3>3.2 I/O Error Testing</h3>
+
+<p>I/O error testing seeks to verify that SQLite responds sanely
+to failed I/O operations.  I/O errors might result from a full disk drive,
+malfunctioning disk hardware, network outages when using a network
+file system, system configuration or permission changes that occur in the 
+middle of an SQL operation, or other hardware or operating system 
+malfunctions.  Whatever the cause, it is important that SQLite be able
+to respond correctly to these errors and I/O error testing seeks to
+verify that it does.</p>
+
+<p>I/O error testing is similar in concept to OOM testing; I/O errors
+are simulated and checks are made to verify that SQLite responds
+correctly to the simulated errors.  I/O errors are simulated in both
+the TCL and TH3 test harnesses by inserting a new
+<a href="c3ref/vfs.html">Virtual File System object</a> that is specially rigged
+to simulate an I/O error after a set number of I/O operations.
+As with OOM error testing, the I/O error simulators can be set to
+fail just once, or to fail continuously after the first failure.
+Tests are run in a loop, slowly increasing the point of failure until
+the test case runs to completion without error.  The loop is run twice,
+once with the I/O error simulator set to simulate only a single failure
+and a second time with it set to fail all I/O operations after the first
+failure.</p>
+
+<p>In I/O error tests, after the I/O error simulation failure mechanism
+is disabled, the database is examined using
+<a href="pragma.html#pragma_integrity_check">PRAGMA integrity_check</a> to make sure that the I/O error has not
+introduced database corruption.</p>
+
+<h3>3.3 Crash Testing</h3>
+
+<p>Crash testing seeks to demonstrate that an SQLite database will not
+go corrupt if the application or operating system crashes or if there
+is a power failure in the middle of a database update.  A separate
+white-paper titled
+<a href="atomiccommit.html">Atomic Commit in SQLite</a> describes the
+defensive measure SQLite takes to prevent database corruption following
+a crash.  Crash tests strive to verify that those defensive measures
+are working correctly.</p>
+
+<p>It is impractical to do crash testing using real power failures, of
+course, and so crash testing is done in simulation.  An alternative
+<a href="c3ref/vfs.html">Virtual File System</a> is inserted that allows the test
+harness to simulate the state of the database file following a crash.</p>
+
+<p>In the TCL test harness, the crash simulation is done in a separate
+process.  The main testing process spawns a child process which runs
+some SQLite operation and randomly crashes somewhere in the middle of
+a write operation.  A special VFS randomly reorders and corrupts
+the unsynchronized
+write operations to simulate the effect of buffered filesystems.  After
+the child dies, the original test process opens and reads the test
+database and verifies that the changes attempted by the child either
+completed successfully or else were completely rolled back.  The
+<a href="pragma.html#pragma_integrity_check">integrity_check</a> <a href="pragma.html#syntax">PRAGMA</a> is used to make sure no database corruption
+occurs.</p>
+
+<p>The TH3 test harness needs to run on embedded systems that do not
+necessarily have the ability to spawn child processes, so it uses
+an in-memory VFS to simulate crashes.  The in-memory VFS can be rigged
+to make a snapshot of the entire filesystem after a set number of I/O
+operations.  Crash tests run in a loop.  On each iteration of the loop,
+the point at which a snapshot is made is advanced until the SQLite
+operations being tested run to completion without ever hitting a
+snapshot.  Within the loop, after the SQLite operation under test has
+completed, the filesystem is reverted to the snapshot and random file
+damage is introduced that is characteristic of the kinds of damage
+one expects to see following a power loss.  Then the database is opened
+and checks are made to ensure that it is well-formed and that the
+transaction either ran to completion or was completely rolled back.
+The interior of the loop is repeated multiple times for each
+snapshot with different random damage each time.</p>
+
+<h3>3.4 Compound failure tests</h3>
+
+<p>The test suites for SQLite also explore the result of stacking
+multiple failures.  For example, tests are run to insure correct behavior
+when an I/O error or OOM fault occurs while trying to recover from a
+prior crash.
+
+<h2>4.0 Fuzz Testing</h2>
+
+<p><a href="http://en.wikipedia.org/wiki/Fuzz_testing">Fuzz testing</a>
+seeks to establish that SQLite response correctly to invalid, out-of-range,
+or malformed inputs.</p>
+
+<h3>4.1 SQL Fuzz</h3>
+
+<p>SQL fuzz testing consists of creating syntactically correct yet
+wildly nonsensical SQL statements and feeding them to SQLite to see
+what it will do with them.  Usually some kind of error is returned
+(such as "no such table").  Sometimes, purely by chance, the SQL
+statement also happens to be semantically correct.  In that case, the
+resulting prepared statement is run to make sure it gives a reasonable
+result.</p>
+
+<p>The SQL fuzz generator tests are part of the TCL test suite.
+During a full test run, about 107.5 
+thousand fuzz SQL statements are
+generated and tested.</p>
+
+<h3>4.2 Malformed Database Files</h3>
+
+<p>There are numerous test cases that verify that SQLite is able to
+deal with malformed database files.
+These tests first build a well-formed database file, then add
+corruption by changing one or more bytes in the file by some means
+other than SQLite.  Then SQLite is used to read the database.
+In some cases, the bytes changes are in the middle of data.
+This causes the content of the database to change while keeping the
+database well-formed.
+In other cases, unused bytes of the file are modified, which has
+no effect on the integrity of the database.
+The interesting cases are when bytes of the file that
+define database structure get changed.  The malformed database tests
+verify that SQLite finds the file format errors and reports them
+using the <a href="c3ref/c_abort.html">SQLITE_CORRUPT</a> return code without overflowing
+buffers, dereferencing NULL pointers, or performing other
+unwholesome actions.</p>
+
+<h3>4.3 Boundary Value Tests</h3>
+
+<p>SQLite defines certain <a href="limits.html">limits</a> on its operation, such as the
+maximum number of columns in a table, the maximum length of an 
+SQL statement, or the maximum value of an integer.  The TCL and TH3 test
+suites both contains numerous tests that push SQLite right to the edge
+of its defined limits and verify that it performs correctly for
+all allowed values.  Additional tests go beyond the defined limits
+and verify that SQLite correctly returns errors.  The source code
+contains <a href="testing.html#testcase">testcase macros</a> to verify that both sides of each boundary
+have been tested.</p>
+
+<h2>5.0 Regression Testing</h2>
+
+<p>Whenever a bug is reported against SQLite, that bug is not considered
+fixed until new test cases have been added to the TCL test suite which
+would exhibit the bug in an unpatched version of SQLite.  Over the years,
+this has resulted in thousands and thousands of new tests being added
+to the TCL test suite.  These regression tests insure that bugs that have
+been fixed in the past are not reintroduced into future versions of
+SQLite.</p>
+
+<h2>6.0 Automatic Resource Leak Detection</h2>
+
+<p>Resource leak occurs when system resources
+are allocated and never freed.  The most troublesome resource leaks
+in many applications are memory leaks - when memory is allocated using
+malloc() but never released using free().  But other kinds of resources
+can also be linked:  file descriptors, threads, mutexes, etc.</p>
+
+<p>Both the TCL and TH3 test harnesses automatically track system
+resources and report resources leaks on <u>every</u> test run.
+No special configuration or setup is required.   The test harnesses
+are especially vigilant with regard to memory leaks.  If a change
+causes a memory leak, the test harnesses will recognize this
+quickly.  SQLite is designed to never leak memory, even after
+an exception such as an OOM error or disk I/O error.  The test
+harnesses are zealous to enforce this.</p>
+
+<a name="coverage"></a>
+
+<h2>7.0 Test Coverage</h2>
+
+<p>The SQLite core has 100% branch test coverage under <a href="th3.html">TH3</a> as of
+2009-07-25, in its default configuration as measured by
+<a href="http://gcc.gnu.org/onlinedocs/gcc/Gcov.html">gcov</a>
+utility on SuSE Linux 10.1 on x86 hardware with the GCC 4.0.1 compiler.</p>
+
+<p>The "SQLite core" in the previous paragraph excludes the
+operating-system dependent <a href="c3ref/vfs.html">VFS</a> backends, since it is
+not possible to write cross-platform tests for those modules.  Extensions
+such as FTS3 and RTree are also excluded from the analysis.</p>
+
+<h3>7.1 Statement versus branch coverage</h3>
+
+<p>There are many ways to measure test coverage.  The most popular
+metric is "statement coverage".  When you hear someone say that their
+program as "XX% test coverage" without further explanation, they usually
+mean statement coverage.  Statement coverage measures what percentage
+of lines of code are executed at least once by the test suite.</p>
+
+<p>Branch coverage is more rigorous than statement coverage.  Branch
+coverage measure the number of machine-code branch instructions that
+are evaluated at least once on both directions.</p>
+
+<p>To illustrate the difference between statement coverage and
+branch coverage, consider the following hypothetical
+line of C code:</p>
+
+<blockquote><pre>
+if( a>b && c!=25 ){ d++; }
+</pre></blockquote>
+
+<p>Such a line of C code might generate a dozen separate machine code
+instructions.  If any one of those instructions is ever evaluated, then
+we say that the statement has been tested.  So, for example, it might
+be the case that the conditional expression is
+always false and the "d" variable is
+never incremented.  Even so, statement coverage counts this line of
+code as having been tested.</p>
+
+<p>Branch coverage is more strict.  With branch coverage, each test and
+each subblock within the statement is considered separately.  In order
+to achieve 100% branch coverage in the example above, there must be at
+least three test cases:</p>
+
+<p><ul>
+<li> a<=b
+<li> a>b && c==25
+<li> a>b && c!=25
+</ul></p>
+
+<p>Any one of the above test cases would provide 100% statement coverage
+but all three are required for 100% branch coverage.  Generally speaking,
+100% branch coverage implies 100% statement coverage, but the converse is
+not true.  To reemphasize, the
+<a href="th3.html">TH3</a> test harness for SQLite provides the stronger form of
+test coverage - 100% branch test coverage.</p>
+
+
+<h3>7.2 Coverage testing of defensive code</h3>
+
+<p>A well-written C program will typically contain some defensive tests
+which in practice are always true or always false.  This leads to a 
+programming dilemma:  Does one remove defensive code in order to obtain
+100% branch coverage?</p>
+
+<p>In SQLite, the answer to the previous question is "no".
+For testing purposes, the SQLite source code defines
+macros called ALWAYS() and NEVER().   The ALWAYS() macro
+surrounds conditions
+which are expected to always evaluate as true and NEVER() surrounds
+conditions that are always evaluated to false.  These macros serve as
+comments to indicate that the conditions are defensive code.
+For standard builds, these macros are pass-throughs:</p>
+
+<blockquote><pre>
+#define ALWAYS(X)  (X)
+#define NEVER(X)   (X)
+</pre></blockquote>
+
+<p>During most testing, however, these macros will throw an assertion
+fault if their argument does not have the expected truth value.  This
+alerts the developers quickly to incorrect design assumptions.
+
+<blockquote><pre>
+#define ALWAYS(X)  ((X)?1:assert(0),0)
+#define NEVER(X)   ((X)?assert(0),1:0)
+</pre></blockquote>
+
+<p>When measuring test coverage, these macros are defined to be constant
+truth values so that they do not generate assembly language branch
+instructions, and hence do not come into play when calculating the
+branch coverage:</p>
+
+<blockquote><pre>
+#define ALWAYS(X)  (1)
+#define NEVER(X)   (0)
+</pre></blockquote>
+
+<p>The test suite is designed to be run three times, once for each of
+the ALWAYS() and NEVER() definitions shown above.  All three test runs
+should yield exactly the same result.  There is a run-time test using
+the <a href="c3ref/test_control.html">sqlite3_test_control</a>(<a href="c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_ALWAYS</a>, ...) interface that
+can be used to verify that the macros are correctly set to the first
+form (the pass-through form) for deployment.</p>
+
+<a name="testcase"></a>
+
+<h3>7.3 Forcing coverage of boundary values and boolean vector tests</h3>
+
+<p>Another macro used in conjunction with test coverage measurement is
+the <tt>testcase()</tt> macro.  The argument is a condition for which
+we want test cases that evaluate to both true and false.
+In non-coverage builds (that is to so, in release builds) the testcase()
+macro is a no-op:</p>
+
+<blockquote><pre>
+#define testcase(X)
+</pre></blockquote>
+
+<p>But in a coverage measuring build, the testcase() macro generates code
+that evaluates the conditional expression in its argument.  
+Then during analysis, a check
+is made to insure tests exists that evaluate the conditional to both true
+and false.  Testcase() macros are used, for example, to help verify that
+boundary values are tested.  For example:</p>
+
+<blockquote><pre>
+testcase( a==b );
+testcase( a==b+1 );
+if( a>b && c!=25 ){ d++; }
+</pre></blockquote>
+
+<p>Testcase macros are also used when two or more cases of a switch
+statement go to the same block of code, to make sure that the code was
+reached for all cases:</p>
+
+<blockquote><pre>
+switch( op ){
+  case OP_Add:
+  case OP_Subtract: {
+    testcase( op==OP_Add );
+    testcase( op==OP_Subtract );
+    /* ... */
+    break;
+  }
+  /* ... */
+}
+</pre></blockquote>
+
+<p>For bitmask tests, testcase() macros are used to verify that every
+bit of the bitmask effects the test.  For example, in the following block
+of code, the condition is true if the mask contains either of two bits
+indicating either a MAIN_DB or a TEMP_DB is being opened.  The testcase()
+macros that precede the if statement verify that both cases are tested:</p>
+
+<blockquote><pre>
+testcase( mask & SQLITE_OPEN_MAIN_DB );
+testcase( mask & SQLITE_OPEN_TEMP_DB );
+if( (mask & (SQLITE_OPEN_MAIN_DB|SQLITE_OPEN_TEMP_DB))!=0 ){ ... }
+</pre></blockquote>
+
+<p>The SQLite source code contains 558
+uses of the testcase() macro.</p>
+
+<a name="mcdc"></a>
+
+<h3>7.4 Branch coverage versus MC/DC</h3>
+
+<p>Two methods of measuring test coverage were described above:
+"statement" and "branch" coverage.  There are many other test coverage
+metrics besides these two.  Another popular metric is "Modified
+Condition/Decision Coverage" or MC/DC.  
+<a href="http://en.wikipedia.org/wiki/Modified_Condition/Decision_Coverage">Wikipedia</a>
+defines MC/DC as follows:</p>
+
+<ul>
+<li> Each decision tries every possible outcome.
+<li> Each condition in a decision takes on every possible outcome.
+<li> Each entry and exit point is invoked.
+<li> Each condition in a decision is shown to independently
+     affect the outcome of the decision.
+</ul>
+
+<p>In the C programming language 
+where <b><tt>&amp;&amp;</tt></b> and <b><tt>||</tt></b>
+are "short-circuit" operators, MC/DC and branch coverage are very nearly
+the same thing.  The primary difference is in boolean vector tests.
+One can test for any of several bits in bit-vector and still obtain
+100% branch test coverage even though the second element of MC/DC - the
+requirement that each condition in a decision take on every possible outcome -
+might not be satisfied.</p>
+
+<p>SQLite uses <tt>testcase()</tt> macros as described in the previous
+subsection to make sure that every condition in a bit-vector decision takes
+on every possible outcome.  In this way, SQLite also achieves 100% MC/DC
+in addition to 100% branch coverage.</p>
+
+<h3>7.5 Experience with full test coverage</h3>
+
+<p>The developers of SQLite have found that full coverage testing is an
+extremely productive method for preventing the introduction of new bugs
+as the system evolves.  Because every single branch
+instruction in SQLite core code is covered by test cases, the developers
+can be confident that changes they make in one part of the code
+do not have unintended consequences in other parts of the code.
+It would be extremely difficult maintain the quality of SQLite without such
+assurances.</p>
+
+<h2>8.0 Dynamic Analysis</h2>
+
+<p>Dynamic analysis refers to internal and external checks on the
+SQLite code which are performed while the code is live and running.
+Dynamic analysis has proven to be a great help in maintaining the
+quality of SQLite.</p>
+
+<h3>8.1 Assert</h3>
+
+<p>The SQLite core contains 2831 <tt>assert()</tt>
+statements that verify function preconditions and postconditions and
+loop invariants.  Assert() is a macro which is a standard part of
+ANSI-C.  The argument is a boolean value that is assumed to always be
+true.  If the assertion is false, the program prints an error message
+and halts.</p>
+
+<p>Assert() macros are disabled by compiling with the NDEBUG macro defined.
+In most systems, asserts are enabled by default.  But in SQLite, the
+asserts are so numerous and are in such performance critical places, that
+the database engine runs about three times slower when asserts are enabled.
+Hence, the default (production) build of SQLite disables asserts.  
+Assert statements are only enabled when SQLite is compiled with the
+SQLITE_DEBUG preprocessor macro defined.</p>
+
+<h3>8.2 Valgrind</h3>
+
+<p><a href="http://valgrind.org/">Valgrind</a> is perhaps the most amazing
+and useful developer tool in the world.  Valgrind is a simulator - it simulates
+an x86 running a linux binary.  (Ports of valgrind for platforms other
+than linux are in development, but as of this writing, valgrind only
+works reliably on linux, which in the opinion of the SQLite developers 
+means that linux should be preferred platform for all software development.)
+As valgrind runs a linux binary, it looks for all kinds of interesting
+errors such as array overruns, reading from uninitialized memory,
+stack overflows, memory leaks, and so forth.  Valgrind finds problems
+that can easily slip through all of the other tests run against SQLite.
+And, when valgrind does find an error, it can dump the developer directly
+into a symbolic debugger at the exact point where the error occur, to
+facilitate a quick fix.</p>
+
+<p>Because it is a simulator, running a binary in valgrind is slower than 
+running it on native hardware.  So it is impractical to run the full
+SQLite test suite through valgrind.  However, the veryquick tests and
+a subset of the TH3 tests are run through valgrind prior to every release.</p>
+
+<h3>8.3 Memsys2</h3>
+
+<p>SQLite contains a pluggable
+<a href="malloc.html">memory allocation subsystem</a>.
+The default implementation uses system malloc() and free(). 
+However, if SQLite is compiled with <a href="compile.html#memdebug">SQLITE_MEMDEBUG</a>, an alternative
+memory allocation wrapper (<a href="malloc.html#memdebug">memsys2</a>)
+is inserted that looks for memory allocation
+errors at run-time.  The memsys2 wrapper checks for memory leaks, of
+course, but also looks for buffer overruns, uses of uninitialized memory,
+and attempts to use memory after it has been freed.  These same checks
+are also done by valgrind (and, indeed, valgrind does them better)
+but memsys2 has the advantage of being much faster than valgrind, which
+means the checks can be done more often and for longer tests.</p>
+
+<h3>8.4 Mutex Asserts</h3>
+
+<p>SQLite contains a pluggable mutex subsystem.  Depending on 
+compile-time options, the default mutex system contains interfaces
+<a href="c3ref/mutex_held.html">sqlite3_mutex_held()</a> and <a href="c3ref/mutex_held.html">sqlite3_mutex_notheld()</a> that detect
+whether or not a particular mutex is held by the calling thread.
+These two interfaces are used extensively within assert() statements
+in SQLite to verify mutexes are held and released at all the right
+moments, in order to double-check that SQLite does work correctly
+in multi-threaded applications.</p>
+
+<h3>8.5 Journal Tests</h3>
+
+<p>One of the things that SQLite does to insure that transactions
+are atomic across system crashes and power failures is to write
+all changes into the rollback journal file prior to changing the
+database.  The TCL test harness contains an alternative
+<a href="c3ref/vfs.html">Virtual File System</a> implementation that helps to
+verify this is occurring correctly.  The "journal-test VFS" monitors
+all disk I/O traffic between the database file and rollback journal,
+checking to make sure that nothing is written into the database
+file which has not first been written and synced to the rollback journal.
+If any discrepancies are found, an assertion fault is raised.</p>
+
+<p>The journal tests are an additional double-check over and above
+the crash tests to make sure that SQLite transactions will be atomic
+across system crashes and power failures.</p>
+
+<h2>9.0 Static Analysis</h2>
+
+<p>Static analysis means analyzing code at or before compile-time to
+check for correctness.  Static analysis consists mostly of making
+sure SQLite compiles without warnings, even when all warnings are
+enabled.  SQLite is developed primarily using GCC and it does
+compile without warnings on GCC using the -Wall and -Wextra flags.
+There are occasional reports of warnings coming from VC++, however.</p>
+
+<p>Static analysis has not proven to be helpful in finding
+bugs in SQLite.  We cannot call to mind a single problem in SQLite that
+was detected by static analysis that was not first seen by one
+of the other testing methods described above.  On the other hand,
+we have on occasion introduced new bugs in our efforts to get SQLite
+to compile without warnings.</p>
+
+<p>Our experience, then, is that static analysis is counter-productive
+to quality.  In other words, focusing on static analysis (being
+concerned with compiler warnings) actually reduces the quality of the
+code.  Nevertheless, we developers have capitulated to pressure from
+users and actively work to eliminate compiler warnings.  We are
+willing to do this because the other tests described above do an
+excellent job of finding the bugs that are often introduced when
+removing compiler warnings, so that product quality is probably not
+decreased as a result.</p>
+
+<h2>10.0 Summary</h2>
+
+<p>SQLite is open source.  This gives many people with the idea that
+it is not well tested as commercial software and is perhaps unreliable.
+But that impression is false.  
+SQLite has exhibited very high reliability in the field and
+a very low defect rate, especially considering how rapidly it is evolving.
+The quality of SQLite is achieved in part by careful code design and
+implementation.  But extensive testing also plays a vital role in
+maintaining and improving the quality of SQLite.  This document has
+summarized the testing procedures that every release of SQLite undergoes
+with the hopes of inspiring the reader to understand that SQLite is
+suitable for use in mission-critical applications.</p>
+

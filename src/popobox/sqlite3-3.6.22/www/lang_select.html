@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Query Language: SELECT</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>SELECT</h2><h4><a href="syntaxdiagrams.html#select-stmt">select-stmt:</a></h4><blockquote> <img alt="syntax diagram select-stmt" src="images/syntax/select-stmt.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#select-core">select-core:</a></h4><blockquote> <img alt="syntax diagram select-core" src="images/syntax/select-core.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#result-column">result-column:</a></h4><blockquote> <img alt="syntax diagram result-column" src="images/syntax/result-column.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#join-source">join-source:</a></h4><blockquote> <img alt="syntax diagram join-source" src="images/syntax/join-source.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#single-source">single-source:</a></h4><blockquote> <img alt="syntax diagram single-source" src="images/syntax/single-source.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#join-op">join-op:</a></h4><blockquote> <img alt="syntax diagram join-op" src="images/syntax/join-op.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#join-constraint">join-constraint:</a></h4><blockquote> <img alt="syntax diagram join-constraint" src="images/syntax/join-constraint.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#ordering-term">ordering-term:</a></h4><blockquote> <img alt="syntax diagram ordering-term" src="images/syntax/ordering-term.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#compound-operator">compound-operator:</a></h4><blockquote> <img alt="syntax diagram compound-operator" src="images/syntax/compound-operator.gif"></img> </blockquote>
+
+
+<p>The SELECT statement is used to query the database.  The
+result of a SELECT is zero or more rows of data where each row
+has a fixed number of columns.  The number of columns in the
+result is specified by the expression list in between the
+SELECT and FROM keywords.  Any arbitrary expression can be used
+as a result.  If a result expression is <font color="#2c2cf0"><big>*</big></font> then all columns of all tables are substituted
+for that one expression.  If the expression is the name of
+a table followed by <font color="#2c2cf0"><big>.*</big></font> then the result is all columns
+in that one table.</p>
+
+<p>The DISTINCT keyword causes a subset of result rows to be returned, 
+in which each result row is different.  NULL values are not treated as 
+distinct from each other.  The default behavior is that all result rows 
+be returned, which can be made explicit with the keyword ALL.</p>
+
+<p>The query is executed against one or more tables specified after
+the FROM keyword.  If multiple tables names are separated by commas,
+then the query is against the cross join of the various tables.
+The full SQL-92 join syntax can also be used to specify joins.
+A sub-query
+in parentheses may be substituted for any table name in the FROM clause.
+The entire FROM clause may be omitted, in which case the result is a
+single row consisting of the values of the expression list.
+</p>
+
+<p>The WHERE clause can be used to limit the number of rows over
+which the query operates.</p>
+
+<p>The GROUP BY clause causes one or more rows of the result to
+be combined into a single row of output.  This is especially useful
+when the result contains aggregate functions.  The expressions in
+the GROUP BY clause do <em>not</em> have to be expressions that
+appear in the result.  The HAVING clause is similar to WHERE except
+that HAVING applies after grouping has occurred.  The HAVING expression
+may refer to values, even aggregate functions, that are not in the result.</p>
+
+<p>The ORDER BY clause causes the output rows to be sorted.  
+The argument to ORDER BY is a list of expressions that are used as the
+key for the sort.  The expressions do not have to be part of the
+result for a simple SELECT, but in a compound SELECT each sort
+expression must exactly match one of the result columns.  Each
+sort expression may be optionally followed by a COLLATE keyword and
+the name of a collating function used for ordering text and/or
+keywords ASC or DESC to specify the sort order.</p>
+
+<p>Each term of an ORDER BY expression is processed as follows:</p>
+
+<ol>
+<li><p>If the ORDER BY expression is a constant integer K then the
+output is ordered by the K-th column of the result set.</p></li>
+<li><p>If the ORDER BY expression is an identifier and one of the
+output columns has an alias by the same name, then the output is
+ordered by the identified column.</p></li>
+<li><p>Otherwise, the ORDER BY expression is evaluated and the output 
+is ordered by the value of that expression.</p></li>
+</ol>
+
+<p>In a compound SELECT statement, the third ORDER BY matching rule
+requires that the expression be identical to one of the columns in
+the result set.  The three rules are first applied to the left-most
+SELECT in the compound.  If a match is found, the search stops.  Otherwise,
+the next SELECT to the right is tried.  This continues until a match
+is found.  Each term of the ORDER BY clause is processed separately 
+and may come from different SELECT statements in the compound.</p>
+
+<p>The LIMIT clause places an upper bound on the number of rows
+returned in the result.  A negative LIMIT indicates no upper bound.
+The optional OFFSET following LIMIT specifies how many
+rows to skip at the beginning of the result set.
+In a compound query, the LIMIT clause may only appear on the
+final SELECT statement.
+The limit is applied to the entire query not
+to the individual SELECT statement to which it is attached.
+Note that if the OFFSET keyword is used in the LIMIT clause, then the
+limit is the first number and the offset is the second number.  If a
+comma is used instead of the OFFSET keyword, then the offset is the
+first number and the limit is the second number.  This seeming
+contradition is intentional - it maximizes compatibility with legacy
+SQL database systems.
+</p>
+
+<p>A compound SELECT is formed from two or more simple SELECTs connected
+by one of the operators UNION, UNION ALL, INTERSECT, or EXCEPT.  In
+a compound SELECT, all the constituent SELECTs must specify the
+same number of result columns.  There may be only a single ORDER BY
+clause at the end of the compound SELECT.  The UNION and UNION ALL
+operators combine the results of the SELECTs to the right and left into
+a single big table.  The difference is that in UNION all result rows
+are distinct where in UNION ALL there may be duplicates.
+The INTERSECT operator takes the intersection of the results of the
+left and right SELECTs.  EXCEPT takes the result of left SELECT after
+removing the results of the right SELECT.  When three or more SELECTs
+are connected into a compound, they group from left to right.</p>
+
+
+

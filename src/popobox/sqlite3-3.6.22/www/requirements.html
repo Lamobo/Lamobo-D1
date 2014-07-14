@@ -1,0 +1,159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>No Title</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<!-- title>SQLite Requirements</title -->
+
+
+<h1>SQLite Requirements</h1>
+
+<h2>1.0 Introduction</h2>
+
+<p>These requirements strive to describe the interfaces and operation of 
+SQLite in sufficient detail that a compatible implementation of SQLite
+can be written solely from these requirements and without reference to
+the canonical SQLite source code.</p>
+
+<p>Software development processes typically recognize a hierarchy of
+requirements:</p>
+
+<ul>
+<li>System requirements</li>
+<li>High-level requirements</li>
+<li>Derived high-level requirements</li>
+<li>Low-level requirements</li>
+<li>Derived low-level requirements</li>
+</ul>
+
+<p>The usual distinction between high-level and low-level requirements is
+that high-level requirements describe "what" the system does and the
+low-level requirements describe "how" the system does it.  Since the
+the requirements denoted here describe the
+behavior of SQLite and not its implementation, they are best thought of
+as high-level requirements.  Consistent with that view, most of
+the requirements numbers begin with the letter "<b>H</b>" (for "high-level"). 
+A few of the requirements presented here specify broad objectives that
+SQLite strives to achieve.  These broad requirements can be thought of
+as system requirements and are number with an initial letter "<b>S</b>".</p>
+
+<p>These requirements are hierarchical in the sense that the more
+specific requirements are derived from broader and more general
+requirements.  When requirement B is derived from requirement A, we say
+that A is the parent of B and that B is a child of A.  The parent/child
+relationships of all requirements are tracked.  All requirements presented
+here ultimately derive from a single very broad, very high-level, and
+very general system requirement called "S10000".</p>
+
+<p>Some behaviors of SQLite are undefined.  For example, the order in
+which result rows are returned from a SELECT statement is undefined if
+there is no ORDER BY clause.  As another example, many of the C interfaces
+require a pointer to an open <a href="c3ref/sqlite3.html">database connection</a> as their first argument
+and the behavior of those interfaces is undefined (and probably undesirable)
+if a pointer to some other object is supplied instead.  Some, but not all
+undefined behaviors are explicitly stated and number in this document
+with numbers beginning with the "<b>U</b>" for "Undefined".  Applications
+that use SQLite should never depend on undefined behavior.  If a behavior
+is not explicitly defined by a requirement, then the behavior is undefined,
+and so explicitly stating undefined behaviors in this document is
+technically redundant.  Nevertheless, we find that explicitly stating
+some undefined behaviors helps application developers to better understand
+the boundaries of operation of SQLite and to generate safer and more
+accurate programs that use SQLite.</p>
+
+<h2><a href="sysreq.html">2.0 System Requirements</a></h2>
+
+<h2><a href="hlr10000.html">3.0 Application C-Language Interfaces</a></h2>
+
+<h2><a href="hlr20000.html">4.0 C-Language Interfaces For
+Extending SQLite</a></h2>
+
+<h2><a href="hlr30000.html">5.0 Database File Format</a></h2>
+
+<h2><a href="hlr40000.html">6.0 SQL Language Specification</a></h2>
+

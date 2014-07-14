@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Obtaining SQL Function Parameter Values</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Obtaining SQL Function Parameter Values</h2><blockquote><pre>const void *sqlite3_value_blob(sqlite3_value*);
+int sqlite3_value_bytes(sqlite3_value*);
+int sqlite3_value_bytes16(sqlite3_value*);
+double sqlite3_value_double(sqlite3_value*);
+int sqlite3_value_int(sqlite3_value*);
+sqlite3_int64 sqlite3_value_int64(sqlite3_value*);
+const unsigned char *sqlite3_value_text(sqlite3_value*);
+const void *sqlite3_value_text16(sqlite3_value*);
+const void *sqlite3_value_text16le(sqlite3_value*);
+const void *sqlite3_value_text16be(sqlite3_value*);
+int sqlite3_value_type(sqlite3_value*);
+int sqlite3_value_numeric_type(sqlite3_value*);
+</pre></blockquote><p>
+The C-language implementation of SQL functions and aggregates uses
+this set of interface routines to access the parameter values on
+the function or aggregate.</p>
+
+<p>The xFunc (for scalar functions) or xStep (for aggregates) parameters
+to <a href="../c3ref/create_function.html">sqlite3_create_function()</a> and <a href="../c3ref/create_function.html">sqlite3_create_function16()</a>
+define callbacks that implement the SQL functions and aggregates.
+The 4th parameter to these callbacks is an array of pointers to
+<a href="../c3ref/value.html">protected sqlite3_value</a> objects.  There is one <a href="../c3ref/value.html">sqlite3_value</a> object for
+each parameter to the SQL function.  These routines are used to
+extract values from the <a href="../c3ref/value.html">sqlite3_value</a> objects.</p>
+
+<p>These routines work only with <a href="../c3ref/value.html">protected sqlite3_value</a> objects.
+Any attempt to use these routines on an <a href="../c3ref/value.html">unprotected sqlite3_value</a>
+object results in undefined behavior.</p>
+
+<p>These routines work just like the corresponding <a href="../c3ref/column_blob.html">column access functions</a>
+except that  these routines take a single <a href="../c3ref/value.html">protected sqlite3_value</a> object
+pointer instead of a <a href="../c3ref/stmt.html">sqlite3_stmt*</a> pointer and an integer column number.</p>
+
+<p>The sqlite3_value_text16() interface extracts a UTF-16 string
+in the native byte-order of the host machine.  The
+sqlite3_value_text16be() and sqlite3_value_text16le() interfaces
+extract UTF-16 strings as big-endian and little-endian respectively.</p>
+
+<p>The sqlite3_value_numeric_type() interface attempts to apply
+numeric affinity to the value.  This means that an attempt is
+made to convert the value to an integer or floating point.  If
+such a conversion is possible without loss of information (in other
+words, if the value is a string that looks like a number)
+then the conversion is performed.  Otherwise no conversion occurs.
+The <a href="../c3ref/c_blob.html">datatype</a> after conversion is returned.</p>
+
+<p>Please pay particular attention to the fact that the pointer returned
+from <a href="../c3ref/value_blob.html">sqlite3_value_blob()</a>, <a href="../c3ref/value_blob.html">sqlite3_value_text()</a>, or
+<a href="../c3ref/value_blob.html">sqlite3_value_text16()</a> can be invalidated by a subsequent call to
+<a href="../c3ref/value_blob.html">sqlite3_value_bytes()</a>, <a href="../c3ref/value_blob.html">sqlite3_value_bytes16()</a>, <a href="../c3ref/value_blob.html">sqlite3_value_text()</a>,
+or <a href="../c3ref/value_blob.html">sqlite3_value_text16()</a>.</p>
+
+<p>These routines must be called from the same thread as
+the SQL function that supplied the <a href="../c3ref/value.html">sqlite3_value*</a> parameters.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

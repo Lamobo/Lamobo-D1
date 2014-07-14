@@ -1,0 +1,233 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Query Language: BEGIN TRANSACTION</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>BEGIN TRANSACTION</h2><h4><a href="syntaxdiagrams.html#begin-stmt">begin-stmt:</a></h4><blockquote> <img alt="syntax diagram begin-stmt" src="images/syntax/begin-stmt.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#commit-stmt">commit-stmt:</a></h4><blockquote> <img alt="syntax diagram commit-stmt" src="images/syntax/commit-stmt.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#rollback-stmt">rollback-stmt:</a></h4><blockquote> <img alt="syntax diagram rollback-stmt" src="images/syntax/rollback-stmt.gif"></img> </blockquote>
+
+
+<p>
+No changes can be made to the database except within a transaction.
+Any command that changes the database (basically, any SQL command
+other than <a href="lang_select.html">SELECT</a>) will automatically start a transaction if
+one is not already in effect.  Automatically started transactions
+are committed when the last query finishes.
+</p>
+
+<p>
+Transactions can be started manually using the BEGIN
+command.  Such transactions usually persist until the next
+COMMIT or ROLLBACK command.  But a transaction will also 
+ROLLBACK if the database is closed or if an error occurs
+and the ROLLBACK conflict resolution algorithm is specified.
+See the documentation on the <a href="lang_conflict.html">ON CONFLICT</a>
+clause for additional information about the ROLLBACK
+conflict resolution algorithm.
+</p>
+
+<p>
+END TRANSACTION is an alias for COMMIT.
+</p>
+
+<p> Transactions created using BEGIN...COMMIT do not nest.
+For nested transactions, use the <a href="lang_savepoint.html">SAVEPOINT</a> and <a href="lang_savepoint.html">RELEASE</a> commands.
+The "TO SAVEPOINT <i>name</i>" clause of the ROLLBACK command shown
+in the syntax diagram above is only applicable to <a href="lang_savepoint.html">SAVEPOINT</a>
+transactions.  An attempt to invoke the BEGIN command within
+a transaction will fail with an error, regardless of whether
+the transaction was started by <a href="lang_savepoint.html">SAVEPOINT</a> or a prior BEGIN.
+The COMMIT command and the ROLLBACK command without the TO clause
+work the same on <a href="lang_savepoint.html">SAVEPOINT</a> transactions as they do with transactions
+started by BEGIN.</p>
+
+<p>
+Transactions can be deferred, immediate, or exclusive.  
+The default transaction behavior is deferred.
+Deferred means that no locks are acquired
+on the database until the database is first accessed.  Thus with a
+deferred transaction, the BEGIN statement itself does nothing to the
+filesystem.  Locks
+are not acquired until the first read or write operation.  The first read
+operation against a database creates a <a href="lockingv3.html#shared_lock">SHARED</a> lock and the first
+write operation creates a <a href="lockingv3.html#reserved_lock">RESERVED</a> lock.   Because the acquisition of
+locks is deferred until they are needed, it is possible that another
+thread or process could create a separate transaction and write to
+the database after the BEGIN on the current thread has executed.
+If the transaction is immediate, then <a href="lockingv3.html#reserved_lock">RESERVED</a> locks
+are acquired on all databases as soon as the BEGIN command is
+executed, without waiting for the
+database to be used.  After a BEGIN IMMEDIATE, 
+no other <a href="c3ref/sqlite3.html">database connection</a> will be able to write to the database or
+do a BEGIN IMMEDIATE or BEGIN EXCLUSIVE.  Other processes can continue
+to read from the database, however.  An exclusive transaction causes
+<a href="lockingv3.html#excl_lock">EXCLUSIVE</a> locks to be acquired on all databases.  After a BEGIN
+EXCLUSIVE, no other <a href="c3ref/sqlite3.html">database connection</a> except for <a href="pragma.html#pragma_read_uncommitted">read_uncommitted</a>
+connections will be able to read the database and no other connection without
+exception will be able to write the database until the transaction is
+complete.
+</p>
+
+<p>
+An implicit transaction (a transaction that is started automatically,
+not a transaction started by BEGIN) is committed automatically when
+the last active statement finishes.  A statement finishes when its
+prepared statement is <a href="c3ref/reset.html">reset</a> or
+<a href="c3ref/finalize.html">finalized</a>.  An open <a href="c3ref/blob.html">sqlite3_blob</a> used for
+incremental BLOB I/O counts as an unfinished statement.  The <a href="c3ref/blob.html">sqlite3_blob</a>
+finishes when it is <a href="c3ref/blob_close.html">closed</a>.
+</p>
+
+<p>
+The explicit COMMIT command runs immediately, even if there are
+pending <a href="lang_select.html">SELECT</a> statements.  However, if there are pending
+write operations, the COMMIT command
+will fail with a error code <a href="c3ref/c_abort.html">SQLITE_BUSY</a>.
+</p>
+
+<p>
+An attempt to execute COMMIT might also result in an <a href="c3ref/c_abort.html">SQLITE_BUSY</a> return code
+if an another thread or process has a <a href="lockingv3.html#shared_lock">shared lock</a> on the database
+that prevented the database from being updated.  When COMMIT fails in this
+way, the transaction remains active and the COMMIT can be retried later
+after the reader has had a chance to clear.
+</p>
+
+<p>
+The ROLLBACK will fail with an error code <a href="c3ref/c_abort.html">SQLITE_BUSY</a> if there
+are any pending queries.  Both read-only and read/write queries will
+cause a ROLLBACK to fail.  A ROLLBACK must fail if there are pending
+read operations (unlike COMMIT which can succeed) because bad things
+will happen if the in-memory image of the database is changed out from under
+an active query.
+</p>
+
+<p>
+If <a href="pragma.html#pragma_journal_mode">PRAGMA journal_mode</a> is set to OFF (thus disabling the rollback journal
+file) then the behavior of the ROLLBACK command is undefined.
+</p>
+
+<h3>Response To Errors Within A Transaction</h3>
+
+<p> If certain kinds of errors occur within a transaction, the
+transaction may or may not be rolled back automatically.  The
+errors that cause the behavior include:</p>
+
+<ul>
+<li> <a href="c3ref/c_abort.html">SQLITE_FULL</a>: database or disk full
+<li> <a href="c3ref/c_abort.html">SQLITE_IOERR</a>: disk I/O error
+<li> <a href="c3ref/c_abort.html">SQLITE_BUSY</a>: database in use by another process
+<li> <a href="c3ref/c_abort.html">SQLITE_NOMEM</a>: out or memory
+<li> <a href="c3ref/c_abort.html">SQLITE_INTERRUPT</a>: processing <a href="c3ref/interrupt.html">interrupted</a>
+     by application request
+</ul>
+
+<p>
+For all of these errors, SQLite attempts to undo just the one statement
+it was working on and leave changes from prior statements within the
+same transaction intact and continue with the transaction.  However, 
+depending on the statement being evaluated and the point at which the
+error occurs, it might be necessary for SQLite to rollback and
+cancel the entire transaction.  An application can tell which
+course of action SQLite took by using the
+<a href="c3ref/get_autocommit.html">sqlite3_get_autocommit()</a> C-language interface.</p>
+
+<p>It is recommended that applications respond to the errors
+listed above by explicitly issuing a ROLLBACK command.  If the 
+transaction has already been rolled back automatically
+by the error response, then the ROLLBACK command will fail with an
+error, but no harm is caused by this.</p>
+
+<p>Future versions of SQLite may extend the list of errors which
+might cause automatic transaction rollback.  Future versions of
+SQLite might change the error response.  In particular, we may
+choose to simplify the interface in future versions of SQLite by
+causing the errors above to force an unconditional rollback.</p>
+
+

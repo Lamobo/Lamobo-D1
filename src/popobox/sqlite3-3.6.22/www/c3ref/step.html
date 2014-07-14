@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Evaluate An SQL Statement</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Evaluate An SQL Statement</h2><blockquote><pre>int sqlite3_step(sqlite3_stmt*);
+</pre></blockquote><p>
+After a <a href="../c3ref/stmt.html">prepared statement</a> has been prepared using either
+<a href="../c3ref/prepare.html">sqlite3_prepare_v2()</a> or <a href="../c3ref/prepare.html">sqlite3_prepare16_v2()</a> or one of the legacy
+interfaces <a href="../c3ref/prepare.html">sqlite3_prepare()</a> or <a href="../c3ref/prepare.html">sqlite3_prepare16()</a>, this function
+must be called one or more times to evaluate the statement.</p>
+
+<p>The details of the behavior of the sqlite3_step() interface depend
+on whether the statement was prepared using the newer "v2" interface
+<a href="../c3ref/prepare.html">sqlite3_prepare_v2()</a> and <a href="../c3ref/prepare.html">sqlite3_prepare16_v2()</a> or the older legacy
+interface <a href="../c3ref/prepare.html">sqlite3_prepare()</a> and <a href="../c3ref/prepare.html">sqlite3_prepare16()</a>.  The use of the
+new "v2" interface is recommended for new applications but the legacy
+interface will continue to be supported.</p>
+
+<p>In the legacy interface, the return value will be either <a href="../c3ref/c_abort.html">SQLITE_BUSY</a>,
+<a href="../c3ref/c_abort.html">SQLITE_DONE</a>, <a href="../c3ref/c_abort.html">SQLITE_ROW</a>, <a href="../c3ref/c_abort.html">SQLITE_ERROR</a>, or <a href="../c3ref/c_abort.html">SQLITE_MISUSE</a>.
+With the "v2" interface, any of the other <a href="../c3ref/c_abort.html">result codes</a> or
+<a href="../c3ref/c_ioerr_access.html">extended result codes</a> might be returned as well.</p>
+
+<p><a href="../c3ref/c_abort.html">SQLITE_BUSY</a> means that the database engine was unable to acquire the
+database locks it needs to do its job.  If the statement is a <a href="../lang_transaction.html">COMMIT</a>
+or occurs outside of an explicit transaction, then you can retry the
+statement.  If the statement is not a <a href="../lang_transaction.html">COMMIT</a> and occurs within a
+explicit transaction then you should rollback the transaction before
+continuing.</p>
+
+<p><a href="../c3ref/c_abort.html">SQLITE_DONE</a> means that the statement has finished executing
+successfully.  sqlite3_step() should not be called again on this virtual
+machine without first calling <a href="../c3ref/reset.html">sqlite3_reset()</a> to reset the virtual
+machine back to its initial state.</p>
+
+<p>If the SQL statement being executed returns any data, then <a href="../c3ref/c_abort.html">SQLITE_ROW</a>
+is returned each time a new row of data is ready for processing by the
+caller. The values may be accessed using the <a href="../c3ref/column_blob.html">column access functions</a>.
+sqlite3_step() is called again to retrieve the next row of data.</p>
+
+<p><a href="../c3ref/c_abort.html">SQLITE_ERROR</a> means that a run-time error (such as a constraint
+violation) has occurred.  sqlite3_step() should not be called again on
+the VM. More information may be found by calling <a href="../c3ref/errcode.html">sqlite3_errmsg()</a>.
+With the legacy interface, a more specific error code (for example,
+<a href="../c3ref/c_abort.html">SQLITE_INTERRUPT</a>, <a href="../c3ref/c_abort.html">SQLITE_SCHEMA</a>, <a href="../c3ref/c_abort.html">SQLITE_CORRUPT</a>, and so forth)
+can be obtained by calling <a href="../c3ref/reset.html">sqlite3_reset()</a> on the
+<a href="../c3ref/stmt.html">prepared statement</a>.  In the "v2" interface,
+the more specific error code is returned directly by sqlite3_step().</p>
+
+<p><a href="../c3ref/c_abort.html">SQLITE_MISUSE</a> means that the this routine was called inappropriately.
+Perhaps it was called on a <a href="../c3ref/stmt.html">prepared statement</a> that has
+already been <a href="../c3ref/finalize.html">finalized</a> or on one that had
+previously returned <a href="../c3ref/c_abort.html">SQLITE_ERROR</a> or <a href="../c3ref/c_abort.html">SQLITE_DONE</a>.  Or it could
+be the case that the same database connection is being used by two or
+more threads at the same moment in time.</p>
+
+<p><b>Goofy Interface Alert:</b> In the legacy interface, the sqlite3_step()
+API always returns a generic error code, <a href="../c3ref/c_abort.html">SQLITE_ERROR</a>, following any
+error other than <a href="../c3ref/c_abort.html">SQLITE_BUSY</a> and <a href="../c3ref/c_abort.html">SQLITE_MISUSE</a>.  You must call
+<a href="../c3ref/reset.html">sqlite3_reset()</a> or <a href="../c3ref/finalize.html">sqlite3_finalize()</a> in order to find one of the
+specific <a href="../c3ref/c_abort.html">error codes</a> that better describes the error.
+We admit that this is a goofy design.  The problem has been fixed
+with the "v2" interface.  If you prepare all of your SQL statements
+using either <a href="../c3ref/prepare.html">sqlite3_prepare_v2()</a> or <a href="../c3ref/prepare.html">sqlite3_prepare16_v2()</a> instead
+of the legacy <a href="../c3ref/prepare.html">sqlite3_prepare()</a> and <a href="../c3ref/prepare.html">sqlite3_prepare16()</a> interfaces,
+then the more specific <a href="../c3ref/c_abort.html">error codes</a> are returned directly
+by sqlite3_step().  The use of the "v2" interface is recommended.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

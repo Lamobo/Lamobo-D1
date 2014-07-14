@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Query Language Understood by SQLite</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+<h1 align=center>SQL As Understood By SQLite</h1>
+
+<p>SQLite understands most of the standard SQL
+language.  But it does <a href="omitted.html">omit some features</a>
+while at the same time
+adding a few features of its own.  This document attempts to
+describe precisely what parts of the SQL language SQLite does
+and does not support.  A list of <a href="lang_keywords.html">SQL keywords</a> is 
+also provided.  The SQL language syntax is described by
+<a href="syntaxdiagrams.html">syntax diagrams</a>.
+
+<p>The following syntax documentation topics are available:</p>
+
+<table width="100%" cellpadding="5" border="0">
+<tr><td valign="top"><ul>
+
+<li><a href="lang_aggfunc.html">aggregate functions</a></li><li><a href="lang_altertable.html">ALTER TABLE</a></li><li><a href="lang_analyze.html">ANALYZE</a></li><li><a href="lang_attach.html">ATTACH DATABASE</a></li><li><a href="lang_transaction.html">BEGIN TRANSACTION</a></li><li><a href="lang_comment.html">comment</a></li><li><a href="lang_transaction.html">COMMIT TRANSACTION</a></li><li><a href="lang_corefunc.html">core functions</a></li><li><a href="lang_createindex.html">CREATE INDEX</a></li><li><a href="lang_createtable.html">CREATE TABLE</a></li><li><a href="lang_createtrigger.html">CREATE TRIGGER</a></li><li><a href="lang_createview.html">CREATE VIEW</a></li></ul></td><td valign="top"><ul><li><a href="lang_createvtab.html">CREATE VIRTUAL TABLE</a></li><li><a href="lang_datefunc.html">date and time functions</a></li><li><a href="lang_delete.html">DELETE</a></li><li><a href="lang_detach.html">DETACH DATABASE</a></li><li><a href="lang_dropindex.html">DROP INDEX</a></li><li><a href="lang_droptable.html">DROP TABLE</a></li><li><a href="lang_droptrigger.html">DROP TRIGGER</a></li><li><a href="lang_dropview.html">DROP VIEW</a></li><li><a href="lang_transaction.html">END TRANSACTION</a></li><li><a href="lang_explain.html">EXPLAIN</a></li><li><a href="lang_expr.html">expression</a></li><li><a href="lang_indexedby.html">INDEXED BY</a></li></ul></td><td valign="top"><ul><li><a href="lang_insert.html">INSERT</a></li><li><a href="lang_keywords.html">keywords</a></li><li><a href="lang_conflict.html">ON CONFLICT clause</a></li><li><a href="pragma.html#syntax">PRAGMA</a></li><li><a href="lang_reindex.html">REINDEX</a></li><li><a href="lang_savepoint.html">RELEASE SAVEPOINT</a></li><li><a href="lang_replace.html">REPLACE</a></li><li><a href="lang_transaction.html">ROLLBACK TRANSACTION</a></li><li><a href="lang_savepoint.html">SAVEPOINT</a></li><li><a href="lang_select.html">SELECT</a></li><li><a href="lang_update.html">UPDATE</a></li><li><a href="lang_vacuum.html">VACUUM</a></li>
+</ul></td></tr></table>
+
+<p>The routines <a href="c3ref/prepare.html">sqlite3_prepare_v2()</a>, <a href="c3ref/prepare.html">sqlite3_prepare()</a>,
+<a href="c3ref/prepare.html">sqlite3_prepare16()</a>, <a href="c3ref/exec.html">sqlite3_exec()</a>, and <a href="c3ref/free_table.html">sqlite3_get_table()</a> accept
+an SQL statement list (sql-stmt-list) which is a semicolon-separated
+list of statements.</p>
+
+<h4><a href="syntaxdiagrams.html#sql-stmt-list">sql-stmt-list:</a></h4><blockquote> <img alt="syntax diagram sql-stmt-list" src="images/syntax/sql-stmt-list.gif"></img> </blockquote>
+
+
+<p>Each SQL statement in the statement list is an instance of the
+following:</p>
+
+<h4><a href="syntaxdiagrams.html#sql-stmt">sql-stmt:</a></h4><blockquote> <img alt="syntax diagram sql-stmt" src="images/syntax/sql-stmt.gif"></img> </blockquote>
+
+
+

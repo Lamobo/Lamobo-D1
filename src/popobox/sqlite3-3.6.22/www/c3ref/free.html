@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Memory Allocation Subsystem</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Memory Allocation Subsystem</h2><blockquote><pre>void *sqlite3_malloc(int);
+void *sqlite3_realloc(void*, int);
+void sqlite3_free(void*);
+</pre></blockquote><p>
+The SQLite core uses these three routines for all of its own
+internal memory allocation needs. "Core" in the previous sentence
+does not include operating-system specific VFS implementation.  The
+Windows VFS uses native malloc() and free() for some operations.</p>
+
+<p>The sqlite3_malloc() routine returns a pointer to a block
+of memory at least N bytes in length, where N is the parameter.
+If sqlite3_malloc() is unable to obtain sufficient free
+memory, it returns a NULL pointer.  If the parameter N to
+sqlite3_malloc() is zero or negative then sqlite3_malloc() returns
+a NULL pointer.</p>
+
+<p>Calling sqlite3_free() with a pointer previously returned
+by sqlite3_malloc() or sqlite3_realloc() releases that memory so
+that it might be reused.  The sqlite3_free() routine is
+a no-op if is called with a NULL pointer.  Passing a NULL pointer
+to sqlite3_free() is harmless.  After being freed, memory
+should neither be read nor written.  Even reading previously freed
+memory might result in a segmentation fault or other severe error.
+Memory corruption, a segmentation fault, or other severe error
+might result if sqlite3_free() is called with a non-NULL pointer that
+was not obtained from sqlite3_malloc() or sqlite3_realloc().</p>
+
+<p>The sqlite3_realloc() interface attempts to resize a
+prior memory allocation to be at least N bytes, where N is the
+second parameter.  The memory allocation to be resized is the first
+parameter.  If the first parameter to sqlite3_realloc()
+is a NULL pointer then its behavior is identical to calling
+sqlite3_malloc(N) where N is the second parameter to sqlite3_realloc().
+If the second parameter to sqlite3_realloc() is zero or
+negative then the behavior is exactly the same as calling
+sqlite3_free(P) where P is the first parameter to sqlite3_realloc().
+sqlite3_realloc() returns a pointer to a memory allocation
+of at least N bytes in size or NULL if sufficient memory is unavailable.
+If M is the size of the prior allocation, then min(N,M) bytes
+of the prior allocation are copied into the beginning of buffer returned
+by sqlite3_realloc() and the prior allocation is freed.
+If sqlite3_realloc() returns NULL, then the prior allocation
+is not freed.</p>
+
+<p>The memory returned by sqlite3_malloc() and sqlite3_realloc()
+is always aligned to at least an 8 byte boundary.</p>
+
+<p>In SQLite version 3.5.0 and 3.5.1, it was possible to define
+the SQLITE_OMIT_MEMORY_ALLOCATION which would cause the built-in
+implementation of these routines to be omitted.  That capability
+is no longer provided.  Only built-in memory allocators can be used.</p>
+
+<p>The Windows OS interface layer calls
+the system malloc() and free() directly when converting
+filenames between the UTF-8 encoding used by SQLite
+and whatever filename encoding is used by the particular Windows
+installation.  Memory allocation errors are detected, but
+they are reported back as <a href="../c3ref/c_abort.html">SQLITE_CANTOPEN</a> or
+<a href="../c3ref/c_abort.html">SQLITE_IOERR</a> rather than <a href="../c3ref/c_abort.html">SQLITE_NOMEM</a>.</p>
+
+<p>The pointer arguments to <a href="../c3ref/free.html">sqlite3_free()</a> and <a href="../c3ref/free.html">sqlite3_realloc()</a>
+must be either NULL or else pointers obtained from a prior
+invocation of <a href="../c3ref/free.html">sqlite3_malloc()</a> or <a href="../c3ref/free.html">sqlite3_realloc()</a> that have
+not yet been released.</p>
+
+<p>The application must not read or write any part of
+a block of memory after it has been released using
+<a href="../c3ref/free.html">sqlite3_free()</a> or <a href="../c3ref/free.html">sqlite3_realloc()</a>.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

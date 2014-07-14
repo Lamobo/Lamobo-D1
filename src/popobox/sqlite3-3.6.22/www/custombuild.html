@@ -1,0 +1,389 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Custom Builds Of SQLite</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+
+
+<h1 align="center">
+Custom Builds Of SQLite<br>
+or<br>
+Porting SQLite To New Operating Systems
+</h1>
+
+<h2>1.0 Introduction</h2>
+
+<p>For most applications, the recommended method for building
+SQLite is to use <a href="amalgamation.html">the amalgamation</a> code
+file, <b>sqlite3.c</b>, and its corresponding header file
+<b>sqlite3.h</b>.  The sqlite3.c code file should compile and
+run on any Unix, Windows, OS/2, or Mac OS X system without any changes
+or special compiler options.  Most applications can simply include
+the sqlite3.c file together with the other C code files that make
+up the application, compile them all together, and have working
+and well configured version of SQLite.</p>
+
+<blockquote><i>Most applications work great with SQLite in its
+default configuration and with no special compile-time configuration.
+Most developers should be able to completely ignore this document
+and simply build SQLite from
+<a href="amalgamation.html">the amalgamation</a> without any
+special knowledge and without taking any special actions.</i></blockquote>
+
+<p>However, highly tuned and specialized
+applications may want or need to replace some of
+SQLite's built-in system interface with alternative implementations
+more suitable for the needs of the application.  SQLite is designed
+to be easily reconfigured at compile-time to meet the specific
+needs of individual projects.  Among the compile-time configuration
+options for SQLite are these:</p>
+
+<ul>
+<li><p> Replace the built-in mutex subsystem with an alternative
+        implementation.  </p></li>
+
+<li><p> Completely disable all mutexing for use in single-threaded
+        applications. </p></li>
+
+<li><p> Reconfigure the memory allocation subsystem to use a memory
+        allocator other the malloc() implementation from the standard
+        library. </p></li>
+
+<li><p> Realign the memory allocation subsystem so that it never calls
+        malloc() at all but instead satisfies all memory requests using
+        a fixed-size memory buffer assigned to SQLite at startup. </p></li>
+
+<li><p> Replace the interface to the file system with an alternative
+        design.  In other words, override all of the system calls that
+        SQLite makes in order to talk to the disk with a completely different
+        set of system calls. </p></li>
+
+<li><p> Override other operating system interfaces such as calls to obtain
+        Zulu or local time. </p></li>
+</ul>
+
+<p>Generally speaking, there are three separate subsystems within
+SQLite that can be modified or overridden at compile-time.  The
+mutex subsystem is used to serialize access to SQLite resources that
+are shared among threads.  The memory allocation subsystem is used
+to allocate memory required by SQLite objects and for the database
+cache.  Finally, the <a href="c3ref/vfs.html">Virtual File System</a> subsystem is
+used to provide a portable interface between SQLite and the underlying
+operating system and especially the file system.  We call these three
+subsystems the "interface" subsystems of SQLite.</p>
+
+<p>We emphasis that most applications are well-served by the 
+built-in default implementations of the SQLite interface subsystems.
+Developers are encouraged to use the
+default built-in implementations whenever possible
+and to build SQLite without any special compile-time options or parameters.
+However, some highly specialized applications may benefit from
+substituting or modifying one or more of these built-in SQLite
+interface subsystems.
+Or, if SQLite is used on an operating system other than
+Unix (Linux or Mac OS X), Windows (Win32 or WinCE), or OS/2 then none
+of the interface subsystems that come built into SQLite will work
+and the application will need to provide alternative implementations
+suitable for the target platform.</p>
+
+<h2>2.0 Configuring Or Replacing The Mutex Subsystem</h2>
+
+<p>In a multithreaded environment, SQLite uses mutexes to serialize
+access to shared resources.
+The mutex subsystem is only required for applications that access
+SQLite from multiple threads.  For single-threaded applications, or
+applications which only call SQLite from a single thread, the mutex
+subsystem can be completely disabled by recompiling with the following
+option:</p>
+
+<blockquote><pre>
+-DSQLITE_THREADSAFE=0
+</pre></blockquote>
+
+<p>Mutexes are cheap but they are not free, so performance will be better
+when mutexes are completely disabled.  The resulting library footprint
+will also be a little smaller.  Disability the mutexes as compile-time
+is a recommended optimization for applications were it makes sense.</p>
+
+<p>When using SQLite as a shared library, an application can test to see
+whether or not mutexes have been disabled using the
+<a href="c3ref/threadsafe.html">sqlite3_threadsafe()</a> API.  Applications that link against SQLite at
+run-time and use SQLite from multiple threads should probably check this
+API to make sure they did not accidently get linked against a version of
+the SQLite library that has its mutexes disabled.  Single-threaded
+applications will, of course, work correctly regardless of whether or
+not SQLite is configured to be threadsafe, though they will be a little
+bit faster when using versions of SQLite with mutexes disabled.</p>
+
+<p>SQLite mutexes can also be disabled at run-time using the
+the <a href="c3ref/config.html">sqlite3_config()</a> interface.  To completely disable all mutexing,
+the application can invoke:</p>
+
+<blockquote><pre>
+sqlite3_config(SQLITE_CONFIG_SINGLETHREAD);
+</pre></blockquote>
+
+<p>Disabling mutexes at run-time is not as effective as disabling them
+at compile-time since SQLite still must do a test of a boolean variable
+to see if mutexes are enabled or disabled at each point where a mutex
+might be required.  But there is still a performance advantage for
+disabling mutexes at run-time.</p>
+
+<p>For multi-threaded applications that are careful about how they
+manage threads, SQLite supports an alternative run-time configuration
+that is half way between not using any mutexes and the default situation
+of mutexing everything in sight.  This in-the-middle mutex alignment can
+be established as follows:</p>
+
+<blockquote><pre>
+sqlite3_config(SQLITE_CONFIG_MULTITHREAD);
+sqlite3_config(SQLITE_CONFIG_MEMSTATUS, 0);
+</pre></blockquote>
+
+<p>There are two separate configuration changes here which can
+be used either togethr or separately. The
+<a href="c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MULTITHREAD</a> setting disables the mutexes that
+serialize access to <a href="c3ref/sqlite3.html">database connection</a> objects and 
+<a href="c3ref/stmt.html">prepared statement</a> objects.  With this setting, the application
+is free to use SQLite from multiple threads, but it must make sure
+than no two threads try to access the same <a href="c3ref/sqlite3.html">database connection</a>
+or any <a href="c3ref/stmt.html">prepared statements</a> associated with the same 
+<a href="c3ref/sqlite3.html">database connection</a> at the same time.  Two threads can use SQLite
+at the same time, but they must use separate <a href="c3ref/sqlite3.html">database connections</a>.
+The second <a href="c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MEMSTATUS</a> setting disables the mechanism
+in SQLite that tracks the total size of all outstanding memory
+allocation requests.  This omits the need to mutex each call
+to <a href="c3ref/free.html">sqlite3_malloc()</a> and <a href="c3ref/free.html">sqlite3_free()</a>, which saves a huge
+number of mutex operations.  But a consequence of disabling the
+memory statistics mechanism is that the 
+<a href="c3ref/memory_highwater.html">sqlite3_memory_used()</a>, <a href="c3ref/memory_highwater.html">sqlite3_memory_highwater()</a>, and
+<a href="c3ref/soft_heap_limit.html">sqlite3_soft_heap_limit()</a> interfaces cease to work.
+</p>
+
+<p>SQLite uses pthreads for its mutex implementation on Unix and
+SQLite requires a recursive mutex.  Most modern pthread implementations
+support recursive mutexes, but not all do.  For systems that do not
+support recursive mutexes, it is recommended that applications operate
+in single-threaded mode only.  If this is not possible, SQLite provides
+an alternative recursive mutex implementation built on top of the
+standard "fast" mutexes of pthreads.  This alternative
+implementation should work correctly as long as pthread_equal() is
+atomic and the processor has a coherient data cache.  The alternative
+recursive mutex implementation is enabled by the following
+compiler command-line switch:</p>
+
+<blockquote><pre>
+-DSQLITE_HOMEGROWN_RECURSIVE_MUTEX=1
+</pre></blockquote>
+
+<p>When porting SQLite to a new operating system, it is usually necessary
+to completely replace the built-in mutex subsystem with an alternative
+built around the mutex primitives of the new operating system.  This
+is accomplished by compiling SQLite with the following option:</p>
+
+<blockquote><pre>
+-DSQLITE_MUTEX_APPDEF=1
+</pre></blockquote>
+
+<p>When SQLite is compiled with the SQLITE_MUTEX_APPDEF=1 option, it
+completely omits the implementation of its 
+<a href="c3ref/mutex_alloc.html">mutex primitive functions</a>.  But the SQLite
+library still attempts to call these functions where necessary, so the
+application must itself implement the
+<a href="c3ref/mutex_alloc.html">mutex primitive functions</a> and link them together
+with SQLite.</p>
+
+<h2>3.0 Configuring Or Replacing The Memory Allocation Subsystem</h2>
+
+<p>By default, SQLite obtains the memory it needs for objects and
+cache from the malloc()/free() implementation of the standard library.
+There is also on-going work with experimental memory allocators that
+satisfy all memory requests from a single fixed memory buffer handed
+to SQLite at application start.  Additional information on these
+experimental memory allocators will be provided in a future revision
+of this document.</p>
+
+<p>SQLite supports the ability of an application to specify an alternative
+memory allocator at run-time using the <a href="c3ref/config.html">sqlite3_config()</a> interface.
+For example:</p>
+
+<blockquote><pre>
+sqlite3_config(SQLITE_CONFIG_MALLOC, dlmalloc, dlfree, dlrealloc, dlmalloc_usable_size);
+</pre></blockquote>
+
+<p>The <a href="c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MALLOC</a> setting to <a href="c3ref/config.html">sqlite3_config()</a> passes four
+function pointers into SQLite.  The first three functions work exactly
+like malloc(), free(), and realloc(), respectively, from the standard
+C library.  The fourth function pointer must be for a routine that
+returns the size of a memory allocation given a pointer to that allocation.
+In the default memory allocator implementation for SQLite, these fourth
+"memsize" function is implemented by prepending an 8-byte size integer
+to the beginning of every allocation.  The memsize function is not a
+standard part of must memory alloction libraries and so must be implemented
+in this way.  However, Doug Lea's dlmalloc implementation, as shown in the
+example above, does provide an implementation of memsize which, if used,
+reduces the size overhead and execution time of every memory allocation
+and deallocation.</p>
+
+<p><i>TBD: Talk about alternative zero-malloc implementations and how to
+select them at compile-time.</i></p>
+
+<p><i>TBD: Talk about how to disable any built-in memory allocator so that
+an application is required to register the memory allocator at
+startup.</i></p>
+
+<h2>4.0 Adding New Virtual File Systems</h2>
+
+<p>Since <a href="releaselog/3_5_0.html">version 3.5.0</a>, SQLite has supported an interface called the
+<a href="c3ref/vfs.html">virtual file system</a> or "VFS".
+This object is somewhat misnamed since it
+is really an interface to whole underlying operating system,
+just the filesystem.</p>
+
+<p> One of the interesting features
+of the VFS interface is that SQLite can support multiple VFSes at the
+same time.  Each <a href="c3ref/sqlite3.html">database connection</a> has to choose a single VFS for its
+use when the connection is first opened using <a href="c3ref/open.html">sqlite3_open_v2()</a>.
+But if a process contains multiple <a href="c3ref/sqlite3.html">database connections</a> each can choose
+a different VFS.  VFSes can be added at run-time using the
+<a href="c3ref/vfs_find.html">sqlite3_vfs_register()</a> interface.</p>
+
+<p>The default builds for SQLite on Unix, Windows, and OS/2 include 
+a VFS appropriate for the target platform.  SQLite builds for other
+operating systems do not contain a VFS by default, but the application
+can register one or more at run-time.</p>
+
+<h2>5.0 Porting SQLite To A New Operating System</h2>
+
+<p>In order to port SQLite to a new operating system - an operating
+system not supported by default - the application
+must provide...</p>
+
+<ul>
+<li> a working mutex subsystem (but only if it is multithreaded), </li>
+<li> a working memory allocation subsystem (assuming it lacks malloc()
+in its standard library), and</li>
+<li> a working VFS implementation.</li>
+</ul>
+
+<p>All of these things can be provided in a single auxiliary C code file
+and then linked with the stock "sqlite3.c" code file to generate a working
+SQLite build for the target operating system.  In addition to the
+alternative mutex and memory allocation subsystems and the new VFS,
+the auxiliary C code file should contain implementations for the
+following two routines:</p>
+
+<ul>
+<li> <a href="c3ref/initialize.html">sqlite3_os_init()</a> </li>
+<li> <a href="c3ref/initialize.html">sqlite3_os_end()</a> </li>
+</ul>
+
+<p>The "sqlite3.c" code file contains default implementations of a VFS
+and of the <a href="c3ref/initialize.html">sqlite3_initialize()</a> and <a href="c3ref/initialize.html">sqlite3_shutdown()</a> functions that
+are appropriate for Unix, Windows, and OS/2.
+To prevent one of these default components from being loaded when sqlite3.c
+is compiled, it is necessary to add the following compile-time
+option:</p>
+
+<blockquote><pre>
+-DSQLITE_OS_OTHER=1
+</pre></blockquote>
+
+
+<p>The SQLite core will call <a href="c3ref/initialize.html">sqlite3_initialize()</a> early.  The auxiliary
+C code file can contain an implementation of sqlite3_initialize() that
+registers an appropriate VFS and also perhaps initializes an alternative
+mutex system (if mutexes are required) or does any memory allocation
+subsystem initialization that is required.
+The SQLite core never calls <a href="c3ref/initialize.html">sqlite3_shutdown()</a> but it is part of the
+official SQLite API and is not otherwise provided when compiled with
+-DSQLITE_OS_OTHER=1, so the auxiliary C code file should probably provide
+it for completeness.</p>
+

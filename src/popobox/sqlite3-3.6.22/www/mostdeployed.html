@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Most Widely Deployed SQL Database Engine</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+<h2>Most Widely Deployed SQL Database</h2>
+
+<p>We <em>believe</em> that there are more copies of SQLite
+in use around the world than any other SQL database engine,
+and possibly all other SQL database engines combined.  We cannot
+be certain of this since we have no way of measuring either
+the number of SQLite deployments nor the number of deployments
+of other databases.  But we believe the claim is defensible.</p>
+
+<p>The belief that SQLite is the most widely deployed SQL
+database engine stems from its use as an embedded database.
+Other database engines, such as MySQL, PostgreSQL, or Oracle,
+are typically found one to a server.  And usually a single
+server can serve multiple users.  With SQLite, on the other
+hand, a single user will typically have exclusive use of
+multiple copies of SQLite.  SQLite is used on servers, but
+it is also used on desktop PC, and in cellphones, and PDAs,
+and MP3-players, and set-top boxes.</p>
+
+<h3>Estimates</h3>
+
+<p>At the end of 2006, there were 100 million websites on the internet.
+<a href="http://news.netcraft.com/archives/2006/11/01/november_2006_web_server_survey.html">&#91;1]</a>
+Let us use that number as a proxy for the number of deployed
+SQL database engines other than SQLite.  Not every website
+runs an SQL database engine and not every SQL database engine
+runs a website.  Larger websites run multiple
+database engines.  But the vast majority of smaller websites
+(the long tail) share
+a database engine with several other websites,
+if they use a database engine at all.
+And many large SQL database installations have nothing to do with
+websites.
+So using the number of websites as a surrogate for the number of operational
+SQL database engines is a crude approximation, but it is the best
+we have so we will go with it.  (Readers are encouraged to submit
+better estimates.)</p>
+
+<p>Now let's consider where SQLite is used:</p>
+
+<ul>
+<li>300 million copies of Mozilla Firefox.</li>
+<li>20 million Mac computers, each of which contains multiple
+copies of SQLite</li>
+<li>20 million websites run PHP which has SQLite built in.  
+<a href="http://www.php.net/usage.php">&#91;3]</a>  We have no
+way of estimating what fraction of those sites actively use
+SQLite, but we think it is a significant fraction.</li>
+<li>450 million registered <a href="http://www.skype.com/">Skype</a> users.</li>
+<li>20 million Symbian smartphones shipped in Q3 2007
+<a href="http://www.symbian.com/news/pr/2007/pr20079552.html">&#91;5]</a>
+Newer versions of the SymbianOS have SQLite built in.  It is unclear
+exactly how many Symbian phones actually contain SQLite, so we will
+use a single quarter's sales as a lower bound.</li>
+<li>10 million Solaris 10 installations, all of which require SQLite in
+order to boot.</li>
+<li>Millions and millions of copies of
+<a href="http://www.mcafee.com/">McAfee</a> anti-virus software all
+use SQLite internally.</li>
+<li>Millions of iPhones use SQLite</li>
+<li>Millions and millions of other cellphones from 
+manufactures other than Symbian and Apple use SQLite.
+This has not been publicly acknowledged by the manufactures
+but it is known to the SQLite developers.</li>
+<li>There are perhaps millions of additional deployments of
+SQLite that the SQLite developers do not know about.</li>
+</ul>
+
+<p>
+By these estimates, we see at least 500 million SQLite deployments
+and about 100 million deployments of other SQL database engines.  These
+estimates are obviously very rough and may be off significantly.  
+But there is a wide margin. So the SQLite
+developers think it is likely that SQLite is the most widely deployed
+SQL database engine in the world.
+</p>
+

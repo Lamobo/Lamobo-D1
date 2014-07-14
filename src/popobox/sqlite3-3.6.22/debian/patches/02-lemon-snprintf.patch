@@ -1,0 +1,128 @@
+--- sqlite3-3.6.10.orig/tool/lemon.c	2009-01-15 14:01:58.000000000 +0000
++++ sqlite3-3.6.10/tool/lemon.c	2009-01-18 18:21:18.319124796 +0000
+@@ -1325,15 +1325,15 @@
+   va_start(ap, format);
+   /* Prepare a prefix to be prepended to every output line */
+   if( lineno>0 ){
+-    sprintf(prefix,"%.*s:%d: ",PREFIXLIMIT-10,filename,lineno);
++    snprintf(prefix,sizeof prefix,"%.*s:%d: ",PREFIXLIMIT-10,filename,lineno);
+   }else{
+-    sprintf(prefix,"%.*s: ",PREFIXLIMIT-10,filename);
++    snprintf(prefix,sizeof prefix,"%.*s: ",PREFIXLIMIT-10,filename);
+   }
+   prefixsize = lemonStrlen(prefix);
+   availablewidth = LINEWIDTH - prefixsize;
+ 
+   /* Generate the error message */
+-  vsprintf(errmsg,format,ap);
++  vsnprintf(errmsg,sizeof errmsg,format,ap);
+   va_end(ap);
+   errmsgsize = lemonStrlen(errmsg);
+   /* Remove trailing '\n's from the error message. */
+@@ -2350,7 +2350,7 @@
+           for(z=psp->filename, nBack=0; *z; z++){
+             if( *z=='\\' ) nBack++;
+           }
+-          sprintf(zLine, "#line %d ", psp->tokenlineno);
++          snprintf(zLine,sizeof zLine, "#line %d ", psp->tokenlineno);
+           nLine = lemonStrlen(zLine);
+           n += nLine + lemonStrlen(psp->filename) + nBack;
+         }
+@@ -2915,7 +2915,7 @@
+     while( cfp ){
+       char buf[20];
+       if( cfp->dot==cfp->rp->nrhs ){
+-        sprintf(buf,"(%d)",cfp->rp->index);
++        snprintf(buf,sizeof buf,"(%d)",cfp->rp->index);
+         fprintf(fp,"    %5s ",buf);
+       }else{
+         fprintf(fp,"          ");
+@@ -2970,6 +2970,7 @@
+ {
+   char *pathlist;
+   char *path,*cp;
++  size_t pathsz;
+   char c;
+ 
+ #ifdef __WIN32__
+@@ -2980,21 +2981,21 @@
+   if( cp ){
+     c = *cp;
+     *cp = 0;
+-    path = (char *)malloc( lemonStrlen(argv0) + lemonStrlen(name) + 2 );
+-    if( path ) sprintf(path,"%s/%s",argv0,name);
++    path = (char *)malloc( (pathsz = lemonStrlen(argv0) + lemonStrlen(name) + 2) );
++    if( path ) snprintf(path,pathsz,"%s/%s",argv0,name);
+     *cp = c;
+   }else{
+     extern char *getenv();
+     pathlist = getenv("PATH");
+     if( pathlist==0 ) pathlist = ".:/bin:/usr/bin";
+-    path = (char *)malloc( lemonStrlen(pathlist)+lemonStrlen(name)+2 );
++    path = (char *)malloc( (pathsz = lemonStrlen(pathlist)+lemonStrlen(name)+2) );
+     if( path!=0 ){
+       while( *pathlist ){
+         cp = strchr(pathlist,':');
+         if( cp==0 ) cp = &pathlist[lemonStrlen(pathlist)];
+         c = *cp;
+         *cp = 0;
+-        sprintf(path,"%s/%s",pathlist,name);
++        snprintf(path,pathsz,"%s/%s",pathlist,name);
+         *cp = c;
+         if( c==0 ) pathlist = "";
+         else pathlist = &cp[1];
+@@ -3074,14 +3075,16 @@
+ 
+   cp = strrchr(lemp->filename,'.');
+   if( cp ){
+-    sprintf(buf,"%.*s.lt",(int)(cp-lemp->filename),lemp->filename);
++    snprintf(buf,sizeof buf,"%.*s.lt",(int)(cp-lemp->filename),lemp->filename);
+   }else{
+-    sprintf(buf,"%s.lt",lemp->filename);
++    snprintf(buf,sizeof buf,"%s.lt",lemp->filename);
+   }
+   if( access(buf,004)==0 ){
+     tpltname = buf;
+   }else if( access(templatename,004)==0 ){
+     tpltname = templatename;
++  }else if( access("/usr/share/lemon/lempar.c",004)==0 ){
++    tpltname = "/usr/share/lemon/lempar.c";
+   }else{
+     tpltname = pathsearch(lemp->argv0,templatename,0);
+   }
+@@ -3093,7 +3096,7 @@
+   }
+   in = fopen(tpltname,"rb");
+   if( in==0 ){
+-    fprintf(stderr,"Can't open the template file \"%s\".\n",templatename);
++    fprintf(stderr,"Can't open the template file \"%s\".\n",tpltname);
+     lemp->errorcnt++;
+     return 0;
+   }
+@@ -3236,7 +3239,7 @@
+   while( n-- > 0 ){
+     c = *(zText++);
+     if( c=='%' && n>0 && zText[0]=='d' ){
+-      sprintf(zInt, "%d", p1);
++      snprintf(zInt,sizeof zInt, "%d", p1);
+       p1 = p2;
+       strcpy(&z[used], zInt);
+       used += lemonStrlen(&z[used]);
+@@ -3832,7 +3835,7 @@
+   /* Generate a table containing the symbolic name of every symbol
+   */
+   for(i=0; i<lemp->nsymbol; i++){
+-    sprintf(line,"\"%s\",",lemp->symbols[i]->name);
++    snprintf(line,sizeof line,"\"%s\",",lemp->symbols[i]->name);
+     fprintf(out,"  %-15s",line);
+     if( (i&3)==3 ){ fprintf(out,"\n"); lineno++; }
+   }
+@@ -3999,7 +4002,7 @@
+   in = file_open(lemp,".h","rb");
+   if( in ){
+     for(i=1; i<lemp->nterminal && fgets(line,LINESIZE,in); i++){
+-      sprintf(pattern,"#define %s%-30s %2d\n",prefix,lemp->symbols[i]->name,i);
++      snprintf(pattern,sizeof pattern,"#define %s%-30s %2d\n",prefix,lemp->symbols[i]->name,i);
+       if( strcmp(line,pattern) ) break;
+     }
+     fclose(in);

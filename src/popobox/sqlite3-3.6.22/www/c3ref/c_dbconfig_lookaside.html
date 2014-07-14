@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Configuration Options</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Configuration Options</h2><blockquote><pre>#define SQLITE_DBCONFIG_LOOKASIDE    1001  /* void* int int */
+</pre></blockquote><p><b>Important:</b> This interface is <a href="../c3ref/experimental.html">experimental</a> and is subject to change without notice.</p><p>
+These constants are the available integer configuration options that
+can be passed as the second argument to the <a href="../c3ref/db_config.html">sqlite3_db_config()</a> interface.</p>
+
+<p>New configuration options may be added in future releases of SQLite.
+Existing configuration options might be discontinued.  Applications
+should check the return code from <a href="../c3ref/db_config.html">sqlite3_db_config()</a> to make sure that
+the call worked.  The <a href="../c3ref/db_config.html">sqlite3_db_config()</a> interface will return a
+non-zero <a href="../c3ref/c_abort.html">error code</a> if a discontinued or unsupported configuration option
+is invoked.</p>
+
+<p><dl>
+<dt>SQLITE_DBCONFIG_LOOKASIDE</dt>
+<dd> This option takes three additional arguments that determine the
+<a href="../malloc.html#lookaside">lookaside memory allocator</a> configuration for the <a href="../c3ref/sqlite3.html">database connection</a>.
+The first argument (the third parameter to <a href="../c3ref/db_config.html">sqlite3_db_config()</a> is a
+pointer to an memory buffer to use for lookaside memory.
+The first argument after the SQLITE_DBCONFIG_LOOKASIDE verb
+may be NULL in which case SQLite will allocate the
+lookaside buffer itself using <a href="../c3ref/free.html">sqlite3_malloc()</a>. The second argument is the
+size of each lookaside buffer slot.  The third argument is the number of
+slots.  The size of the buffer in the first argument must be greater than
+or equal to the product of the second and third arguments.  The buffer
+must be aligned to an 8-byte boundary.  If the second argument to
+SQLITE_DBCONFIG_LOOKASIDE is not a multiple of 8, it is internally
+rounded down to the next smaller
+multiple of 8.  See also: <a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_LOOKASIDE</a></dd></p>
+
+<p></dl>
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

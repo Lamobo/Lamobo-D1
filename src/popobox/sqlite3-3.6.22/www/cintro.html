@@ -1,0 +1,454 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>An Introduction To The SQLite C/C++ Interface</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+<h1 align=center>An Introduction To The SQLite C/C++ Interface</h1>
+
+<p>
+  This article provides an overview and roadmap to the C/C++ interface
+  to SQLite.
+</p>
+
+<p>
+  Early versions of SQLite were very easy to learn since they only
+  supported 5 C/C++ interfaces.  But as SQLite has grown in capability
+  new C/C++ interfaces have been added so that now there
+  are over 150 distinct APIs.  This can be overwhelming to a new programmer.
+  Fortunately, most of the C/C++ interfaces in SQLite are very specialized
+  and never need to be used.  Despite having so many
+  entry points, the core API is still relatively simple and easy to code to.
+  This article aims to provide all of the background information needed to
+  easily understand how SQLite works.
+</p>
+
+<p>
+  A separate document, <a href="c3ref/intro.html">The SQLite C/C++ Interface</a>,
+  provides detailed
+  specifications for all of the various C/C++ APIs for SQLite.  Once
+  the reader
+  understands the basic principles of operation for SQLite, 
+  <a href="c3ref/intro.html">that document</a> should be used as a reference
+  guide.  This article is intended as introduction only and is neither a
+  complete nor authoritative reference for the SQLite API.
+</p>
+
+<h2>1.0 Core Objects And Interfaces</h2>
+
+<p>
+  The principal task of an SQL database engine is to evaluate statements
+  of SQL.  In order to accomplish this purpose, the developer needs
+  to know about two objects:
+</p>
+
+<p><ul>
+  <li> The <a href="c3ref/sqlite3.html">database connection</a> object: sqlite3 </li>
+  <li> The <a href="c3ref/stmt.html">prepared statement</a> object: sqlite3_stmt </li>
+</ul></p>
+
+<p>
+  Strictly speaking, the <a href="c3ref/stmt.html">prepared statement</a> object is not required since
+  the convenience wrapper interfaces, <a href="c3ref/exec.html">sqlite3_exec</a> or
+  <a href="c3ref/free_table.html">sqlite3_get_table</a>, can be used and these convenience wrappers
+  encapsulate and hide the <a href="c3ref/stmt.html">prepared statement</a> object.
+  Nevertheless, an understanding of
+  <a href="c3ref/stmt.html">prepared statements</a> is needed to make full use of SQLite.
+</p>
+
+<p>
+  The <a href="c3ref/sqlite3.html">database connection</a> and <a href="c3ref/stmt.html">prepared statement</a> objects are controlled
+  by a small set of C/C++ interface routine listed below.
+</p>
+
+<p><ul>
+  <li> <a href="c3ref/open.html">sqlite3_open()</a> </li>
+  <li> <a href="c3ref/prepare.html">sqlite3_prepare()</a> </li>
+  <li> <a href="c3ref/step.html">sqlite3_step()</a> </li>
+  <li> <a href="c3ref/column_blob.html">sqlite3_column()</a> </li>
+  <li> <a href="c3ref/finalize.html">sqlite3_finalize()</a> </li>
+  <li> <a href="c3ref/close.html">sqlite3_close()</a> </li>
+</ul></p>
+
+<p>
+  The six C/C++ interface routines and two objects listed above form the core
+  functionality of SQLite.  The developer who understands them
+  will have a good foundation for using SQLite.
+</p>
+
+<p>
+  Note that the list of routines is conceptual rather than actual.
+  Many of these routines come in multiple versions.
+  For example, the list above shows a single routine
+  named <a href="c3ref/open.html">sqlite3_open()</a> when in fact there are three separate routines
+  that accomplish the same thing in slightly different ways:
+  <a href="c3ref/open.html">sqlite3_open()</a>, <a href="c3ref/open.html">sqlite3_open16()</a> and <a href="c3ref/open.html">sqlite3_open_v2()</a>.
+  The list mentions <a href="c3ref/column_blob.html">sqlite3_column()</a>
+  when in fact no such routine exists.
+  The "sqlite3_column()" shown in the list is place holders for
+  an entire families of routines to be used for extracting column
+  data in various datatypes.
+</p>
+
+<p>
+  Here is a summary of what the core interfaces do:
+</p>
+
+<table border="0" cellspacing="15">
+
+<tr><td valign="top" align="right"><a href="c3ref/open.html">sqlite3_open()</a></td>
+<td valign="top">
+  This routine 
+  opens a connection to an SQLite database file and returns a
+  <a href="c3ref/sqlite3.html">database connection</a> object.  This is often the first SQLite API
+  call that an application makes and is a prerequisite for most other
+  SQLite APIs.  Many SQLite interfaces require a pointer to
+  the <a href="c3ref/sqlite3.html">database connection</a> object as their first parameter and can
+  be thought of as methods on the <a href="c3ref/sqlite3.html">database connection</a> object.
+  This routine is the constructor for the <a href="c3ref/sqlite3.html">database connection</a> object.
+</td>
+
+<tr><td valign="top" align="right"><a href="c3ref/prepare.html">sqlite3_prepare()</a></td>
+<td valign="top">
+  This routine
+  converts SQL text into a <a href="c3ref/stmt.html">prepared statement</a> object and returns a pointer
+  to that object.  This interface requires a <a href="c3ref/sqlite3.html">database connection</a> pointer
+  created by a prior call to <a href="c3ref/open.html">sqlite3_open()</a> and a text string containing
+  the SQL statement to be prepared.  This API does not actually evaluate
+  the SQL statement.  It merely prepares the SQL statement for evaluation.
+
+  <p>Note that the use of <a href="c3ref/prepare.html">sqlite3_prepare()</a> is not recommended for new
+  applications.  The alternative routine <a href="c3ref/prepare.html">sqlite3_prepare_v2()</a> should
+  be used instead.</p>
+</td>
+
+<tr><td valign="top" align="right"><a href="c3ref/step.html">sqlite3_step()</a></td>
+<td valign="top">
+  This routine is used to evaluate a <a href="c3ref/stmt.html">prepared statement</a> that has been
+  previously created by the <a href="c3ref/prepare.html">sqlite3_prepare()</a> interface.  The statement
+  is evaluated up to the point where the first row of results are available.
+  To advance to the second row of results, invoke <a href="c3ref/step.html">sqlite3_step()</a> again.
+  Continue invoking <a href="c3ref/step.html">sqlite3_step()</a> until the statement is complete.
+  Statements that do not return results (ex: INSERT, UPDATE, or DELETE
+  statements) run to completion on a single call to <a href="c3ref/step.html">sqlite3_step()</a>.
+</td>
+
+
+<tr><td valign="top" align="right"><a href="c3ref/column_blob.html">sqlite3_column()</a></td>
+<td valign="top">
+  This routine returns a single column from the current row of a result
+  set for a <a href="c3ref/stmt.html">prepared statement</a> that is being evaluated by <a href="c3ref/step.html">sqlite3_step()</a>.
+  Each time <a href="c3ref/step.html">sqlite3_step()</a> stops with a new result set row, this routine
+  can be called multiple times to find the values of all columns in that row.
+  As noted above, there really is no such thing as a "sqlite3_column()"
+  function in the SQLite API.  Instead, what we here call "sqlite3_column()"
+  is really a place-holder for an entire family of functions that return
+  a value from the result set in various data types.  There are also routines
+  in this family that return the size of the result (if it is a string or
+  BLOB) and the number of columns in the result set.  
+
+  <p><ul>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_blob()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_bytes()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_bytes16()</a> </li>
+    <li> <a href="c3ref/column_count.html">sqlite3_column_count()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_double()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_int()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_int64()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_text()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_text16()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_type()</a> </li>
+    <li> <a href="c3ref/column_blob.html">sqlite3_column_value()</a> </li>
+  </ul></p>
+</td>
+
+<tr><td valign="top" align="right"><a href="c3ref/finalize.html">sqlite3_finalize()</a></td>
+<td valign="top">
+  This routine destroys a <a href="c3ref/stmt.html">prepared statement</a> created by a prior call
+  to <a href="c3ref/prepare.html">sqlite3_prepare()</a>.  Every prepared statement must be destroyed using
+  a call to this routine in order to avoid memory leaks.
+</td>
+
+<tr><td valign="top" align="right"><a href="c3ref/close.html">sqlite3_close()</a></td>
+<td valign="top">
+  This routine closes a <a href="c3ref/sqlite3.html">database connection</a> previously opened by a call
+  to <a href="c3ref/open.html">sqlite3_open()</a>.  All <a href="c3ref/stmt.html">prepared statements</a> associated with the
+  connection should be <a href="c3ref/finalize.html">finalized</a> prior to closing the
+  connection.
+</td>
+
+</table>
+
+<h3>1.1 Typical Usage Of Core Routines And Objects</h3>
+
+<p>
+  An application that wants to use SQLite will typically use
+  <a href="c3ref/open.html">sqlite3_open()</a> to create a single <a href="c3ref/sqlite3.html">database connection</a>
+  during initialization.
+  Note that <a href="c3ref/open.html">sqlite3_open()</a> can be used to either open existing database
+  files or to create and open new database files.
+  While many applications use only a single <a href="c3ref/sqlite3.html">database connection</a>, there is
+  no reason why an application cannot call <a href="c3ref/open.html">sqlite3_open()</a> multiple times
+  in order to open multiple <a href="c3ref/sqlite3.html">database connections</a> - either to the same
+  database or to different databases.  Sometimes a multi-threaded application
+  will create separate <a href="c3ref/sqlite3.html">database connections</a> for each threads.
+  Note too that is not necessary to open separate database connections in
+  order to access two or more databases.  A single <a href="c3ref/sqlite3.html">database connection</a>
+  can be made to access two or more databases at one time using the
+  <a href="lang_attach.html">ATTACH</a> SQL command.
+</p>
+
+<p>
+  Many applications destroy their <a href="c3ref/sqlite3.html">database connections</a> using calls to
+  <a href="c3ref/close.html">sqlite3_close()</a> at shutdown.  Or, for example, an application might
+  open <a href="c3ref/sqlite3.html">database connections</a> in response to a File->Open menu action
+  and then destroy the corresponding <a href="c3ref/sqlite3.html">database connection</a> in response
+  to the File->Close menu.
+</p>
+
+<p>
+  To run an SQL statement, the application follows these steps:
+</p>
+
+<p><ol>
+  <li> Create a <a href="c3ref/stmt.html">prepared statement</a> using <a href="c3ref/prepare.html">sqlite3_prepare()</a>. </li>
+  <li> Evaluate the <a href="c3ref/stmt.html">prepared statement</a> by calling <a href="c3ref/step.html">sqlite3_step()</a> one
+       or more times. </li>
+  <li> For queries, extract results by calling 
+       <a href="c3ref/column_blob.html">sqlite3_column()</a> in between
+       two calls to <a href="c3ref/step.html">sqlite3_step()</a>. </li>
+  <li> Destroy the <a href="c3ref/stmt.html">prepared statement</a> using <a href="c3ref/finalize.html">sqlite3_finalize()</a>. </li>
+</ol></p>
+
+<p>
+  The foregoing is all one really needs to know in order to use SQLite
+  effectively.  All the rest is just ornimentation and detail.
+</p>
+
+<h2>2.0 Convenience Wrappers Around Core Routines</h2>
+
+<p>
+  The <a href="c3ref/exec.html">sqlite3_exec()</a> interface is a convenience wrapper that carries out
+  all four of the above steps with a single function call.  A callback
+  function passed into <a href="c3ref/exec.html">sqlite3_exec()</a> is used to process each row of
+  the result set.  The <a href="c3ref/free_table.html">sqlite3_get_table()</a> is another convenience wrapper
+  that does all four of the above steps.  The <a href="c3ref/free_table.html">sqlite3_get_table()</a> interface
+  differs from <a href="c3ref/exec.html">sqlite3_exec()</a> in that it stores the results of queries
+  in heap memory rather than invoking a callback.
+</p>
+
+<p>
+  It is important to realize that neither <a href="c3ref/exec.html">sqlite3_exec()</a> nor
+  <a href="c3ref/free_table.html">sqlite3_get_table()</a> do anything that cannot be accomplished using
+  the core routines.  In fact, these wrappers are implemented purely in
+  terms of the core routines.
+</p>
+
+
+<h2>3.0 Binding Parameters and Reusing Prepared Statements</h2>
+
+<p>
+  In prior discussion, it was assumed that each SQL statement is prepared
+  onces, evaluated, then destroyed.  However, the SQLite allows the same
+  <a href="c3ref/stmt.html">prepared statement</a> to evaluated multiple times.  These is accomplished
+  using the following routines:
+</p>
+
+<p><ul>
+  <li> <a href="c3ref/reset.html">sqlite3_reset()</a> </li>
+  <li> <a href="c3ref/bind_blob.html">sqlite3_bind()</a> </li>
+</ul></p>
+
+<p>
+  After a <a href="c3ref/stmt.html">prepared statement</a> has been evaluated by one or more calls to
+  <a href="c3ref/step.html">sqlite3_step()</a>, it can be reset in order to be evaluted again by a
+  call to <a href="c3ref/reset.html">sqlite3_reset()</a>.
+  Using <a href="c3ref/reset.html">sqlite3_reset()</a> on an existing <a href="c3ref/stmt.html">prepared statement</a> rather
+  creating a new <a href="c3ref/stmt.html">prepared statement</a> avoids unnecessary calls to
+  <a href="c3ref/prepare.html">sqlite3_prepare()</a>.
+  In many SQL statements, the time needed
+  to run <a href="c3ref/prepare.html">sqlite3_prepare()</a> equals or exceeds the time needed by
+  <a href="c3ref/step.html">sqlite3_step()</a>.  So avoiding calls to <a href="c3ref/prepare.html">sqlite3_prepare()</a> can result
+  in a significant performance improvement.
+</p>
+
+<p>
+  Usually, though, it is not useful to evaluate exactly the same SQL
+  statement more than once.  More often, one wants to evalute similar
+  statements.  For example, you might want to evaluate an INSERT statement
+  multiple times though with different values to insert.  To accommodate
+  this kind of flexibility, SQLite allows SQL statements to contain
+  <a href="lang_expr.html#varparam">parameters</a>
+  which are "bound" to values prior to being evaluated.  These values can
+  later be changed and the same <a href="c3ref/stmt.html">prepared statement</a> can be evaluated
+  a second time using the new values.
+</p>
+
+<p>
+  In SQLite, whereever it is valid to include a string literal, one can use
+  a <a href="lang_expr.html#varparam">parameter</a> in one of the following forms:
+</p>
+
+<p><ul>
+  <li> <b>?</b> </li>
+  <li> <b>?</b><i>NNN</i> </li>
+  <li> <b>:</b><i>AAA</i> </li>
+  <li> <b>$</b><i>AAA</i> </li>
+  <li> <b>@</b><i>AAA</i> </li>
+</ul></p>
+
+<p>
+  In the examples above, <i>NNN</i> is an integer value and
+  <i>AAA</i> is an identifier.
+  A parameter initially has a value of NULL.
+  Prior to calling <a href="c3ref/step.html">sqlite3_step()</a> for the first time or immediately
+  after <a href="c3ref/reset.html">sqlite3_reset()</a>, the application can invoke one of the
+  <a href="c3ref/bind_blob.html">sqlite3_bind()</a> interfaces to attach values
+  to the parameters.  Each call to <a href="c3ref/bind_blob.html">sqlite3_bind()</a>
+  overrides prior bindings on the same parameter.
+</p>
+
+<p>
+  An application is allows to prepare multiple SQL statements in advance
+  and evaluate them as needed.
+  There is no arbitrary limit to the number of outstanding
+  <a href="c3ref/stmt.html">prepared statements</a>.
+</p>
+
+<h2>4.0 Extending SQLite</h2>
+
+<p>
+  SQLite includes interface that can be used to extend its functionality.
+  Such routines include:
+</p>
+
+<p><ul>
+  <li> <a href="c3ref/create_collation.html">sqlite3_create_collation()</a> </li>
+  <li> <a href="c3ref/create_function.html">sqlite3_create_function()</a> </li>
+  <li> <a href="c3ref/create_module.html">sqlite3_create_module()</a> </li>
+</ul></p>
+
+<p>
+  The <a href="c3ref/create_collation.html">sqlite3_create_collation()</a> interface is used to create new
+  collating sequences for sorting text.
+  The <a href="c3ref/create_module.html">sqlite3_create_module()</a> interface is used register new
+  virtual table implementations.
+</p>
+
+<p>
+  The <a href="c3ref/create_function.html">sqlite3_create_function()</a> interface creates new SQL functions - 
+  either scalar or aggregate.  The new function implementation typically
+  makes use of the following additional interfaces:
+</p>
+
+<p><ul>
+  <li> <a href="c3ref/aggregate_context.html">sqlite3_aggregate_context()</a> </li>
+  <li> <a href="c3ref/result_blob.html">sqlite3_result()</a> </li>
+  <li> <a href="c3ref/user_data.html">sqlite3_user_data()</a> </li>
+  <li> <a href="c3ref/value_blob.html">sqlite3_value()</a> </li>
+</ul></p>
+
+<p>
+  All of the built-in SQL functions of SQLite are created using exactly
+  these same interfaces.  Refer to the SQLite source code, and in particular
+  the <b>date.c</b> and <b>func.c</b> source files for examples.
+</p>
+
+<h2>5.0 Other Interfaces</h2>
+
+<p>
+  This article only mentions the foundational SQLite interfaces.
+  The SQLite library includes many other APIs implementing useful
+  features that are not described here.  
+  A <a href="c3ref/funclist.html">complete list of functions</a> that form the SQLite
+  application program interface is found at the
+  <a href="c3ref/intro.html">C/C++ Interface Specification</a>.
+  Refer to that document for complete and authoritative information about
+  all SQLite interfaces.
+</p>
+

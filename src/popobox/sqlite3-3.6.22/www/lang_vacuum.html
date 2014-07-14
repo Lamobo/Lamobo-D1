@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Query Language: VACUUM</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>VACUUM</h2><h4><a href="syntaxdiagrams.html#vacuum-stmt">vacuum-stmt:</a></h4><blockquote> <img alt="syntax diagram vacuum-stmt" src="images/syntax/vacuum-stmt.gif"></img> </blockquote>
+
+
+<p>When an object (table, index, trigger, or view) is dropped from the 
+database, it leaves behind empty space. 
+This empty space will be reused the next time new information is
+added to the database.  But in the meantime, the database file might
+be larger than strictly necessary.  Also, frequent inserts, updates,
+and deletes can cause the information in the database to become
+fragmented - scrattered out all across the database file rather
+than clustered together in one place.</p>
+
+<p>The VACUUM command cleans
+the main database by copying its contents to a temporary database file and 
+reloading the original database file from the copy.  This eliminates 
+free pages,  aligns table data to be contiguous, and otherwise cleans 
+up the database file structure.</p>
+
+<p>The VACUUM command may change the 
+<a href="lang_createtable.html#rowid">ROWIDs</a> of entries in tables that do
+not have an explicit <a href="lang_createtable.html#rowid">INTEGER PRIMARY KEY</a>.</p>
+
+<p>VACUUM only works on the main database.
+It is not possible to VACUUM an attached database file.</p>
+
+<p>The VACUUM command will fail if there is an active transaction.
+The VACUUM command is a no-op for in-memory databases.</p>
+
+<p>As of SQLite version 3.1, an alternative to using the VACUUM command
+is auto-vacuum mode, enabled using the 
+<a href="pragma.html#pragma_auto_vacuum">auto_vacuum</a> pragma.  When <a href="pragma.html#pragma_auto_vacuum">auto_vacuum</a> is enabled for a database, 
+large deletes cause
+the size of the database file to shrink.  However, <a href="pragma.html#pragma_auto_vacuum">auto_vacuum</a>
+also causes excess fragmentation of the database file.  And <a href="pragma.html#pragma_auto_vacuum">auto_vacuum</a>
+does not compact partially filled pages of the database as VACUUM
+does.</p>
+
+<p>The <a href="pragma.html#pragma_page_size">page_size</a> and/or <a href="pragma.html#pragma_auto_vacuum">auto_vacuum</a> mode of a database can be changed
+by invoking the <a href="pragma.html#pragma_page_size">page_size pragma</a> and/or <a href="pragma.html#pragma_auto_vacuum">auto_vacuum pragma</a> and then
+immediately VACUUMing the database.</p>
+
+

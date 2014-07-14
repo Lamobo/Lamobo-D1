@@ -1,0 +1,311 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>List Of SQLite Constants</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a>
+
+<h2>Constants:</h2>
+<p>Note: Constants marked with "<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a>"
+are <a href="../c3ref/experimental.html">experimental</a> and constants marked with
+"<a href="../c3ref/experimental.html"><small><i>(obs)</i></small></a>" are <a href="../c3ref/experimental.html">deprecated</a></p>
+<table width="100%" cellpadding="5"><tr>
+<td valign="top"><ul><li><a href="../c3ref/c_abort.html">SQLITE_ABORT</a></li>
+<li><a href="../c3ref/c_access_exists.html">SQLITE_ACCESS_EXISTS</a></li>
+<li><a href="../c3ref/c_access_exists.html">SQLITE_ACCESS_READ</a></li>
+<li><a href="../c3ref/c_access_exists.html">SQLITE_ACCESS_READWRITE</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_ALTER_TABLE</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_ANALYZE</a></li>
+<li><a href="../c3ref/c_any.html">SQLITE_ANY</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_ATTACH</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_AUTH</a></li>
+<li><a href="../c3ref/c_blob.html">SQLITE_BLOB</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_BUSY</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_CANTOPEN</a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_GETMALLOC</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_GETMUTEX</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_GETPCACHE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_HEAP</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_LOOKASIDE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MALLOC</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MEMSTATUS</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MULTITHREAD</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MUTEX</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_PAGECACHE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_PCACHE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_SCRATCH</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_SERIALIZED</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_SINGLETHREAD</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_CONSTRAINT</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_COPY</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_CORRUPT</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_INDEX</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_TABLE</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_TEMP_INDEX</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_TEMP_TABLE</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_TEMP_TRIGGER</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_TEMP_VIEW</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_TRIGGER</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_VIEW</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_CREATE_VTABLE</a></li>
+<li><a href="../c3ref/c_dbconfig_lookaside.html">SQLITE_DBCONFIG_LOOKASIDE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_dbstatus_lookaside_used.html">SQLITE_DBSTATUS_LOOKASIDE_USED</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DELETE</a></li>
+<li><a href="../c3ref/c_deny.html">SQLITE_DENY</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DETACH</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_DONE</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_INDEX</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_TABLE</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_TEMP_INDEX</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_TEMP_TABLE</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_TEMP_TRIGGER</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_TEMP_VIEW</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_TRIGGER</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_VIEW</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_DROP_VTABLE</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_EMPTY</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_ERROR</a></li>
+<li><a href="../c3ref/c_fcntl_lockstate.html">SQLITE_FCNTL_LOCKSTATE</a></li>
+<li><a href="../c3ref/c_blob.html">SQLITE_FLOAT</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_FORMAT</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_FULL</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_FUNCTION</a></li>
+<li><a href="../c3ref/c_fcntl_lockstate.html">SQLITE_GET_LOCKPROXYFILE</a></li>
+<li><a href="../c3ref/c_deny.html">SQLITE_IGNORE</a></li>
+<li><a href="../c3ref/c_index_constraint_eq.html">SQLITE_INDEX_CONSTRAINT_EQ</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_index_constraint_eq.html">SQLITE_INDEX_CONSTRAINT_GE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_index_constraint_eq.html">SQLITE_INDEX_CONSTRAINT_GT</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_index_constraint_eq.html">SQLITE_INDEX_CONSTRAINT_LE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_index_constraint_eq.html">SQLITE_INDEX_CONSTRAINT_LT</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_index_constraint_eq.html">SQLITE_INDEX_CONSTRAINT_MATCH</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_INSERT</a></li>
+<li><a href="../c3ref/c_blob.html">SQLITE_INTEGER</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_INTERNAL</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_INTERRUPT</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC16K</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC1K</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC2K</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC32K</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC4K</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC512</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC64K</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_ATOMIC8K</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_SAFE_APPEND</a></li>
+<li><a href="../c3ref/c_iocap_atomic.html">SQLITE_IOCAP_SEQUENTIAL</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_IOERR</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_ACCESS</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_BLOCKED</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_CHECKRESERVEDLOCK</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_CLOSE</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_DELETE</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_DIR_CLOSE</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_DIR_FSYNC</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_FSTAT</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_FSYNC</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_LOCK</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_NOMEM</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_RDLOCK</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_READ</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_SHORT_READ</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_TRUNCATE</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_UNLOCK</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_WRITE</a></li>
+<li><a href="../c3ref/c_fcntl_lockstate.html">SQLITE_LAST_ERRNO</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_ATTACHED</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_COLUMN</a></li>
+</ul></td>
+<td valign="top"><ul><li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_COMPOUND_SELECT</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_EXPR_DEPTH</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_FUNCTION_ARG</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_LENGTH</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_LIKE_PATTERN_LENGTH</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_SQL_LENGTH</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_TRIGGER_DEPTH</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_VARIABLE_NUMBER</a></li>
+<li><a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_VDBE_OP</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_LOCKED</a></li>
+<li><a href="../c3ref/c_ioerr_access.html">SQLITE_LOCKED_SHAREDCACHE</a></li>
+<li><a href="../c3ref/c_lock_exclusive.html">SQLITE_LOCK_EXCLUSIVE</a></li>
+<li><a href="../c3ref/c_lock_exclusive.html">SQLITE_LOCK_NONE</a></li>
+<li><a href="../c3ref/c_lock_exclusive.html">SQLITE_LOCK_PENDING</a></li>
+<li><a href="../c3ref/c_lock_exclusive.html">SQLITE_LOCK_RESERVED</a></li>
+<li><a href="../c3ref/c_lock_exclusive.html">SQLITE_LOCK_SHARED</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_MISMATCH</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_MISUSE</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_FAST</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_RECURSIVE</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_STATIC_LRU</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_STATIC_LRU2</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_STATIC_MASTER</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_STATIC_MEM</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_STATIC_MEM2</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_STATIC_OPEN</a></li>
+<li><a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_STATIC_PRNG</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_NOLFS</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_NOMEM</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_NOTADB</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_NOTFOUND</a></li>
+<li><a href="../c3ref/c_blob.html">SQLITE_NULL</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_OK</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_CREATE</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_DELETEONCLOSE</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_EXCLUSIVE</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_FULLMUTEX</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_MAIN_DB</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_MAIN_JOURNAL</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_MASTER_JOURNAL</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_NOMUTEX</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_PRIVATECACHE</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_READONLY</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_READWRITE</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_SHAREDCACHE</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_SUBJOURNAL</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_TEMP_DB</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_TEMP_JOURNAL</a></li>
+<li><a href="../c3ref/c_open_create.html">SQLITE_OPEN_TRANSIENT_DB</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_PERM</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_PRAGMA</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_PROTOCOL</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_RANGE</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_READ</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_READONLY</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_REINDEX</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_ROW</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_SAVEPOINT</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_SCHEMA</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_SELECT</a></li>
+<li><a href="../c3ref/c_fcntl_lockstate.html">SQLITE_SET_LOCKPROXYFILE</a></li>
+<li><a href="../c3ref/c_source_id.html">SQLITE_SOURCE_ID</a></li>
+<li><a href="../c3ref/c_static.html">SQLITE_STATIC</a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_MALLOC_SIZE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_MEMORY_USED</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_PAGECACHE_OVERFLOW</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_PAGECACHE_SIZE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_PAGECACHE_USED</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_PARSER_STACK</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_SCRATCH_OVERFLOW</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_SCRATCH_SIZE</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_status_malloc_size.html">SQLITE_STATUS_SCRATCH_USED</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_stmtstatus_fullscan_step.html">SQLITE_STMTSTATUS_FULLSCAN_STEP</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_stmtstatus_fullscan_step.html">SQLITE_STMTSTATUS_SORT</a>&nbsp;&nbsp;<a href="../c3ref/experimental.html"><small><i>(exp)</i></small></a></li>
+<li><a href="../c3ref/c_sync_dataonly.html">SQLITE_SYNC_DATAONLY</a></li>
+<li><a href="../c3ref/c_sync_dataonly.html">SQLITE_SYNC_FULL</a></li>
+<li><a href="../c3ref/c_sync_dataonly.html">SQLITE_SYNC_NORMAL</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_ALWAYS</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_ASSERT</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_BENIGN_MALLOC_HOOKS</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_BITVEC_TEST</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_FAULT_INSTALL</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_FIRST</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_ISKEYWORD</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_LAST</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_OPTIMIZATIONS</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_PENDING_BYTE</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_PRNG_RESET</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_PRNG_RESTORE</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_PRNG_SAVE</a></li>
+<li><a href="../c3ref/c_testctrl_always.html">SQLITE_TESTCTRL_RESERVE</a></li>
+<li><a href="../c3ref/c_blob.html">SQLITE_TEXT</a></li>
+<li><a href="../c3ref/c_abort.html">SQLITE_TOOBIG</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_TRANSACTION</a></li>
+<li><a href="../c3ref/c_static.html">SQLITE_TRANSIENT</a></li>
+<li><a href="../c3ref/c_alter_table.html">SQLITE_UPDATE</a></li>
+<li><a href="../c3ref/c_any.html">SQLITE_UTF16</a></li>
+<li><a href="../c3ref/c_any.html">SQLITE_UTF16BE</a></li>
+<li><a href="../c3ref/c_any.html">SQLITE_UTF16LE</a></li>
+<li><a href="../c3ref/c_any.html">SQLITE_UTF16_ALIGNED</a></li>
+<li><a href="../c3ref/c_any.html">SQLITE_UTF8</a></li>
+<li><a href="../c3ref/c_source_id.html">SQLITE_VERSION</a></li>
+<li><a href="../c3ref/c_source_id.html">SQLITE_VERSION_NUMBER</a></li>
+</ul></td>
+</tr></table>
+<p>Other lists:
+<a href="objlist.html">Objects</a> and
+<a href="funclist.html">Functions</a>.</p>
+

@@ -1,0 +1,25 @@
+--- sqlite3-3.6.11.orig/Makefile.in	2009-03-24 11:40:55.000000000 -0700
++++ sqlite3-3.6.11/Makefile.in	2009-03-24 11:42:36.000000000 -0700
+@@ -464,18 +464,20 @@
+ libsqlite3.la:	$(LIBOBJ)
+ 	$(LTLINK) -o $@ $(LIBOBJ) $(TLIBS) \
+ 		${ALLOWRELEASE} -rpath "$(libdir)" -version-info "8:6:8"
++	sed -i "/dependency_libs/s/'.*'/''/" $@
+ 
+ libtclsqlite3.la:	tclsqlite.lo libsqlite3.la
+ 	$(LTLINK) -o $@ tclsqlite.lo \
+-		libsqlite3.la @TCL_STUB_LIB_SPEC@ $(TLIBS) \
++		libsqlite3.la @TCL_STUB_LIB_SPEC@ \
+ 		-rpath "$(TCLLIBDIR)" \
+ 		-version-info "8:6:8" \
+ 		-avoid-version
++	sed -i "/dependency_libs/s/'.*'/''/" $@
+ 
+ sqlite3$(TEXE):	$(TOP)/src/shell.c libsqlite3.la sqlite3.h
+ 	$(LTLINK) $(READLINE_FLAGS) \
+ 		-o $@ $(TOP)/src/shell.c libsqlite3.la \
+-		$(LIBREADLINE) $(TLIBS) -rpath "$(libdir)"
++		$(LIBREADLINE) -rpath "$(libdir)"
+ 
+ # This target creates a directory named "tsrc" and fills it with
+ # copies of all of the C source code and header files needed to

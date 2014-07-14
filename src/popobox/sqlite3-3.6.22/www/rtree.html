@@ -1,0 +1,386 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>The SQLite R*Tree Module</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+
+<h1>1.0 Overview</h1>
+
+<p>
+An <a href="http://en.wikipedia.org/wiki/R-tree">R-Tree</a> is a special
+index that is designed for doing range queries.  R-Trees are most commonly
+used in geospatial systems where each entry is a rectangle with minimum and
+maximum X and Y coordinates.  Given a query rectangle, an R-Tree is able
+to quickly find all entries that are contained within the query rectangle
+or which overlap the query rectangle.  This idea is easily extended to
+three dimensions for use in CAD systems.  R-Trees also find use in time-domain
+range look-ups.  For example, suppose a database records the starting and
+ending times for a large number of events.  A R-Tree is able to quickly
+find all events, for example, that were active at any time during a given
+time interval, or all events that started during a particular time interval,
+or all events that both started and ended within a given time interval.
+And so forth.
+</p>
+
+<p>
+The R-Tree concept originated with 
+<a href="http://www.baymoon.com/~tg2/">Toni Guttman</a>: 
+<em>R-Trees: A Dynamic Index Structure for Spatial Searching</em>,
+Proc. 1984 ACM SIGMOD International Conference on Management of Data,
+pp. 47-57.
+The implementation found in SQLite is a refinement of Guttman's original
+idea, commonly called "R*Trees", that was described by
+Norbert Beckmann, Hans-Peter Kriegel, Ralf Schneider, Bernhard Seeger:
+<em>The R*-Tree: An Efficient and Robust Access Method for Points
+and Rectangles.</em> SIGMOD Conference 1990: 322-331.
+</p>
+
+<h1>2.0 Compiling The R*Tree Module</h1>
+
+<p>
+The source code to the SQLite R*Tree module is included as part
+of the <a href="amalgamation.html">amalgamation</a> but is disabled by default.  To enable the
+R*Tree module, simply compile with the <a href="compile.html#enable_rtree">SQLITE_ENABLE_RTREE</a> 
+C-preprocessor macro defined.  With many compilers, this is accomplished
+by adding the option "-DSQLITE_ENABLE_RTREE=1" to the compiler
+command-line.
+</p>
+
+<h1>3.0 Using the R*Tree Module</h1>
+
+<p>
+The SQLite R*Tree module is implemented as a
+<a href="c3ref/create_module.html">virtual table</a>.  Each R*Tree index is a
+virtual table with an odd number of columns between 3 and 11.
+The first column is always a 64-bit signed integer primary key.
+The other columns are minimum- and maximum-value pairs (stored as
+32-bit floating point numbers) for each
+dimension.  A 1-dimensional R*Tree thus has 3 columns.  
+A 2-dimensional R*Tree (the most common case) has 5 columns.
+A 5-dimensional R*Tree has 11 columns.  The SQLite R*Tree implementation
+does not support R*Trees wider than 5 dimensions.
+</p>
+
+<p>
+The first column of an SQLite R*Tree must always be an integer
+primary key.
+The min/max-value pair columns are always stored as
+32-bit floating point values.  Unlike regular SQLite tables which
+can store data in a variety of datatypes and formats, the R*Tree
+indices rigidly enforce these two storage types.  Attempts to insert
+something other than an integer into the first column, or something
+other than a floating point value into the other columns, will result
+in an error.
+</p>
+
+<h2>3.1 Creating An R*Tree Index</h2>
+
+<p>
+A new R*Tree index is created as follows:
+</p>
+
+<blockquote><pre>
+CREATE VIRTUAL TABLE <em>&lt;name&gt;</em> USING rtree(<em>&lt;column-names&gt;</em>);
+</pre></blockquote>
+
+<p>
+The <em>&lt;name&gt;</em> is the name your application chooses for the
+R*Tree index and <em>&lt;column-names&gt;</em> is a comma separated list
+of between 3 and 11 columns.
+The virtual &lt;name&gt; table creates three "shadow" tables to actually
+store its content.  The names of these shadow tables are:
+</p>
+
+<blockquote>
+<em>&lt;name&gt;</em><strong>_node</strong><br>
+<em>&lt;name&gt;</em><strong>_rowid</strong><br>
+<em>&lt;name&gt;</em><strong>_parent</strong>
+</blockquote>
+
+<p>
+The shadow tables are ordinary SQLite data tables.  You can query them 
+directly if you like, though this unlikely to to reveal anything particularly
+useful. 
+And you can <a href="lang_update.html">UPDATE</a>, <a href="lang_delete.html">DELETE</a>, <a href="lang_insert.html">INSERT</a> or even <a href="lang_droptable.html">DROP</a> 
+the shadow tables, though doing so will corrupt your R*Tree index.
+So it is best to simply ignore the shadow tables.  Recognize that they
+are there to hold your R*Tree index information and let it go as that.
+</p>
+
+<p>
+As an example, consider creating a two-dimensional R*Tree index for use in 
+spatial queries:
+</p>
+
+<blockquote><pre>
+CREATE VIRTUAL TABLE demo_index USING rtree(
+   id,              -- Integer primary key
+   minX, maxX,      -- Minimum and maximum X coordinate
+   minY, maxY       -- Minimum and maximum Y coordinate
+);
+</pre></blockquote>
+
+<h2>3.2 Populating An R*Tree Index</h2>
+
+<p>
+The usual <a href="lang_insert.html">INSERT</a>, <a href="lang_update.html">UPDATE</a>, and <a href="lang_delete.html">DELETE</a> commands work on an R*Tree
+index just like on regular tables.  So to insert some data into our sample
+R*Tree index, we can do something like this:
+</p>
+
+<blockquote><pre>
+INSERT INTO demo_index VALUES(
+    1,                   -- Primary key
+    -80.7749, -80.7747,  -- Longitude range
+    30.3776, 30.3778     -- Latitude range
+);
+INSERT INTO demo_index VALUES(
+    2,
+    -81.0, -79.6,
+    35.0, 36.2
+);
+</pre></blockquote>
+
+<p>
+The entries above might represent (for example) a bounding box around
+the offices for SQLite.org and bounding box around the
+12th Congressional District of North Carolina in which SQLite.org is located.  
+</p>
+
+<h2>3.3 Querying An R*Tree Index</h2>
+
+<p>
+Any valid query will work against an R*Tree index.  But the R*Tree
+implementation is designed to make two kinds of queries especially
+efficient.  First, queries against the primary key are efficient:
+</p>
+
+<blockquote><pre>
+SELECT * FROM demo_index WHERE id=1;
+</pre></blockquote>
+
+<p>
+Of course, an ordinary SQLite table will do a query against its
+integer primary key efficiently, so the previous is no big deal.
+The real reason for using an R*Tree in the first place is so that
+you can efficiently do inequality queries against the coordinate
+ranges.  To find all elements of the index that are contained within
+the vicinity of Charlotte, North Carolina, one might do:
+</p>
+
+<blockquote><pre>
+SELECT id FROM demo_index
+ WHERE minX>=-81.08 AND maxX<=-80.58
+   AND minY>=35.00  AND maxY<=35.44;
+</pre></blockquote>
+
+<p>
+The query above would very quickly locate id of 1 even if the
+R*Tree contained millions of entries.  The previous is an example
+of a "contained-within" query.  The R*Tree also supports "overlapping"
+queries.  For example, to find all bounding boxes that overlap the
+Charlotte area:
+</p>
+
+<blockquote><pre>
+SELECT id FROM demo_index
+ WHERE maxX>=-81.08 AND minX<=-80.58
+   AND maxY>=35.00  AND minY<=35.44;
+</pre></blockquote>
+
+<p>
+This second query would find both entry 1 (the SQLite.org office) which
+is entirely contained within the query box and also
+Mel Watt's Congressional District which extends well outside the
+query box but still overlaps the query box.
+</p>
+
+<p>
+Note that is not necessary for all coordinates in an R*Tree index
+to be constrained in order for the index search to be efficient.
+One might, for example, want to query all objects that overlap with
+the 35th parallel:
+</p>
+
+<blockquote><pre>
+SELECT id FROM demo_index
+ WHERE maxY>=35.0  AND minY<=35.0;
+</pre></blockquote>
+
+<p>
+But, generally speaking, the more constraints that the R*Tree module
+has to work with, and the smaller the bounding box, the faster the
+results will come back.
+</p>
+
+<h1>4.0 Using R*Trees Effectively</h1>
+
+<p>
+The only information that an R*Tree index stores about an object is
+its integer ID and its bounding box.  Additional information needs to
+be stored in separate tables and related to the R*Tree index using
+the primary key.  For the example above, one might create an auxiliary
+table as follows:
+</p>
+
+<blockquote><pre>
+CREATE TABLE demo_data(
+  id INTEGER PRIMARY KEY,  -- primary key
+  objname TEXT,            -- name of the object
+  objtype TEXT,            -- object type
+  boundary BLOB            -- detailed boundary of object
+);
+</pre></blockquote>
+
+<p>
+In this example, the demo_data.boundary field is intended to hold some
+kind of binary representation of the precise boundaries of the object.
+The R*Tree index only holds an axis-aligned rectangular boundary for the
+object.  The R*Tree boundary is just an approximation of the true object
+boundary.  So what typically happens is that the R*Tree index is used to
+narrow a search down to a list of candidate objects and then more detailed
+and expensive computations are done on each candidate to find if the
+candidate truly meets the search criteria.
+</p>
+
+<blockquote><p>
+<strong>Key Point:</strong>
+An R*Tree index does not normally provide the exact answer but merely
+reduces the set of potential answers from millions to dozens.
+</p></blockquote>
+
+<p>
+Suppose the demo_data.boundary field holds some proprietary data description
+of a complex two-dimensional boundary for an object and suppose that the
+application has used the <a href="c3ref/create_function.html">sqlite3_create_function()</a> interface to
+created application-defined functions "contained_in" and
+"overlaps" accept two demo_data.boundary objects and return true or false.
+One may assume that "contained_in" and "overlaps" are relatively slow
+functions that we do not want to invoke too frequently.
+Then an efficient way to find the name of all objects located within
+the North Carolina 12th District, one may run a query like this:
+</p>
+
+<blockquote><pre>
+SELECT objname FROM demo_data, demo_index
+ WHERE demo_data.id=demo_index.id
+   AND contained_in(demo_data.boundary, :boundary)
+   AND minX>=-81.0 AND max<=-79.6
+   AND minY>=35.0 AND maxY<=36.2;
+</pre></blockquote>
+
+<p>In the query above, one would presumably bind the binary BLOB 
+description of the precise boundary of the 12th district to the
+":boundary" parameter.</p>
+
+<p>Notice how the query above works:  The R*Tree index runs in the outer
+loop to find entries that are contained within the bounding box
+of longitude -81..-79.6 and latitude 35.0..36.2. 
+For each object identifier found, SQLite looks up
+the corresponding entry in the demo_data table.  It then uses the boundary
+field from the demo_data table as a parameter to the contained_in()
+function and if that function returns true, the objname field from
+the demo_data table is returned as the next row of query result.</p>
+
+<p>One would get the same answer without the use of the R*Tree index
+using the following simpler query:</p>
+
+<blockquote><pre>
+SELECT objname FROM demo_data
+ WHERE contained_in(demo_data.boundary, :boundary);
+</pre></blockquote>
+
+<p>The problem with this latter query is that it must apply the
+contained_in() function to millions of entries in the demo_data table.
+The use of the R*Tree in the penultimate query reduces the number of
+calls to contained_in() function to a small subset of the entire table.
+The R*Tree index did not find the exact answer itself, it merely
+limited the search space.</p>
+

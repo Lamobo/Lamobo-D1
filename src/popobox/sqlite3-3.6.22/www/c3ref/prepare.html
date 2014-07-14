@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Compiling An SQL Statement</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Compiling An SQL Statement</h2><blockquote><pre>int sqlite3_prepare(
+  sqlite3 *db,            /* Database handle */
+  const char *zSql,       /* SQL statement, UTF-8 encoded */
+  int nByte,              /* Maximum length of zSql in bytes. */
+  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+  const char **pzTail     /* OUT: Pointer to unused portion of zSql */
+);
+int sqlite3_prepare_v2(
+  sqlite3 *db,            /* Database handle */
+  const char *zSql,       /* SQL statement, UTF-8 encoded */
+  int nByte,              /* Maximum length of zSql in bytes. */
+  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+  const char **pzTail     /* OUT: Pointer to unused portion of zSql */
+);
+int sqlite3_prepare16(
+  sqlite3 *db,            /* Database handle */
+  const void *zSql,       /* SQL statement, UTF-16 encoded */
+  int nByte,              /* Maximum length of zSql in bytes. */
+  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+  const void **pzTail     /* OUT: Pointer to unused portion of zSql */
+);
+int sqlite3_prepare16_v2(
+  sqlite3 *db,            /* Database handle */
+  const void *zSql,       /* SQL statement, UTF-16 encoded */
+  int nByte,              /* Maximum length of zSql in bytes. */
+  sqlite3_stmt **ppStmt,  /* OUT: Statement handle */
+  const void **pzTail     /* OUT: Pointer to unused portion of zSql */
+);
+</pre></blockquote><p>
+To execute an SQL query, it must first be compiled into a byte-code
+program using one of these routines.</p>
+
+<p>The first argument, "db", is a <a href="../c3ref/sqlite3.html">database connection</a> obtained from a
+prior successful call to <a href="../c3ref/open.html">sqlite3_open()</a>, <a href="../c3ref/open.html">sqlite3_open_v2()</a> or
+<a href="../c3ref/open.html">sqlite3_open16()</a>.  The database connection must not have been closed.</p>
+
+<p>The second argument, "zSql", is the statement to be compiled, encoded
+as either UTF-8 or UTF-16.  The sqlite3_prepare() and sqlite3_prepare_v2()
+interfaces use UTF-8, and sqlite3_prepare16() and sqlite3_prepare16_v2()
+use UTF-16.</p>
+
+<p>If the nByte argument is less than zero, then zSql is read up to the
+first zero terminator. If nByte is non-negative, then it is the maximum
+number of  bytes read from zSql.  When nByte is non-negative, the
+zSql string ends at either the first '\000' or '\u0000' character or
+the nByte-th byte, whichever comes first. If the caller knows
+that the supplied string is nul-terminated, then there is a small
+performance advantage to be gained by passing an nByte parameter that
+is equal to the number of bytes in the input string <i>including</i>
+the nul-terminator bytes.</p>
+
+<p>If pzTail is not NULL then *pzTail is made to point to the first byte
+past the end of the first SQL statement in zSql.  These routines only
+compile the first statement in zSql, so *pzTail is left pointing to
+what remains uncompiled.</p>
+
+<p>*ppStmt is left pointing to a compiled <a href="../c3ref/stmt.html">prepared statement</a> that can be
+executed using <a href="../c3ref/step.html">sqlite3_step()</a>.  If there is an error, *ppStmt is set
+to NULL.  If the input text contains no SQL (if the input is an empty
+string or a comment) then *ppStmt is set to NULL.
+The calling procedure is responsible for deleting the compiled
+SQL statement using <a href="../c3ref/finalize.html">sqlite3_finalize()</a> after it has finished with it.
+ppStmt may not be NULL.</p>
+
+<p>On success, the sqlite3_prepare() family of routines return <a href="../c3ref/c_abort.html">SQLITE_OK</a>;
+otherwise an <a href="../c3ref/c_abort.html">error code</a> is returned.</p>
+
+<p>The sqlite3_prepare_v2() and sqlite3_prepare16_v2() interfaces are
+recommended for all new programs. The two older interfaces are retained
+for backwards compatibility, but their use is discouraged.
+In the "v2" interfaces, the prepared statement
+that is returned (the <a href="../c3ref/stmt.html">sqlite3_stmt</a> object) contains a copy of the
+original SQL text. This causes the <a href="../c3ref/step.html">sqlite3_step()</a> interface to
+behave differently in three ways:</p>
+
+<p><ol>
+<li>
+If the database schema changes, instead of returning <a href="../c3ref/c_abort.html">SQLITE_SCHEMA</a> as it
+always used to do, <a href="../c3ref/step.html">sqlite3_step()</a> will automatically recompile the SQL
+statement and try to run it again.  If the schema has changed in
+a way that makes the statement no longer valid, <a href="../c3ref/step.html">sqlite3_step()</a> will still
+return <a href="../c3ref/c_abort.html">SQLITE_SCHEMA</a>.  But unlike the legacy behavior, <a href="../c3ref/c_abort.html">SQLITE_SCHEMA</a> is
+now a fatal error.  Calling <a href="../c3ref/prepare.html">sqlite3_prepare_v2()</a> again will not make the
+error go away.  Note: use <a href="../c3ref/errcode.html">sqlite3_errmsg()</a> to find the text
+of the parsing error that results in an <a href="../c3ref/c_abort.html">SQLITE_SCHEMA</a> return.
+</li></p>
+
+<p><li>
+When an error occurs, <a href="../c3ref/step.html">sqlite3_step()</a> will return one of the detailed
+<a href="../c3ref/c_abort.html">error codes</a> or <a href="../c3ref/c_ioerr_access.html">extended error codes</a>.  The legacy behavior was that
+<a href="../c3ref/step.html">sqlite3_step()</a> would only return a generic <a href="../c3ref/c_abort.html">SQLITE_ERROR</a> result code
+and the application would have to make a second call to <a href="../c3ref/reset.html">sqlite3_reset()</a>
+in order to find the underlying cause of the problem. With the "v2" prepare
+interfaces, the underlying reason for the error is returned immediately.
+</li></p>
+
+<p><li>
+If the value of a <a href="../lang_expr.html#varparam">host parameter</a> in the WHERE clause might
+change the query plan for a statement, then the statement may be
+automatically recompiled (as if there had been a schema change) on the first
+<a href="../c3ref/step.html">sqlite3_step()</a> call following any change to the
+<a href="../c3ref/bind_blob.html">bindings</a> of the <a href="../lang_expr.html#varparam">parameter</a>.
+</li>
+</ol>
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

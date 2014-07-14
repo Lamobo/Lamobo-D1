@@ -1,0 +1,2180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>No Title</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<!-- title>SQLite B-Tree Module</title -->
+
+
+    
+
+    <div class=fancy>
+    <div style="font-size:2em;text-align:center;color:#80a796">SQLite B-Tree Module</div>
+    <div style="font-size:1.5em;margin:1em;color:#80a796">Table Of Contents</div>
+    <div id=toc>
+      
+    <div style="margin-left:6ex">
+    <a href="#section_1">1 Document Overview</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_1_1">1.1 Scope and Purpose</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_1_2">1.2 Document and Requirements Organization</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_1_3">1.3 Glossary</a>
+    </a></div>
+  
+    <div style="margin-left:6ex">
+    <a href="#section_2">2 Module Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_2_1">2.1 Functional Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_1_1">2.1.1 Opening and Closing Connections</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_1_2">2.1.2 New Database Image Configuration</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#hlr_transactions">2.1.3 Transaction and Savepoint Functions</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#hlr_reading_data">2.1.4 Reading From the Database Image</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_1_5">2.1.5 Writing to the Database Image</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_1_6">2.1.6 Page-Cache Configuration Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_1_7">2.1.7 Multi-User Database Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_1_8">2.1.8 Backup/Vacuum API Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_1_9">2.1.9 Integrity Check Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_2_2">2.2 Other Requirements and Constraints</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#hlr_memory">2.2.1 Caching and Memory Management Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_2_2">2.2.2 Exception Handling Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_2_2_3">2.2.3 Well-Formedness Requirements</a>
+    </a></div>
+  
+    <div style="margin-left:6ex">
+    <a href="#section_3">3 Module API</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_1">3.1 Opening and Closing Connections</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_3_1_1">3.1.1 sqlite3BtreeOpen</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_3_1_2">3.1.2 sqlite3BtreeClose</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_2">3.2 Database Image Configuration</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_3">3.3 Connection Configuration</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_4">3.4 Query Interfaces</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_5">3.5 Mutex Functions</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_6">3.6 Transaction and Savepoint API</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_7">3.7 Reading and Traversing the Database Image</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_3_7_1">3.7.1 sqlite3BtreeMovetoUnpacked</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_3_7_2">3.7.2 sqlite3BtreeGetMeta</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_8">3.8 Modifying the Database Image</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#sqlite3BtreeCreateTable">3.8.1 sqlite3BtreeCreateTable</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#sqlite3BtreeDropTable">3.8.2 sqlite3BtreeDropTable</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#sqlite3BtreeClearTable">3.8.3 sqlite3BtreeClearTable</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#sqlite3BtreeCursorHasMoved">3.8.4 sqlite3BtreeCursorHasMoved</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#sqlite3BtreePutData">3.8.5 sqlite3BtreePutData</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#sqlite3BtreeUpdateMeta">3.8.6 sqlite3BtreeUpdateMeta</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#sqlite3BtreeDelete">3.8.7 sqlite3BtreeDelete</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_3_8_8">3.8.8 sqlite3BtreeInsert</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#sqlite3BtreeIncrVacuum">3.8.9 sqlite3BtreeIncrVacuum</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_9">3.9 Advisory B-Tree Locks</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_3_9_1">3.9.1 sqlite3BtreeLockTable</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_3_9_2">3.9.2 sqlite3BtreeSchemaLocked</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_10">3.10 What do these do?</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_3_11">3.11 APIs not branded sqlite3BtreeXXX()</a>
+    </a></div>
+  
+    <div style="margin-left:6ex">
+    <a href="#section_4">4 Module Implementation</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_4_1">4.1 Database Image Traversal</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_4_2">4.2 Database Image Manipulation</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_4_2_1">4.2.1 Creating a B-Tree Structure</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_4_2_2">4.2.2 Clearing a B-Tree Structure</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_4_2_3">4.2.3 Deleting a B-Tree Structure</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_4_2_4">4.2.4 Inserting, Replacing and Deleting B-Tree Entries</a>
+    </a></div>
+  
+    <div style="margin-left:24ex">
+    <a href="#section_4_2_4_1">4.2.4.1 B-Tree Insert/Replace Entry</a>
+    </a></div>
+  
+    <div style="margin-left:24ex">
+    <a href="#section_4_2_4_2">4.2.4.2 B-Tree Delete Entry</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#btree_balancing_algorithm">4.2.5 B-Tree Balancing Algorithm</a>
+    </a></div>
+  
+    <div style="margin-left:24ex">
+    <a href="#section_4_2_5_1">4.2.5.1 Balance Deeper</a>
+    </a></div>
+  
+    <div style="margin-left:24ex">
+    <a href="#section_4_2_5_2">4.2.5.2 Balance Shallower</a>
+    </a></div>
+  
+    <div style="margin-left:24ex">
+    <a href="#section_4_2_5_3">4.2.5.3 Balance Quick</a>
+    </a></div>
+  
+    <div style="margin-left:24ex">
+    <a href="#balance_siblings">4.2.5.4 Balance Siblings</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_4_2_6">4.2.6 Page Allocation and Deallocation</a>
+    </a></div>
+  
+    <div style="margin-left:24ex">
+    <a href="#free_overflow_chain">4.2.6.1 Moving an overflow-chain to the free-list</a>
+    </a></div>
+  
+    <div style="margin-left:18ex">
+    <a href="#section_4_2_7">4.2.7 Incremental Vacuum Step</a>
+    </a></div>
+  
+    <div style="margin-left:12ex">
+    <a href="#section_4_3">4.3 Transactions and Savepoints</a>
+    </a></div>
+  
+    <div style="margin-left:6ex">
+    <a href="#section_5">5 References</a>
+    </a></div>
+  
+    </div id>
+    
+
+  <h1 id="section_1">1 Document Overview</h1>
+
+
+  <h2 id="section_1_1">1.1 Scope and Purpose</h2>
+
+
+  <p>
+    This document provides a description of the functionality of and public 
+    interface offered by the SQLite b-tree module. It also, to a certain extent,
+    describes the algorithm and implementation techniques used internally by
+    the module. 
+
+  <ul>
+    <li><p> To make it easier to maintain, test and improve this critical
+            sub-system of the SQLite software library.
+
+    <li><p> To facilitate development of compatible backend modules that can 
+            be used with other SQLite sub-systems, either for experimental or 
+            production purposes.
+  </ul>
+
+  <p>
+    It is important to note that, even given the second bullet point above,
+    the interfaces and sub-systems described in this document are not stable.
+    They may be changed in any way with each new SQLite release. Any 
+    external software development that uses these interfaces must be prepared
+    to adapt to interface refactoring without notice.
+
+  <h2 id="section_1_2">1.2 Document and Requirements Organization</h2>
+
+
+     <p class=todo>
+       Change the following so that those requirements that describe the API
+       are "low-level" requirements.
+
+     <table style="margin:1em auto;width:80%;border-spacing:0">
+        <tr style="text-align:left"> <th> Requirement ids <th> Contents
+        <tr style="text-align:left;background-color:#DDDDDD"> <td> H50**** <td> Requirement statements specifying the functionality required of the B-Tree module.
+        <tr style="text-align:left"> <td> H51**** <td> Requirement statements specifying the API provided by the B-Tree module.
+        <tr style="text-align:left;background-color:#DDDDDD"> <td> L****** <td> Requirement statements specifying some details of the internal workings of the B-Tree module.
+      </table>
+
+  <h2 id="section_1_3">1.3 Glossary</h2>
+
+
+    <table id=glossary>
+      <tr><td class=defn><a name="glossary_Balance-Siblings_Algorithm"></a><a class=defnlink href="#glossary_Balance-Siblings_Algorithm">Balance-Siblings Algorithm</a> <td>
+        The <a class=defnlink href="#glossary_Balance-Siblings_Algorithm">balance-siblings algorithm</a> is one of four algorithms that may be used
+	used to redistribute data within a b-tree structure after an insert or
+        delete operation that causes a b-tree node to become overfull or underfull.
+        See section <cite><a href="#balance_siblings" title="Balance Siblings">4.2.5.4</a></cite> for details.
+      
+      <tr><td class=defn><a name="glossary_B-Tree_Cursor"></a><a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree Cursor</a> <td>
+        <span class=todo>Define this.
+      
+      <tr><td class=defn><a name="glossary_B-Tree_Database_Connection"></a><a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree Database Connection</a> <td>
+        A <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database connection</a> is a single client connection to an in-memory 
+        <a class=defnlink href="#glossary_Page_cache">page cache</a>, through which a single temporary or <a class=defnlink href="#glossary_Persistent_database">persistent database</a> may
+        be accessed. This term is used throughout this document to avoid confusing
+	such connections with SQL level SQLite client connections, which are
+        sometime simply termed "database connections".
+      
+      <tr><td class=defn><a name="glossary_Lazy-write_cache"></a><a class=defnlink href="#glossary_Lazy-write_cache">Lazy-write cache</a> <td>
+        <span class=todo>Define this.
+      
+      <tr><td class=defn><a name="glossary_Overflow_Cell"></a><a class=defnlink href="#glossary_Overflow_Cell">Overflow Cell</a> <td>
+        <span class=todo>Define this.
+      
+      <tr><td class=defn><a name="glossary_Page_cache"></a><a class=defnlink href="#glossary_Page_cache">Page cache</a> <td>
+        <span class=todo>Define this.
+      
+      <tr><td class=defn><a name="glossary_Persistent_database"></a><a class=defnlink href="#glossary_Persistent_database">Persistent database</a> <td>
+        <span class=todo>Define this.
+      
+      <tr><td class=defn><a name="glossary_Read-through_cache"></a><a class=defnlink href="#glossary_Read-through_cache">Read-through cache</a> <td>
+        <span class=todo>Define this.
+      
+      <tr><td class=defn><a name="glossary_Shared-cache_mode"></a><a class=defnlink href="#glossary_Shared-cache_mode">Shared-cache mode</a> <td>
+        <span class=todo>Define this.
+      
+      <tr><td class=defn><a name="glossary_SQLite_Error_Code"></a><a class=defnlink href="#glossary_SQLite_Error_Code">SQLite Error Code</a> <td>
+        <span class=todo>Define this.
+      
+      <tr><td class=defn><a name="glossary_Temporary_database"></a><a class=defnlink href="#glossary_Temporary_database">Temporary database</a> <td>
+        <span class=todo>Define this.
+      
+    </table>
+   
+
+  <h1 id="section_2">2 Module Requirements</h1>
+
+
+  <p>
+    The SQLite B-Tree module, the software module described by this document,
+    is designed to query and modify a database stored using the database image
+    format described in <cite><a href="#ref_file_format" title="">[1]</a></cite>. Database images may
+    exist only in volatile main-memory (in-memory databases), or may be stored 
+    persistently within the file-system (also described in
+    <cite><a href="#ref_file_format" title="">[1]</a></cite>). Or, a database image may be stored primarily
+    in main-memory with the file-system used as secondary storage if the
+    database image grows too large. Database images stored only in main-memory,
+    and those stored primarily in main-memory with the file-system used only to
+    provide secondary storage space are known collectively as <a class=defnlink href="#glossary_Temporary_database">temporary
+    databases</a>. Database images stored persistently in the file-system are termed
+    <a class=defnlink href="#glossary_Persistent_database">persistent databases</a>.
+
+  <p>
+    This module implements an in-memory <a class=defnlink href="#glossary_Page_cache">page cache</a> to manage database image
+    content. The size of the pages managed by the cache are the same as the
+    page-size of the database image. When operating on a <a class=defnlink href="#glossary_Persistent_database">persistent database</a>, 
+    the cache operates as a read-through, <a class=defnlink href="#glossary_Lazy-write_cache">lazy-write cache</a>. When committing a 
+    database transaction, the user explicitly directs the cache to flush all 
+    dirty pages through to persistent storage. A single in-memory <a class=defnlink href="#glossary_Page_cache">page cache</a> 
+    used to access the content of a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> may support multiple
+    logical client connections. <span class=todo>Some brief explanation of what
+    this means. And maybe a pointer to the "Multi-User Database Requirements"
+    section.</span>
+
+  <p>
+    When operating on a <a class=defnlink href="#glossary_Temporary_database">temporary database</a>, there may only be one client for
+    each <a class=defnlink href="#glossary_Page_cache">page cache</a>. Depending on the SQLite configuration, either the database
+    or journal file, or both, may be omitted from the system.
+
+      
+      <center>
+      <a name="figure_overview"></a>
+      <object data="images/btreemodule_overview.svg" type="image/svg+xml" width=640 height=271 style="overflow:hidden"></object>
+      <p><i>Figure 1 - Role of <a class=defnlink href="#glossary_Page_cache">Page Cache</a></i>
+      </center>
+  
+
+  <p>
+    Figure <cite><a href="#figure_overview" title="Role of Page Cache">1</a></cite> depicts...
+
+  <p><i>
+    Roughly what is encapsulated by the module.
+  </i>
+
+    <h2 id="section_2_1">2.1 Functional Requirements</h2>
+
+
+    <p>
+      This section contains requirements describing the functionality required 
+      from the B-Tree module.
+
+    <p class=todo>
+      Figure out where integrity-check goes.
+
+    <h3 id="section_2_1_1">2.1.1 Opening and Closing Connections</h3>
+
+  
+    <p>
+      The B-Tree module provides an interface to open new <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connections</a>.
+
+      <p class=req id=H50010><span>The B-Tree module shall provide an interface to open a connection 
+to either a named <a class=defnlink href="#glossary_Persistent_database">persistent database</a> file, or an anonymous <a class=defnlink href="#glossary_Temporary_database">temporary 
+database</a>.</span> (C: * <a class=reqlink href=#H51001>H51001</a>)</p>
+      <p class=req id=H50020><span>When opening a <a class=defnlink href="#glossary_Persistent_database">persistent database</a>, the B-Tree module shall allow the user 
+to specify that the connection be opened for read-only access.</span></p>
+      <p class=req id=H50030><span>When opening a <a class=defnlink href="#glossary_Persistent_database">persistent database</a>, the B-Tree module shall allow the user 
+to specify that the connection only be opened if the specified file exists.</span></p>
+      <p class=req id=H50040><span>If SQLite is configured to run in <a class=defnlink href="#glossary_Shared-cache_mode">shared-cache mode</a>, and a connection is opened
+to a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> file for which there exists already a <a class=defnlink href="#glossary_Page_cache">page-cache</a> within 
+the current processes address space, then the connection opened shall be a
+connection to the existing <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50050><span>If a new <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database connection</a> is opened and requirement <a class=reqlink href=#H50040>H50040</a> does not apply,
+then a new <a class=defnlink href="#glossary_Page_cache">page-cache</a> shall be created within the processes address space. The
+opened connection shall be a connection to the new <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+
+    <p>
+      The B-Tree module also provides an interface to close existing <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database 
+      connections</a>.
+
+      <p class=req id=H50060><span>The B-Tree module shall provide an interface to close a <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database connection</a>.</span></p>
+      <p class=req id=H50070><span>If a <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database connection</a> is closed and this causes the associated
+<a class=defnlink href="#glossary_Page_cache">page-cache</a> to have zero connections to it, then the <a class=defnlink href="#glossary_Page_cache">page-cache</a> shall be closed
+and all associated resources released.</span></p>
+
+    <h3 id="section_2_1_2">2.1.2 New Database Image Configuration</h3>
+
+
+    <p>
+      The following requirements describe database configuration options that
+      are only applicable to new database images. For the purposes of the
+      following requirements, a "new database image" is defined as one that is
+      zero pages in size.
+
+      <p class=req id=H50080><span>The B-Tree module shall provide an interface to configure the page-size of a
+new database image.</span></p>
+      <p class=req id=H50090><span>The B-Tree module shall provide an interface to configure whether or not a new
+database image is auto-vacuum capable.</span></p>
+
+    <h3 id="hlr_transactions">2.1.3 Transaction and Savepoint Functions</h3>
+
+
+     <p class=todo>
+       This needs a lot of work...
+
+    <p>
+      All read and write operations performed on a database image via the
+      B-Tree module interfaces occur within the context of a read or write
+      transaction. <span class=todo>Something about the ACID nature of
+      transactions and how this applies to read and write transactions</span>)
+
+      <p class=req id=H50100><span>The B-Tree module shall provide an interface to open (start) a read-only transaction.</span></p>
+      <p class=req id=H50101><span>The B-Tree module shall provide an interface to close (finish) a read-only transaction.</span></p>
+
+    <p>
+      Read/write:
+
+      <p class=req id=H50102><span>The B-Tree module shall provide an interface to open a read/write transaction
+or to upgrade from a read-only transaction to a read/write transaction.</span></p>
+      <p class=req id=H50103><span>The B-Tree module shall provide an interface to commit a read/write transaction.</span></p>
+      <p class=req id=H50104><span>The B-Tree module shall provide an interface to rollback a read/write transaction.</span></p>
+
+    <p class=todo>
+      Multi-file transaction support.
+
+    <p>
+      Transaction state query:
+      <p class=req id=H50108><span>The B-Tree module shall provide an interface to query a <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database
+connection</a> to determine if there is an open transaction, and if so if the open
+transaction is read-only or read/write.</span></p>
+
+    <p>
+      Savepoints:
+
+    <p class=todo>
+      Define "savepoint transactions" and fix the following requirements.
+
+      <p class=req id=H50105><span>The B-Tree module shall provide an interface to open savepoint transactions.</span></p>
+      <p class=req id=H50106><span>The B-Tree module shall provide an interface to commit savepoint transactions.</span></p>
+      <p class=req id=H50107><span>The B-Tree module shall provide an interface to rollback savepoint transactions.</span></p>
+
+    <h3 id="hlr_reading_data">2.1.4 Reading From the Database Image</h3>
+
+
+    <p>
+      The B-Tree module allows the user to read a subset of the fields from the
+      database image header. Each such field is stored in the header as a 4-byte 
+      unsigned big-endian integer. A complete description of each field and its 
+      interpretation may be found in <cite><a href="#ref_file_format" title="">[1]</a></cite>. 
+
+      <p class=req id=H50109><span>The B-Tree module shall provide an interface to read the value of any of the
+4-byte unsigned big-endian integer fields beginning at byte offset 36 of the
+database image.</span> (C: <a class=reqlink href=#H51015>H51015</a> <a class=reqlink href=#H51016>H51016</a> <a class=reqlink href=#H51017>H51017</a>)</p>
+
+    <p>
+      In other words, the database image header fields that may be read via
+      this module are:
+
+    <ul>
+      <li> The number of free pages in the database image,
+      <li> The database image schema version (schema cookie).
+      <li> The database image schema layer file-format.
+      <li> The default <a class=defnlink href="#glossary_Page_cache">page-cache</a> size.
+      <li> The "auto-vacuum last root-page" field.
+      <li> The database image text-encoding field.
+      <li> The database image user-cookie value.
+      <li> The database image incremental-vacuum flag.
+    </ul>
+
+    <p>
+      With the exception of the database image header fields described above,
+      all data is read from the database image using <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursors</a>. A <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree
+      cursor</a> is a control structure for traversing the contents of a single
+      table or index b-tree structure within a database image. As well as
+      "forward" and "back" operations, a <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> supports fast seeking to
+      a table entry identified by key value, or to the first or last entry in
+      the table.
+
+    <p>
+      When a <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> is created, the specific table or index b-tree that
+      it is used to traverse is identified by the database image page number 
+      of its root page. Since the root-page of the schema table is always page
+      1, and the contents of the schema table includes the root page numbers of all
+      other index and table b-tree structures in the database image, it is
+      possible for the application to determine the set of valid root-page
+      numbers by first traversing the schema table.
+
+      <p class=req id=H50110><span>The B-Tree module shall provide an interface to open a <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> on any table or
+index b-tree within the database image, given its root page number.</span></p>
+      <p class=req id=H50111><span>The B-Tree module shall provide an interface to close a <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a>.</span></p>
+      <p class=req id=H50112><span>The B-Tree module shall provide an interface to move an open <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> to
+the entry associated with the largest key in the open b-tree structure.</span></p>
+      <p class=req id=H50113><span>The B-Tree module shall provide an interface to move an open <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> to
+the entry associated with the smallest key in the open b-tree structure.</span></p>
+      <p class=req id=H50114><span>The B-Tree module shall provide an interface to move an open <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> that
+currently points at a valid b-tree entry to the next entry in the b-tree
+structure, sorted in order of key value, if any.</span></p>
+      <p class=req id=H50115><span>The B-Tree module shall provide an interface to move an open <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> that
+currently points at a valid b-tree entry to the previous entry in the b-tree
+structure, sorted in order of key value, if any.</span></p>
+      <p class=req id=H50116><span>The B-Tree module shall provide an interface to retrieve the key value 
+associated with the b-tree structure entry that a <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> is pointing to,
+if any.</span></p>
+      <p class=req id=H50117><span>The B-Tree module shall provide an interface to retrieve the blob of data (the
+database record) associated with the b-tree structure entry that a <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree
+cursor</a> open on a table b-tree is pointing to, if any.</span></p>
+      <p class=req id=H50118><span>The B-Tree module shall provide an interface to return the number of entries
+currently stored in the b-tree structure that a <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> is open on.</span></p>
+
+    <p>
+      As well as traversing a b-tree structure using the operations enumerated
+      by the above requirements, it is also possible to use a cursor to search
+      a b-tree structure for a specified key value. If the key value can be
+      found, the cursor is left pointing at the entry with the specified key
+      value. Otherwise, the cursor is left pointing at either the entry with the 
+      largest key that is smaller than the specified key, or to the entry with 
+      the smallest key that is larger than the specified key. For table b-tree
+      structures, where the key values are 64-bit integers, the definition of
+      smaller, larger and equal to is straightforward. For index b-tree
+      structures, where the key values are database records, the manner in
+      which key values must be compared is more complicated. Refer to
+      <cite><a href="#ref_file_format" title="">[1]</a></cite> for a full explanation.
+
+    <p class=todo>
+      There is a specific section in <cite><a href="#ref_file_format" title="">[1]</a></cite> devoted to
+      record sort order in index b-tree structures. There needs to be some way to
+      point to it. Or, better, to the requirement or range of requirements.
+
+    <p class=todo>
+      Maybe a system that automatically links text like H30100 to the
+      corresponding requirement. Within a document if it can find it, or a
+      summary page (hlreq.html for example).
+
+
+      <p class=req id=H50119><span>Given a key value, the B-Tree module shall provide an interface to move a
+<a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> open on a b-tree structure to the B-Tree entry with the matching
+key value, if such an entry exists.</span></p>
+      <p class=req id=H50120><span>If the interface required by <a class=reqlink href=#H50119>H50119</a> is used to search for a key value that is
+not present in the b-tree structure and the b-tree is not empty, the cursor shall
+be moved to an existing entry that would be adjacent to a hypothetical
+entry with the specified key value.</span></p>
+      <p class=req id=H50121><span>The interface required by <a class=reqlink href=#H50119>H50119</a> shall provide an indication to the caller as
+to whether the cursor is left pointing at an entry with a key value that is
+smaller, larger or equal to the requested value, or if it is pointing to no
+entry at all (because the b-tree structure is empty).</span></p>
+
+    <p class=todo>
+      Does it depend on the structure of the tree whether the cursor is left
+      pointing to a smaller or larger entry after a failed search? Or is it
+      possible to determine which it will be based only on the set of keys
+      stored in the tree?
+
+    <p>
+      As well as the standard search operation described by the above
+      requirements, cursors open on index b-tree structures are required to
+      support several variants, as follows:
+
+    <ul>
+      <li> <b>Ignore rowid search mode</b>. The final value in a database
+	   record used as an index-btree key is always an integer "rowid"
+	   field. A search in this mode proceeds as if each key in the b-tree
+           was missing this field.
+
+      <li> <b>Increment key mode</b>.
+      <li> <b>Prefix match mode</b>.
+      <li> <b>Prefix search mode</b>.
+    </ul>
+
+    <p class=todo>
+      Finish the bullet points above and add HLR for each search mode.
+
+    <p>
+      More than one cursor can be open on a single b-tree structure at one time.
+      It is also possible for a write-cursor to modify the contents of a b-tree
+      structure while other cursors are open on it. The b-tree module does not
+      include any type of row-locking mechanism. It is possible for a write-cursor
+      to be used to delete an entry from a b-tree structure even if there are
+      one or more other cursors currently pointing to the entry being deleted.
+
+    <p class=todo>
+      Requirements to do with how the above is handled. Traceibility to 
+      sqlite3BtreeCursorHasMoved is required.
+
+    <h3 id="section_2_1_5">2.1.5 Writing to the Database Image</h3>
+
+
+    <p>
+      The B-Tree module allows the user to write values to a subset of the
+      fields from the database image header. The set of writable fields is
+      the same as the set of fields enumerated in section
+      <cite><a href="#hlr_reading_data" title="Reading From the Database Image">2.1.4</a></cite> that the B-Tree module is required to
+      provide read access to by requirement <a class=reqlink href=#H50109>H50109</a>.
+
+      <p class=req id=H50122><span>The B-Tree module shall provide an interface to write a value to any of the
+4-byte unsigned big-endian integer fields beginning at byte offset 36 of the
+database image.</span></p>
+
+    <p>
+      The B-Tree module also supports operations to create new b-tree 
+      structures within the database image. Existing b-tree structures may be
+      deleted from the database image entirely, or their entire contents may be
+      deleted, leaving an empty b-tree structure.
+
+      <p class=req id=H50123><span>The B-Tree module shall provide an interface to create a new index or table
+b-tree structures within the database image. The interface shall automatically
+assign a root-page to the new b-tree structure.</span></p>
+      <p class=req id=H50124><span>The B-Tree module shall provide an interface to remove an existing index or 
+table b-tree structure from the database image, given the root page number of
+the b-tree to remove.</span></p>
+      <p class=req id=H50125><span>The B-Tree module shall provide an interface to remove all entries from (delete
+the contents of) an index or table b-tree, given the root page number of the
+b-tree to empty.</span></p>
+
+    <p>
+      As one would expect, the B-Tree module also provides an interface to
+      insert and delete entries from b-tree structures. These operations are
+      performed using a B-Tree write cursor, a special type of <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a>
+      (see section <cite><a href="#hlr_reading_data" title="Reading From the Database Image">2.1.4</a></cite>).
+
+      <p class=req id=H50126><span>When opening a <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursor</a> using the interface required by <a class=reqlink href=#H50110>H50110</a>, it shall
+be possible to specify that the new cursor be a write cursor, or an ordinary
+read-only cursor.</span></p>
+      <p class=req id=H50127><span>The B-Tree module shall provide an interface that allows the user to delete the
+b-tree entry that a write cursor points to, if any.</span> (C: <a class=reqlink href=#L50013>L50013</a>)</p>
+      <p class=req id=H50128><span>The B-Tree module shall provide an interface to insert new entries into a table
+or index B-Tree, given a write cursor open on the table or index b-tree the new
+entry is to be inserted into.</span> (C: <a class=reqlink href=#L50001>L50001</a> <a class=reqlink href=#L50002>L50002</a> <a class=reqlink href=#L50003>L50003</a> <a class=reqlink href=#L50004>L50004</a> <a class=reqlink href=#L50012>L50012</a>)</p>
+
+    <p class=todo>
+      Incremental vacuum step.
+
+    <h3 id="section_2_1_6">2.1.6 <a class=defnlink href="#glossary_Page_cache">Page-Cache</a> Configuration Requirements</h3>
+
+
+    <p>
+      A <a class=defnlink href="#glossary_Page_cache">page-cache</a> has a number of operational parameters that may be configured
+      at run-time via an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a>. Note that even though the
+      interfaces provided by this module allow these parameters to be set via a
+      <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a>, they are properties of the <a class=defnlink href="#glossary_Page_cache">page-cache</a>, not
+      the <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a>. In situations where more than one <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree
+      database connection</a> is connected to a single <a class=defnlink href="#glossary_Page_cache">page-cache</a>, writes made via
+      one <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> may overwrite the values set by another.
+      The following table summarizes the available configuration parameters.
+
+    <table style="margin:1em auto;width:80%;border-spacing:0">
+      <tr style="text-align:left"> <th>Parameter <th>Description  <th>Requirements
+      <tr style="text-align:left;background-color:#DDDDDD"> <td>Locking-mode 
+           <td><span class=todo>This!</span> 
+           <td><a class=reqlink href=#H50138>H50138</a>, <a class=reqlink href=#H50139>H50139</a>, <a class=reqlink href=#H50140>H50140</a>
+      <tr style="text-align:left"> <td>Journal-mode 
+           <td><span class=todo>This!</span> 
+           <td><a class=reqlink href=#H50141>H50141</a>, <a class=reqlink href=#H50142>H50142</a>, <a class=reqlink href=#H50143>H50143</a>, <a class=reqlink href=#H50144>H50144</a>, <a class=reqlink href=#H50145>H50145</a>, <a class=reqlink href=#H50146>H50146</a>
+      <tr style="text-align:left;background-color:#DDDDDD"> <td>Journal-file size limit
+	   <td>The journal-file size limit parameter may be set to any integer
+	       value within the range of a 64-bit signed integer. Any negative
+	       values is interpreted as "no limit". Otherwise, if the
+	       journal-file size limit is set to zero or a positive number, it
+	       represents an upper limit on the size of the journal file in
+	       bytes. If the application executes a database write operation that
+	       would normally cause the journal file to grow larger than this
+	       configured limit, the operation fails and an error is returned
+	       to the user. The default value of this parameter is -1 (no
+               limit).
+           <td><a class=reqlink href=#H50147>H50147</a>, <a class=reqlink href=#H50148>H50148</a>, <a class=reqlink href=#H50149>H50149</a>
+      <tr style="text-align:left"> <td style="white-space:nowrap">Database-file size limit
+	   <td>The database-image size limit parameter may be set to any integer
+	       value greater than zero within the range of a 32-bit signed
+               integer. The configured value represents an upper limit on the size of
+	       the database image in pages. If the application executes a
+               database write operation that would normally cause the database image to
+	       grow larger than this configured limit, the operation fails and
+               an error is returned to the user.
+           <td><a class=reqlink href=#H50150>H50150</a>, <a class=reqlink href=#H50151>H50151</a>, <a class=reqlink href=#H50152>H50152</a>
+      <tr style="text-align:left;background-color:#DDDDDD"> <td>Cache size
+	   <td>The cache-size parameter may be set to any integer value. How it
+               affects operation depends on the specific P-Cache implementation used
+	       by the <a class=defnlink href="#glossary_Page_cache">page-cache</a>. <span class=todo>Refer to details for the
+               behaviour of the built-in default P-Cache.</span>
+           <td><a class=reqlink href=#H50153>H50153</a>
+      <tr style="text-align:left"> <td>Safety level
+	   <td>The safety-level parameter may be set to "none", "normal" or "full".
+               <span class=todo> Where will the effect of this defined/required?</span>
+           <td><a class=reqlink href=#H50154>H50154</a>, <a class=reqlink href=#H50155>H50155</a>
+    </table>
+
+      <p class=req id=H50138><span>The B-Tree module shall provide an interface allowing the application to set
+the locking-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> to either "normal" or "exclusive", given an
+open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50139><span>If the locking-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> is set to "normal" when a read/write 
+or read-only transaction is ended, any locks held on the database file-system
+representation by the <a class=defnlink href="#glossary_Page_cache">page-cache</a> shall be relinquished.</span></p>
+      <p class=req id=H50140><span>If the locking-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> is set to "exclusive" when a read/write 
+or read-only transaction is ended, any locks held on the database file-system
+representation by the <a class=defnlink href="#glossary_Page_cache">page-cache</a> shall be retained.</span></p>
+
+    <p class=todo>
+      And if a read/write transaction is downgraded to a read-only transaction?
+      This scenario should also be dealt with in section <cite><a href="#hlr_transactions" title="Transaction and Savepoint Functions">2.1.3</a></cite>.
+
+      <p class=req id=H50141><span>The B-Tree module shall provide an interface allowing the application to set
+the journal-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> to one of "off", "memory", "delete",
+"persist", or "truncate", given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that
+<a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50142><span>If the journal-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> is set to "off" when a read/write
+transaction is opened, then the transaction shall use no journal file.</span></p>
+      <p class=req id=H50143><span>If the journal-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> is set to "memory" when a read/write
+transaction is opened, then instead of using the journal file located in the
+file-system, journal-file data shall be stored in main-memory.</span></p>
+      <p class=req id=H50144><span>If the journal-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> is set to "delete" when a read/write
+transaction is opened, then any journal file used by the transaction shall
+be deleted at the conclusion of the transaction.</span></p>
+      <p class=req id=H50145><span>If the journal-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> is set to "truncate" when a read/write
+transaction is opened, then any journal file used by the transaction shall
+be truncated to zero bytes in size at the conclusion of the transaction.</span></p>
+      <p class=req id=H50146><span>If the journal-mode of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> is set to "persist" when a read/write
+transaction is opened, then any journal file used by the transaction shall
+remain in the file-system at the conclusion of the transaction.</span></p>
+
+    <p class=todo>
+      The difference in functionality provided by "off", "memory" and the 3
+      modes that use a real journal file should also feature in
+      <cite><a href="#hlr_transactions" title="Transaction and Savepoint Functions">2.1.3</a></cite>.
+
+      <p class=req id=H50147><span>The B-Tree module shall provide an interface to set the value of the
+journal-file size limit configuration parameter of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given
+an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50148><span>The default value assigned to the journal-file size limit configuration of a
+<a class=defnlink href="#glossary_Page_cache">page-cache</a> shall be -1.</span></p>
+      <p class=req id=H50149><span>If the journal-file size limit parameter is set to a non-negative value, and
+the user executes a write operation that would otherwise require the journal
+file to be extended to a size greater than the configured value in bytes, then
+the operation shall fail and an error be returned to the user.</span></p>
+
+      <p class=req id=H50150><span>The B-Tree module shall provide an interface to set the value of the
+database-image size limit configuration parameter of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given
+an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50151><span>The default value assigned to the database-image size limit configuration of a
+<a class=defnlink href="#glossary_Page_cache">page-cache</a> shall be the value of the compile time symbol SQLITE_MAX_PAGE_COUNT
+(1073741823 by default).</span></p>
+      <p class=req id=H50152><span>If the database-image size limit parameter is set to a non-negative value, and
+the user executes a write operation that would otherwise require the journal
+file to be extended to a size greater than the configured value in bytes, then
+the operation shall fail and an error be returned to the user.</span></p>
+
+      <p class=req id=H50153><span>The B-Tree module shall provide an interface to set the value of the
+cache-size configuration parameter of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree
+database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+
+    <p>
+      See section <cite><a href="#hlr_memory" title="Caching and Memory Management Requirements">2.2.1</a></cite> for a description of and requirements
+      specifying how the value of the cache-size parameter affects the
+      operation of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>. <span class=todo>Check this reference is
+      relevant after it is written. Refer to a specific requirement if possible
+      too.</span>
+
+      <p class=req id=H50154><span>The B-Tree module shall provide an interface allowing the application to set
+the safety-level of a <a class=defnlink href="#glossary_Page_cache">page-cache</a> to one of "off", "normal" or "full",
+given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50155><span>The default value assigned to the safety-level configuration parameter of a
+<a class=defnlink href="#glossary_Page_cache">page-cache</a> shall be "full".</span></p>
+
+    <p class=todo>
+      Description of what the safety-level actually does. Or pointer to where a
+      description and requirements can be found (transactions section?).
+
+    <p class=todo>
+      Interface to set the codec function (encryption).
+
+    <p class=todo>
+      The busy-handler. Where exactly does this come in? Transactions and
+      savepoints section?
+
+    <p>
+      The six <a class=defnlink href="#glossary_Page_cache">page-cache</a> operational parameters listed above may also be
+      queried. The following requirements specify the required query
+      interfaces.
+
+      <p class=req id=H50132><span>The B-Tree module shall provide an interface to query the current locking-mode
+of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50133><span>The B-Tree module shall provide an interface to query the current journal-mode
+of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50134><span>The B-Tree module shall provide an interface to query the current journal file
+size-limit of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that
+<a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50135><span>The B-Tree module shall provide an interface to query the current database file
+size-limit of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that
+<a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50136><span>The B-Tree module shall provide an interface to query the current cache-size
+of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+      <p class=req id=H50137><span>The B-Tree module shall provide an interface to query the current safety-level
+of a <a class=defnlink href="#glossary_Page_cache">page-cache</a>, given an open <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> to that <a class=defnlink href="#glossary_Page_cache">page-cache</a>.</span></p>
+
+    <p>
+      It is also possible to interrogate a b-tree database handle to determine
+      if it was opened on a temporary or <a class=defnlink href="#glossary_Persistent_database">persistent database</a>. An b-tree
+      database handle opened on a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> may be queried for the
+      name of (full-path to) either the database or journal file associated
+      with the open database.
+
+      <p class=req id=H50131><span>The B-Tree module shall provide an interface to query an open b-tree database
+handle to determine if the underlying database is a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> or a
+<a class=defnlink href="#glossary_Temporary_database">temporary database</a>.</span></p>
+      <p class=req id=H50129><span>The B-Tree module shall provide an interface allowing the application to query
+a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> open on a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> for the name of the
+underlying database file within the file-system.</span></p>
+      <p class=req id=H50130><span>The B-Tree module shall provide an interface allowing the application to query
+a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> open on a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> for the name of the
+underlying journal file within the file-system.</span></p>
+
+    <h3 id="section_2_1_7">2.1.7 Multi-User Database Requirements</h3>
+
+
+      <p class=req id=H50156><span>The b-tree module shall provide an interface allowing database clients to
+acquire advisory read (shared) or write (exclusive) locks on a specific b-tree
+structure within the database.</span></p>
+
+  <ul>
+    <li> Lock on schema memory object.
+    <li> Locks on b-tree tables.
+    <li> "Unlock notify" feature.
+    <li> Mutexes/thread-safety features.
+  </ul>
+
+    <p class=todo>
+      The b-tree module preventing deadlock (by always grabbing mutexes in
+      order of BtShared pointer) should be required here.
+
+    <h3 id="section_2_1_8">2.1.8 Backup/Vacuum API Requirements</h3>
+
+  <ul>
+    <li> Callbacks for backup module.
+    <li> Page read/write APIs for backup module.
+  </ul>
+
+    <h3 id="section_2_1_9">2.1.9 Integrity Check Requirements</h3>
+
+  <ul>
+    <li> Callbacks for backup module.
+    <li> Page read/write APIs for backup module.
+  </ul>
+
+  <h2 id="section_2_2">2.2 Other Requirements and Constraints</h2>
+
+
+    <h3 id="hlr_memory">2.2.1 Caching and Memory Management Requirements</h3>
+
+  <ul>
+    <li> Memory allocation related features (pcache, scratch memory, other...).
+    <li> Default pcache implementation (sqlite3_release_memory()).
+    <li> Schema memory object allocation (destructor registration).
+  </ul>
+
+    <h3 id="section_2_2_2">2.2.2 Exception Handling Requirements</h3>
+
+
+  <p>
+    System failure. Do not corrupt the database image.
+  <p>
+    Three kinds of exception:
+  <ul>
+    <li> IO Error.
+    <li> Malloc request failure.
+    <li> Database image corruption.
+  </ul>
+
+    <h3 id="section_2_2_3">2.2.3 Well-Formedness Requirements</h3>
+
+  <ul>
+    <li> Identify the subset of file-format well-formedness requirements that
+         this module is responsible for implementing.
+    <li> Define how the module should respond to corrupt database files: don't
+         crash, return SQLITE_CORRUPT as early as is practical. Should it also
+         put the b-tree into a permanent error state?
+  </ul>
+ 
+ 
+
+
+  <h1 id="section_3">3 Module API</h1>
+
+
+      <p class=todo>
+        Description of the interface in btree.h. Also other interfaces accessed by
+        external modules. Including release_memory() and those pager interfaces that
+        are accessed directly by other modules. All of these requirements will be
+        descended/derived from requirements in the previous sections. Some of the
+        text could/should be pulled in from btree.h.
+
+      <p class=todo>
+	  The name of sqlite3BtreeBeginStmt() should probably change to
+	  sqlite3BtreeOpenSavepoint(). Matches the pager layer and is a more
+	  accurate description of the function.
+
+      <p class=todo>
+        There are only a few places in which the pager object is used directly,
+        always to call some trivial get/set configuration function. These should
+	  be replaced somehow with sqlite3BtreeXXX() APIs. Also, the current
+	  approach is probably Ok, but worth looking it over for thread-safety
+        issues.
+
+      <p class=todo>
+	  It would be easier to write up if the dependency between the B-Tree
+        layer and the sqlite3 structure did not exist. At present, it is used for:
+        
+          <br> * The unlock-notify feature (arguments to sqlite3ConnectionBlocked() are database handles),
+          <br> * Accessing the SQLITE_ReadUncommitted flag,
+          <br> * Invoking the busy-handler callback,
+          <br> * During sqlite3BtreeOpen(), to find the VFS to use,
+          <br> * Accessing the SQLITE_SharedCache flag (for setting it),
+          <br> * To check the same B-Tree is not attached more than once in <a class=defnlink href="#glossary_Shared-cache_mode">shared-cache mode</a>,
+          <br> * To link the B-Tree into the pointer-order list of shared-cache b-trees used by the same handle (used for mutexes).
+          <br> * To determine if an in-memory sub-journal should be used.
+          <br> * To know how many savepoints are open in BtreeBeginTrans().
+          <br> * Many, many times to assert() that the db mutex is held when the b-tree layer is accessed..
+
+
+    <h2 id="section_3_1">3.1 Opening and Closing Connections</h2>
+
+
+    <p>
+      This section describes the API offered by the B-Tree module to other
+      SQLite sub-systems to open and close <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database connections</a>.
+
+      <pre class=api>typedef struct Btree Btree;</pre>
+
+    <p>
+      A <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database connection</a> is accessed by other SQLite sub-systems
+      using an opaque handle, modelled in C code using the type "Btree*".
+
+    <h3 id="section_3_1_1">3.1.1 sqlite3BtreeOpen</h3>
+
+
+      <pre class=api>int sqlite3BtreeOpen(
+  const char *zFilename,   /* Name of database file to open */
+  sqlite3 *db,             /* Associated database connection */
+  Btree **ppBtree,         /* Return open Btree* here */
+  int flags,               /* Flags */
+  int vfsFlags             /* Flags passed through to VFS open */
+);</pre> 
+
+      <p class=req id=H51001><span>If successful, a call to the sqlite3BtreeOpen function shall return SQLITE_OK
+and set the value of *ppBtree to contain a new <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database connection</a>
+handle.</span> (P: <a class=reqlink href=#H50010>H50010</a>)</p>
+      <p class=req id=H51002><span>If unsuccessful, a call to the sqlite3BtreeOpen function shall return an <a class=defnlink href="#glossary_SQLite_Error_Code">SQLite
+error code</a> other than SQLITE_OK indicating the reason for the failure. The
+value of *ppBtree shall not be modified in this case.</span></p>
+
+      <p class=req id=H51003><span>If the zFilename parameter to a call to sqlite3BtreeOpen is NULL or a pointer
+to a buffer of which the first byte is a nul (0x00), then sqlite3BtreeOpen
+shall attempt to open a connection to a <a class=defnlink href="#glossary_Temporary_database">temporary database</a>.</span></p>
+      <p class=req id=H51004><span>If the zFilename parameter to a call to sqlite3BtreeOpen is a pointer to a
+buffer containing a nul-terminated UTF-8 encoded string, sqlite3BtreeOpen shall
+attempt to open a connection to a <a class=defnlink href="#glossary_Persistent_database">persistent database</a>.</span></p>
+
+    <p>
+      The combination of the above two requirements implies that if the
+      zFilename argument passed to sqlite3BtreeOpen is other than a NULL
+      pointer or a pointer to a nul-terminated string, the type of or
+      filename of the database that sqlite3BtreeOpen attempts to open a
+      connection to are undefined.
+
+    <p>
+      Valid values for the <i>flags</i> argument to the sqlite3BtreeOpen
+      function consist of the bitwise OR of zero or more of the following
+      symbols.
+
+      <pre class=api>#define BTREE_OMIT_JOURNAL  1  /* Do not use journal.  No argument */
+#define BTREE_NO_READLOCK   2  /* Omit readlocks on readonly files */</pre>
+
+      <p class=req id=H51005><span>If the BTREE_OMIT_JOURNAL bit is set in the flags parameter passed to a 
+successful call to sqlite3BtreeOpen to open a <a class=defnlink href="#glossary_Temporary_database">temporary database</a>, then the
+<a class=defnlink href="#glossary_Page_cache">page-cache</a> created as a result shall not open or use a journal file for any
+purpose.</span></p>
+
+    <p>
+      When opening a connection to a <a class=defnlink href="#glossary_Persistent_database">persistent database</a>, the value of the
+      BTREE_OMIT_JOURNAL bit in the flags parameter is ignored by
+      sqlite3BtreeOpen.
+
+      <p class=req id=H51006><span>If the BTREE_NO_READLOCK bit is set in the flags parameter passed to a 
+successful call to sqlite3BtreeOpen to open a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> and a
+new <a class=defnlink href="#glossary_Page_cache">page-cache</a> is created as a result of the call, then the new <a class=defnlink href="#glossary_Page_cache">page-cache</a> 
+shall only lock the database file-system representation when writing to
+it.</span></p>
+
+    <p>
+      When opening a connection to a <a class=defnlink href="#glossary_Temporary_database">temporary database</a>, the value of the
+      BTREE_NO_READLOCK bit in the flags parameter is ignored, as <a class=defnlink href="#glossary_Temporary_database">temporary
+      databases</a> are never locked for either reading or writing 
+      (<span class=todo>reference to some requirement for this statement.</span>).
+      Whether or not a new <a class=defnlink href="#glossary_Page_cache">page-cache</a> is created when a connection to a
+      <a class=defnlink href="#glossary_Persistent_database">persistent database</a> is opened is governed by requirements <a class=reqlink href=#H50040>H50040</a> and
+      <a class=reqlink href=#H50050>H50050</a>.
+
+      <p class=req id=H51007><span>If the sqlite3BtreeOpen function is called to open a connection to a <a class=defnlink href="#glossary_Persistent_database">persistent
+database</a>, and the call causes a new <a class=defnlink href="#glossary_Page_cache">page-cache</a> to be created, when opening the
+database file using the VFS interface xOpen method the 4th parameter passed to
+xOpen (flags) shall be a copy of the vfsFlags value passed to sqlite3BtreeOpen.</span></p>
+      <p class=req id=H51008><span>If the sqlite3BtreeOpen function is called to open a connection to a <a class=defnlink href="#glossary_Temporary_database">temporary
+database</a>, if and when a temporary file is opened to use as secondary storage
+using the VFS interface xOpen method the 4th parameter passed to xOpen (flags) 
+shall be a copy of the vfsFlags value passed to sqlite3BtreeOpen with the 
+SQLITE_OPEN_READWRITE, SQLITE_OPEN_CREATE, SQLITE_OPEN_EXCLUSIVE and 
+SQLITE_OPEN_DELETEONCLOSE bits also set.</span></p>
+
+    <p class=todo>
+      Requirements explaining how the db parameter to sqlite3BtreeOpen is used. Must be there for something.
+
+    <h3 id="section_3_1_2">3.1.2 sqlite3BtreeClose</h3>
+
+
+      <pre class=api>int sqlite3BtreeClose(Btree*);</pre>
+
+      <p class=req id=H51009><span>A call to the sqlite3BtreeClose function with a valid <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database
+connection</a> handle passed as the only argument shall invalidate the handle,
+close the <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> and release all associated resources.</span></p>
+
+    <p>
+      If a call to sqlite3BtreeClose is made with a value that is not a valid
+      <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> handle passed as the only argument, the
+      results are undefined.
+
+      <p class=req id=H51010><span>If a call to sqlite3BtreeClose is made to close a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a>
+while there exist open <a class=defnlink href="#glossary_B-Tree_Cursor">B-Tree cursors</a> that were opened using the specified
+<a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a>, they shall be closed automatically from within
+sqlite3BtreeClose, just as if their handles were passed to
+sqlite3BtreeCloseCursor.</span></p>
+
+    <p>
+      See also requirement <a class=reqlink href=#H50070>H50070</a>.
+
+
+    <h2 id="section_3_2">3.2 Database Image Configuration</h2>
+
+
+      <p class=todo>
+	This category doesn't work all that well. These APIs are used for other
+        things too (i.e. switching to incremental-vacuum mode).
+
+      <pre class=api>#define BTREE_AUTOVACUUM_NONE 0        /* Do not do auto-vacuum */
+#define BTREE_AUTOVACUUM_FULL 1        /* Do full auto-vacuum */
+#define BTREE_AUTOVACUUM_INCR 2        /* Incremental vacuum */</pre>
+      <pre class=api>int sqlite3BtreeSetAutoVacuum(Btree *, int);
+int sqlite3BtreeSetPageSize(Btree *p, int nPagesize, int nReserve, int eFix);</pre>
+
+    <p>
+      Queries:
+
+      <pre class=api>int sqlite3BtreeGetPageSize(Btree*);</pre>
+      <pre class=api>int sqlite3BtreeGetReserve(Btree*);</pre>
+      <pre class=api>int sqlite3BtreeGetAutoVacuum(Btree *);</pre>
+
+    <h2 id="section_3_3">3.3 Connection Configuration</h2>
+
+
+      <pre class=api>int sqlite3BtreeSetCacheSize(Btree*,int);
+int sqlite3BtreeSetSafetyLevel(Btree*,int,int);
+int sqlite3BtreeMaxPageCount(Btree*,int);</pre>
+
+    <p>
+      And functions to query the current configuration:
+
+      <pre class=api>int sqlite3BtreeSyncDisabled(Btree*);</pre>
+
+    <h2 id="section_3_4">3.4 Query Interfaces</h2>
+
+
+      <pre class=api>const char *sqlite3BtreeGetFilename(Btree *);</pre>
+
+      <p class=req id=H51011><span>A call to the sqlite3BtreeGetFilename function with a valid <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database
+connection</a> handle opened on a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> as the first argument shall
+return a pointer to a buffer containing the full-path of the database file
+formatted as a nul-terminated, UTF-8 string.</span></p>
+      <p class=req id=H51012><span>A call to the sqlite3BtreeGetFilename function with a valid <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database
+connection</a> handle opened on a <a class=defnlink href="#glossary_Temporary_database">temporary database</a> as the first argument shall
+return a pointer to a buffer to a nul-terminated string zero bytes in length
+(i.e. the first byte of the buffer shall be 0x00).</span></p>
+
+      <pre class=api>const char *sqlite3BtreeGetJournalname(Btree *);</pre>
+
+      <p class=req id=H51013><span>A call to the sqlite3BtreeGetJournalname function with a valid <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database
+connection</a> handle opened on a <a class=defnlink href="#glossary_Persistent_database">persistent database</a> as the first argument shall
+return a pointer to a buffer containing the full-path of the journal file
+formatted as a nul-terminated, UTF-8 string.</span></p>
+      <p class=req id=H51014><span>A call to the sqlite3BtreeGetJournalname function with a valid <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database
+connection</a> handle opened on a <a class=defnlink href="#glossary_Temporary_database">temporary database</a> as the first argument shall
+return a pointer to a buffer to a nul-terminated string zero bytes in length
+(i.e. the first byte of the buffer shall be 0x00).</span></p>
+
+    <p>
+      Requirement <a class=reqlink href=#H51013>H51013</a> holds true even if the <a class=defnlink href="#glossary_B-Tree_Database_Connection">B-Tree database connection</a> is
+      configured to use an in-memory journal file or no journal file at all
+      (<span class=todo>ref requirements</span>). In these cases the buffer returned
+      contains the full-path of the journal file that would be used if the
+      connection were configured to use a journal file.
+
+    <h2 id="section_3_5">3.5 Mutex Functions</h2>
+
+
+      <pre class=api>typedef struct BtreeMutexArray BtreeMutexArray;
+struct BtreeMutexArray {
+  int nMutex;
+  Btree *aBtree}; hd_resolve_one {SQLITE_MAX_ATTACHED+1}; hd_puts {;
+};</pre>
+
+      <pre class=api>void sqlite3BtreeEnter(Btree*);
+void sqlite3BtreeEnterAll(sqlite3*);
+void sqlite3BtreeLeave(Btree*);
+void sqlite3BtreeEnterCursor(BtCursor*);
+void sqlite3BtreeLeaveCursor(BtCursor*);
+void sqlite3BtreeLeaveAll(sqlite3*);
+void sqlite3BtreeMutexArrayEnter(BtreeMutexArray*);
+void sqlite3BtreeMutexArrayLeave(BtreeMutexArray*);
+void sqlite3BtreeMutexArrayInsert(BtreeMutexArray*, Btree*);</pre>
+
+    <h2 id="section_3_6">3.6 Transaction and Savepoint API</h2>
+
+
+      <pre class=api>int sqlite3BtreeBeginTrans(Btree*,int);
+int sqlite3BtreeCommitPhaseOne(Btree*, const char *zMaster);
+int sqlite3BtreeCommitPhaseTwo(Btree*);
+int sqlite3BtreeCommit(Btree*);
+int sqlite3BtreeRollback(Btree*);</pre>
+
+      <pre class=api>int sqlite3BtreeBeginStmt(Btree*,int);
+int sqlite3BtreeSavepoint(Btree *, int, int);</pre>
+
+      <pre class=api>int sqlite3BtreeIsInTrans(Btree*);
+int sqlite3BtreeIsInReadTrans(Btree*);
+int sqlite3BtreeIsInBackup(Btree*);</pre>
+
+
+    <h2 id="section_3_7">3.7 Reading and Traversing the Database Image</h2>
+
+
+      <p class=todo>
+	sqlite3BtreeMoveto is never called from outside of the b-tree layer. It
+        could/should be removed from the API.
+
+      <p class=todo>
+	The "bias" argument to sqlite3BtreeMovetoUnpacked is only ever true
+        when it is called from within sqlite3BtreeInsert. This argument could/should 
+        also be removed from the API, if only to make it simpler to describe.
+
+      <pre class=api>typedef struct BtCursor BtCursor;</pre>
+
+      <pre class=api>int sqlite3BtreeCursor(
+  Btree*,                              /* BTree containing table to open */
+  int iTable,                          /* Index of root page */
+  int wrFlag,                          /* 1 for writing.  0 for read-only */
+  struct KeyInfo*,                     /* First argument to compare function */
+  BtCursor *pCursor                    /* Space to write cursor structure */
+);
+int sqlite3BtreeCursorSize(void);</pre>
+      <pre class=api>int sqlite3BtreeCloseCursor(BtCursor*);
+void sqlite3BtreeClearCursor(BtCursor *);</pre>
+
+      <pre class=api>int sqlite3BtreeFirst(BtCursor*, int *pRes);
+int sqlite3BtreeLast(BtCursor*, int *pRes);
+int sqlite3BtreeNext(BtCursor*, int *pRes);
+int sqlite3BtreePrevious(BtCursor*, int *pRes);
+int sqlite3BtreeEof(BtCursor*);</pre>
+
+      <pre class=api>int sqlite3BtreeKeySize(BtCursor*, i64 *pSize);
+int sqlite3BtreeKey(BtCursor*, u32 offset, u32 amt, void*);
+const void *sqlite3BtreeKeyFetch(BtCursor*, int *pAmt);
+const void *sqlite3BtreeDataFetch(BtCursor*, int *pAmt);
+int sqlite3BtreeDataSize(BtCursor*, u32 *pSize);
+int sqlite3BtreeData(BtCursor*, u32 offset, u32 amt, void*);</pre>
+
+      <pre class=api>int sqlite3BtreeCount(BtCursor *, i64 *);</pre>
+
+    <h3 id="section_3_7_1">3.7.1 sqlite3BtreeMovetoUnpacked</h3>
+
+
+      <p>
+        The sqlite3BtreeMovetoUnpacked function is used to 
+
+      <pre class=api>int sqlite3BtreeMovetoUnpacked(
+  BtCursor*,
+  UnpackedRecord *pUnKey,
+  i64 intKey,
+  int bias,
+  int *pRes
+);</pre>
+
+      <p>
+        The following requirements specify exactly how a <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> is to be moved
+        by a successful call to sqlite3BtreeMovetoUnpacked.
+
+      <p class=req id=L50008><span>If a call is made to sqlite3BtreeMovetoUnpacked specifying a key value for 
+which there exists an entry with a matching key value in the b-tree structure,
+the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> shall be moved to point to this entry. In this case *pRes
+(the value of the "int" variable pointed to by the pointer passed as the
+fifth parameter to sqlite3BtreeMovetoUnpacked) shall be set to 0 before
+returning.</span></p>
+      <p class=req id=L50009><span>If a call is made to sqlite3BtreeMovetoUnpacked specifying a key value for
+which there does not exist an entry with a matching key value in the b-tree
+structure, the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> shall be moved to point to an entry located
+on the leaf page that would contain the requested entry, were it present.</span></p>
+      <p class=req id=L50010><span>If the condition specified in <a class=reqlink href=#L50009>L50009</a> is met and the b-tree structure 
+contains one or more entries (is not empty), the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> shall be left
+pointing to an entry that would lie adjacent (immediately before or after in
+order by key) to the requested entry on the leaf page, were it present.</span></p>
+      <p class=req id=L50011><span>If the condition specified in <a class=reqlink href=#L50009>L50009</a> is met and the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> is left
+pointing to an entry with a smaller key than that requested, or the cursor
+is left pointing a no entry at all because the b-tree structure is completely
+empty, *pRes (the value of the "int" variable pointed to by the pointer passed
+as the fifth parameter to sqlite3BtreeMovetoUnpacked) shall be set to -1.
+Otherwise, if the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> is left pointing to an entry with a larger key
+than that requested, *pRes shall be set to 1.</span></p>
+
+
+      <p class=todo>
+	Not clear how to deal with these. Define an external module to
+	encapsulate these and define sorting order etc.? That's tricky as things are
+	because the UnpackedRecord.flags field defines the "search mode" used
+        by sqlite3BtreeMovetoUnpacked.
+
+      <pre class=api>typedef struct KeyInfo KeyInfo;
+struct KeyInfo {
+  sqlite3 *db;        /* The database connection */
+  u8 enc;             /* Text encoding - one of the TEXT_Utf* values */
+  u16 nField;         /* Number of entries in aColl}; hd_resolve_one {}; hd_puts { */
+  u8 *aSortOrder;     /* If defined an aSortOrder}; hd_resolve_one {i}; hd_puts { is true, sort DESC */
+  CollSeq *aColl}; hd_resolve_one {1}; hd_puts {;  /* Collating sequence for each term of the key */
+};</pre>
+      <pre class=api>typedef struct UnpackedRecord UnpackedRecord;
+struct UnpackedRecord {
+  KeyInfo *pKeyInfo;  /* Collation and sort-order information */
+  u16 nField;         /* Number of entries in apMem}; hd_resolve_one {}; hd_puts { */
+  u16 flags;          /* Boolean settings.  UNPACKED_... below */
+  i64 rowid;          /* Used by UNPACKED_PREFIX_SEARCH */
+  Mem *aMem;          /* Values */
+};</pre>
+
+    <h3 id="section_3_7_2">3.7.2 sqlite3BtreeGetMeta</h3>
+
+
+      <p>
+	The sqlite3BtreeGetMeta interface may be used to retrieve the current
+        value of certain fields from the database image header.
+
+      <pre class=api>void sqlite3BtreeGetMeta(Btree *pBtree, int idx, u32 *pValue);</pre>
+
+      <p class=req id=H51015><span>If the first parameter is a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> handle with an open
+read-only or read-write transaction, and the second parameter is an integer
+between 0 and 7 inclusive, and the database image consists of zero pages,
+a call to the sqlite3BtreeGetMeta function shall set the value of *pValue to 
+zero.</span> (P: <a class=reqlink href=#H50109>H50109</a>)</p>
+      <p class=req id=H51016><span>If the first parameter is a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> handle with an open
+read-only or read-write transaction, and the second parameter is an integer
+between 0 and 7 inclusive, and the database image consists of one or more
+pages, a call to the sqlite3BtreeGetMeta function shall set the value of
+*pValue to the current value of the specified 32-bit unsigned integer in the
+database image database header.</span> (P: <a class=reqlink href=#H50109>H50109</a>)</p>
+
+      <p>
+        The two requirements above imply that if sqlite3BtreeGetMeta is called with
+        anything other than a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> handle with an open read-only
+        or read-write transaction as the first argument, or with anything other than
+        an integer between 0 and 7 (inclusive) as the second, the results are undefined.
+
+      <pre class=api>#define BTREE_FREE_PAGE_COUNT     0
+#define BTREE_SCHEMA_VERSION      1
+#define BTREE_FILE_FORMAT         2
+#define BTREE_DEFAULT_CACHE_SIZE  3
+#define BTREE_LARGEST_ROOT_PAGE   4
+#define BTREE_TEXT_ENCODING       5
+#define BTREE_USER_VERSION        6
+#define BTREE_INCR_VACUUM         7</pre>
+
+      <p class=req id=H51017><span>The database header field read from the database image by a call to
+sqlite3BtreeGetMeta in the situation specified by <a class=reqlink href=#H51016>H51016</a> shall be the 32-bit 
+unsigned integer header field stored at byte offset (36 + 4 * idx) of the
+database header, where idx is the value of the second parameter passed to
+sqlite3BtreeGetMeta.</span> (P: <a class=reqlink href=#H50109>H50109</a>)</p>
+
+
+
+
+    <h2 id="section_3_8">3.8 Modifying the Database Image</h2>
+
+
+      <h3 id="sqlite3BtreeCreateTable">3.8.1 sqlite3BtreeCreateTable</h3>
+
+      <pre class=api>int sqlite3BtreeCreateTable(Btree*, int*, int flags);</pre>
+      <pre class=api>#define BTREE_INTKEY     1    /* Table has only 64-bit signed integer keys */
+#define BTREE_ZERODATA   2    /* Table has keys only - no data */
+#define BTREE_LEAFDATA   4    /* Data stored in leaves only.  Implies INTKEY */</pre>
+
+      <h3 id="sqlite3BtreeDropTable">3.8.2 sqlite3BtreeDropTable</h3>
+
+      <pre class=api>int sqlite3BtreeDropTable(Btree*, int, int*);</pre>
+
+      <h3 id="sqlite3BtreeClearTable">3.8.3 sqlite3BtreeClearTable</h3>
+
+      <pre class=api>int sqlite3BtreeClearTable(Btree*, int, int*);</pre>
+
+      <h3 id="sqlite3BtreeCursorHasMoved">3.8.4 sqlite3BtreeCursorHasMoved</h3>
+
+      <pre class=api>int sqlite3BtreeCursorHasMoved(BtCursor*, int*);</pre>
+
+      <h3 id="sqlite3BtreePutData">3.8.5 sqlite3BtreePutData</h3>
+
+      <pre class=api>int sqlite3BtreePutData(BtCursor*, u32 offset, u32 amt, void*);</pre>
+
+      <h3 id="sqlite3BtreeUpdateMeta">3.8.6 sqlite3BtreeUpdateMeta</h3>
+
+        <pre class=api>int sqlite3BtreeUpdateMeta(Btree*, int idx, u32 value);</pre>
+
+      <h3 id="sqlite3BtreeDelete">3.8.7 sqlite3BtreeDelete</h3>
+
+
+        <pre class=api>int sqlite3BtreeDelete(BtCursor*);</pre>
+
+        <p class=req id=L50013><span>A successful call to the sqlite3BtreeDelete function made with a read/write
+<a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> passed as the first argument shall remove the entry pointed to by
+the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> from the b-tree structure.</span> (P: <a class=reqlink href=#H50127>H50127</a>)</p>
+
+      <p class=todo>
+        Effect of a delete operation on other cursors that are pointing to the
+        deleted b-tree entry.
+
+      <p class=todo>
+        Malloc and IO error handling. Same as for sqlite3BtreeInsert.
+
+      <h3 id="section_3_8_8">3.8.8 sqlite3BtreeInsert</h3>
+
+
+        <pre class=api>int sqlite3BtreeInsert(BtCursor*, const void *pKey, i64 nKey,
+                                  const void *pData, int nData,
+                                  int nZero, int bias, int seekResult);</pre>
+
+        <p class=req id=L50001><span>A successful call to the sqlite3BtreeInsert function made with a read/write
+<a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> passed as the first argument shall insert a new entry into 
+the b-tree structure the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> is open on.</span> (P: <a class=reqlink href=#H50128>H50128</a>)</p>
+
+      <p>
+        The requirement above implies that the results of passing anything else as 
+        the first argument to sqlite3BtreeInsert, for example a read-only <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a>,
+        are undefined.
+
+        <p class=req id=L50012><span>If a call to sqlite3BtreeInsert is made to insert an entry specifying a key
+value for which there already exists a matching key within the b-tree
+structure, the entry with the matching key shall be removed from the b-tree
+structure before the new entry is inserted.</span> (P: <a class=reqlink href=#H50128>H50128</a>)</p>
+
+      <p>
+	In other words, the sqlite3BtreeInsert API could easily be renamed
+        sqlite3BtreeInsertOrReplace. <span class=todo>We will probably need a module
+        requirement for the "replace" operation.</span>
+
+        <p class=req id=L50002><span>If the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> passed to sqlite3BtreeInsert as the first argument is
+open on a table b-tree, then the values passed as the second parameter (pKey) 
+shall be ignored. The value passed as the third parameter (nKey) shall be
+used as the integer key for the new entry.</span> (P: <a class=reqlink href=#H50128>H50128</a>)</p>
+        <p class=req id=L50003><span>If the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> passed to sqlite3BtreeInsert as the first argument is
+open on a table b-tree, then the database record associated with the new entry
+shall consist of a copy of the first nData bytes of the buffer pointed to by pData 
+followed by nZero zero (0x00) bytes, where pData, nData and nZero are the
+fourth, fifth and sixth parameters passed to sqlite3BtreeInsert, respectively.</span> (P: <a class=reqlink href=#H50128>H50128</a>)</p>
+        <p class=req id=L50004><span>If the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> passed to sqlite3BtreeInsert as the first argument is
+open on an index b-tree, then the values passed as the fourth, fifth and sixth
+parameters shall be ignored. The key (a database record) used by the new entry 
+shall consist of the first nKey bytes of the buffer pointed to by pKey, where
+pKey and nKey are the second and third parameters passed to sqlite3BtreeInsert,
+respectively.</span> (P: <a class=reqlink href=#H50128>H50128</a>)</p>
+
+      <p>
+        The following requirements describe the seventh and eighth paramaters passed
+        to the sqlite3BtreeInsert function. Both of these are used to provide extra
+        information used by sqlite3BtreeInsert to optimize the insert operation. They
+        may be safely ignored by alternative b-tree implementations.
+
+      <p class=todo>
+        There should be some rationalization for these, eventually. Some tracebility
+        from somewhere to show how the b-tree module offering these slightly esoteric
+        interfaces is helpful to SQLite overall.
+
+        <p class=req id=L50005><span>If the value passed as the seventh parameter to a call to sqlite3BtreeInsert
+is non-zero, sqlite3BtreeInsert shall interpret this to mean that it is likely
+(but not certain) that the key belonging to the new entry is larger than the
+largest key currently stored in the b-tree structure, and optimize accordingly.</span></p>
+        <p class=req id=L50006><span>If the value passed as the eighth parameter to a call to sqlite3BtreeInsert
+is non-zero, then the B-Tree module shall interpret this to mean that the
+the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> has already been positioned by a successful call to 
+sqlite3BtreeMovetoUnpacked specifying the same key value as is being inserted,
+and that sqlite3BtreeMovetoUnpacked has set the output value required by <a class=reqlink href=#L50011>L50011</a> to
+this value.</span></p>
+
+      <p>
+        If a non-zero value is passed as the eighth parameter to sqlite3BtreeInsert 
+        and the <a class=defnlink href="#glossary_B-Tree_Cursor">b-tree cursor</a> has not been positioned as assumed by <a class=reqlink href=#L50006>L50006</a>, the
+        results are undefined.
+
+      <p class=todo>
+        Malloc and IO error handling. Maybe these should be grouped together
+        for a whole bunch of APIs. And hook into the above via a defintion of
+        "successful call".
+
+      <h3 id="sqlite3BtreeIncrVacuum">3.8.9 sqlite3BtreeIncrVacuum</h3>
+
+      <pre class=api>int sqlite3BtreeIncrVacuum(Btree *);</pre>
+
+    <h2 id="section_3_9">3.9 Advisory B-Tree Locks</h2>
+ 
+
+      <p>
+	This section describes the b-tree module interfaces used for acquiring
+	and querying the advisory locks that can be placed on database image
+	pages. The locking mechanisms described in this section are only used
+	to arbitrate between multiple clients of the same in-memory <a class=defnlink href="#glossary_Page_cache">page-cache</a>.
+	The locking mechanism used to control access to a file-system
+	representation of the database when multiple in-memory <a class=defnlink href="#glossary_Page_cache">page caches</a>
+	(possibly located in different OS processes) are open on it is
+        described in <span class=todo>this</span>.
+
+      <p>
+        As well as obtaining advisory locks explicitly using the 
+        sqlite3BtreeLockTable API (see below), a read-lock on page 1 of the
+        database image is automatically obtained whenever a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database 
+	connection</a> opens a read-only or read-write transaction (see 
+        <span class=todo>requirement number</span>). Note that this means
+        that a write-lock on page 1 is effectively an exclusive lock on
+	the entire <a class=defnlink href="#glossary_Page_cache">page-cache</a>, as it prevents any other connection from opening
+        a transaction of any kind.
+
+      <h3 id="section_3_9_1">3.9.1 sqlite3BtreeLockTable</h3>
+
+
+      <pre class=api>int sqlite3BtreeLockTable(Btree *pBtree, int iTab, u8 isWriteLock);</pre>
+
+      <p>
+        The sqlite3BtreeLockTable API allows database clients to place 
+        advisory read or write locks on a specified page of the database 
+        image. The specified page need not exist within the database image.
+        By convention, SQLite acquires read and write locks on the root
+        pages of table b-trees only, but this is not required to be enforced
+        by the b-tree module. Locks may only be obtained when a database
+        client has an open transaction. All locks are automatically released
+        when the open transaction is concluded.
+
+        <p class=req id=L50016><span>A call to sqlite3BtreeLockTable, specifying a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> handle 
+with an open read-only or read-write transaction as the first parameter, and 
+zero as the third parameter, shall attempt to obtain a read-lock on the database
+page specified by the second parameter.</span></p>
+        <p class=req id=L50017><span>A call to sqlite3BtreeLockTable, specifying a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> handle 
+with an open read-write transaction as the first parameter, and a non-zero value as 
+the third parameter, shall attempt to obtain a write-lock on the database
+page specified by the second parameter.</span></p>
+
+      <p>
+        The two requirements above imply that the results of calling 
+        sqlite3BtreeLockTable on a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> handle that does
+        not currently have an open transaction, or attempting to obtain
+        a write-lock using a <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> handle that only has
+        a read-only transaction open are undefined.
+
+
+        <p class=req id=L50019><span>If, when attempting to obtain a read-lock as described in <a class=reqlink href=#L50016>L50016</a>, there exists
+another <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> connected to the same <a class=defnlink href="#glossary_Page_cache">page-cache</a> that is
+holding a write-lock on the same database image page, the read-lock shall not
+be granted and the call to sqlite3BtreeLockTable shall return SQLITE_LOCKED_SHAREDCACHE.</span></p>
+        <p class=req id=L50020><span>If, when attempting to obtain a write-lock as described in <a class=reqlink href=#L50017>L50017</a>, there exists
+another <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> connected to the same <a class=defnlink href="#glossary_Page_cache">page-cache</a> that is
+holding a read or write-lock on the same database image page, the write-lock 
+shall not be granted and the call to sqlite3BtreeLockTable shall return 
+SQLITE_LOCKED_SHAREDCACHE.</span></p>
+
+      <p>
+        Requirement <a class=reqlink href=#L50020>L50020</a> is overly conservative. Because a write-lock may 
+        only be requested if the <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> has an open read-write 
+	transaction (<a class=reqlink href=#L50017>L50017</a>), and at most a single <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a>
+        may have such an open transaction at one time, it is not possible for
+        a request for a write-lock to fail because another connection is holding
+        a write-lock on the same b-tree database image page. It may, however,
+        fail because another connection is holding a read-lock.
+
+      <p>
+        All locks are held until the current transaction is concluded. Or, if
+        a read-write transaction is downgraded to a read-only transaction, all
+        currently held write-locks are changed to read-locks.
+
+        <p class=req id=L50018><span>When a read-only or read-write transaction is concluded, all advisory b-tree locks
+held by the <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> shall be relinquished.</span></p>
+        <p class=req id=L50021><span>When a read-write transaction is downgraded to a read-only transaction, all
+advisory b-tree write-locks held by the <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> shall be
+changed to read-locks.</span></p>
+
+      <p class=todo> The requirement above should refer to some other
+	requirement that defines when a read-write transaction is downgraded to
+        a read-only transaction.
+
+      <p class=todo> Malloc failure?
+
+      <p class=todo> Read uncommitted flag. Maybe this should be handled
+        outside of the b-tree module. Is there anything to stop connections
+        with this flag set simply not obtaining read locks? There are assert()
+        statements in the b-tree module that need to take this flag into account,
+        but not actual functionality.
+
+      <h3 id="section_3_9_2">3.9.2 sqlite3BtreeSchemaLocked</h3>
+
+      <pre class=api>int sqlite3BtreeSchemaLocked(Btree *pBtree);</pre>
+
+        <p class=req id=L50014><span>A call to the sqlite3BtreeSchemaLocked function with a valid <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree 
+database connection</a> as the only argument shall return SQLITE_LOCKED_SHAREDCACHE
+if there exists another <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree database connection</a> connected to the
+same <a class=defnlink href="#glossary_Page_cache">page-cache</a> that currently holds a write-lock on database image
+page 1.</span></p>
+        <p class=req id=L50015><span>A call to the sqlite3BtreeSchemaLocked function with a valid <a class=defnlink href="#glossary_B-Tree_Database_Connection">b-tree 
+database connection</a> as the only argument shall return SQLITE_OK if
+<a class=reqlink href=#H51017>H51017</a> does not apply.</span></p>
+
+    <h2 id="section_3_10">3.10 What do these do?</h2>
+
+
+
+      <p class=todo>
+        Where do the following go?
+
+      <pre class=api>char *sqlite3BtreeIntegrityCheck(Btree*, int *aRoot, int nRoot, int, int*);
+struct Pager *sqlite3BtreePager(Btree*);
+int sqlite3BtreeCopyFile(Btree *, Btree *);</pre>
+
+      <pre class=api>void *sqlite3BtreeSchema(Btree *, int, void(*)(void *));
+int sqlite3BtreeSchemaLocked(Btree *pBtree);
+int sqlite3BtreeLockTable(Btree *pBtree, int iTab, u8 isWriteLock);
+void sqlite3BtreeTripAllCursors(Btree*, int);</pre>
+
+      <p class=todo>
+        I know what the following do, but is this mechanism ever used? Or has it been superceded by other tricks in OP_NewRowid?
+
+      <pre class=api>void sqlite3BtreeSetCachedRowid(BtCursor*, sqlite3_int64);
+sqlite3_int64 sqlite3BtreeGetCachedRowid(BtCursor*);</pre>
+
+      <p class=todo>
+        Should move to btreeInt.h
+
+      <pre class=api>typedef struct BtShared BtShared;</pre>
+
+    <h2 id="section_3_11">3.11 APIs not branded sqlite3BtreeXXX()</h2>
+
+
+<ul>
+<li> sqlite3PagerLockingMode
+<li> sqlite3PagerJournalMode
+<li> sqlite3PagerIsMemdb (vacuum and backup).
+<li> sqlite3PagerJournalSizeLimit
+<li> sqlite3PagerFile (used by sqlite3_file_control() and pragma lock_proxy_file).
+<li> sqlite3PagerPagecounT (pragma page_count and backup).
+<li> Page APIs used by backup routines:
+  <ul>
+    <li> sqlite3PagerGet
+    <li> sqlite3PagerWrite
+    <li> sqlite3PagerGetData
+    <li> sqlite3PagerGetExtra
+    <li> sqlite3PagerUnref
+    <li> sqlite3PagerTruncateImage
+    <li> sqlite3PagerSync
+    <li> sqlite3PagerFile
+    <li> sqlite3PagerCommitPhaseOne, sqlite3PagerCommitPhaseTwo
+    <li> sqlite3PagerBackupPtr
+  </ul>
+</ul>
+
+
+  <h1 id="section_4">4 Module Implementation</h1>
+
+
+  <h2 id="section_4_1">4.1 Database Image Traversal</h2>
+ 
+
+  <h2 id="section_4_2">4.2 Database Image Manipulation</h2>
+
+
+     <p class=todo>
+       This section should describe exactly how bits and bytes are shifted
+       around when the database image is traversed and modified. i.e. how the b-tree 
+       balancing works, deleting an internal cell from an index b-tree etc.
+
+    <h3 id="section_4_2_1">4.2.1 Creating a B-Tree Structure</h3>
+
+    <h3 id="section_4_2_2">4.2.2 Clearing a B-Tree Structure</h3>
+
+    <h3 id="section_4_2_3">4.2.3 Deleting a B-Tree Structure</h3>
+
+
+    <h3 id="section_4_2_4">4.2.4 Inserting, Replacing and Deleting B-Tree Entries</h3>
+
+
+      <p>
+        The following two sections describe the way entries are added and removed
+        from B-Tree structures within a database image. 
+
+      <p>
+        As one might expect, the algorithms described in the following sections
+        involve adding and removing b-tree cells to and from b-tree node pages.
+        The format of b-tree node pages is described in detail in 
+        <cite><a href="#ref_file_format" title="">[1]</a></cite>. This document does not describe the exact
+        way in which content is manipulated within a page, as these details are
+        considered not considered high-level enough to be documented outside of
+        the SQLite source code itself. For the purposes of the descriptions in
+        the following sections, a b-tree node page is considered to be a container
+        for an ordered list of b-tree cells. Cells may be inserted into or removed
+        from any position in the ordered list as required.
+
+      <p>
+	A b-tree node page has a finite capacity. If one of the algorithms
+	described here is required to insert a cell into a b-tree node page,
+	and there is not enough free space within the page to accomadate the
+	cell, it is still nominally inserted into the requested position within
+        the node, but becomes an <a class=defnlink href="#glossary_Overflow_Cell">overflow cell</a>. <a class=defnlink href="#glossary_Overflow_Cell">Overflow cells</a> never remain so
+        for very long. If an insert, replace or delete entry operation creates
+        one or more <a class=defnlink href="#glossary_Overflow_Cell">overflow cells</a>, the b-tree structure is rearranged so that
+        all cells are stored within the body of a b-tree node page before the
+        operation is considered complete. This process of rearranging the b-tree
+        structure is termed b-tree balancing, and is described in section 
+        <cite><a href="#btree_balancing_algorithm" title="B-Tree Balancing Algorithm">4.2.5</a></cite>.
+        
+
+    <h4 id="section_4_2_4_1">4.2.4.1 B-Tree Insert/Replace Entry</h4>
+
+
+      <p>
+        This section describes the way in which new entries may be inserted 
+        into a b-tree structure, and how existing entries may be replaced. Both
+        of these operations are accessed using the sqlite3BtreeInsert API.
+
+      <p>
+        An insert/replace operation involves the following steps:
+
+      <ol>
+        <li> Based on the supplied key and value, and the type of b-tree being
+             inserted into, allocate and populate any required overflow pages.
+             <span class=todo>Should reference file-format requirements that
+             provide the formula for doing this.</span>
+
+        <li> Attempt to move the b-tree write cursor to an entry with a key
+             that matches the new key being inserted. If a matching entry is 
+             found, then the operation is a replace. Otherwise, if the key is
+             not found, an insert.
+
+        <ol type="a">
+          <li> Requirements <a class=reqlink href=#L50008>L50008</a>, <a class=reqlink href=#L50009>L50009</a>, <a class=reqlink href=#L50010>L50010</a> and <a class=reqlink href=#L50011>L50011</a> apply to the cursor
+               seek operation here. This ensures that if the search does not find
+	       an exact match, the cursor is left pointing to the leaf page that 
+               the new entry should be added into.
+
+          <li> As specified by <a class=reqlink href=#L50006>L50006</a>, the cursor may already be positioned. In 
+               this case the seek operation is not required.
+        </ol>
+
+        <li> If a matching key was found in the b-tree, then it must be removed and
+             the new entry added in its place.
+
+        <ol type="a">
+          <li> If there are one or more overflow pages associated with the entry
+               being replaced, they are moved to the free-list.
+          <li> The cell corresponding to the entry being removed is removed from
+               the b-tree node page.
+          <li> The new cell is inserted in the position previously occupied by the
+               cell removed in the previous step. If the page is not a leaf page,
+	       then the first four-bytes (the child-page pointer) of the old
+               cell are copied to the first four bytes of the new cell. If the new
+               cell is larger than the cell that it replaced, then it may become
+               an <a class=defnlink href="#glossary_Overflow_Cell">overflow cell</a>.
+        </ol>
+
+        <li> If no matching key was found in the b-tree, then the new cell is inserted
+             into the leaf page that the cursor was left pointing to by step 1. The
+             new cell may become an <a class=defnlink href="#glossary_Overflow_Cell">overflow cell</a>.
+
+        <li> If the new cell is now an <a class=defnlink href="#glossary_Overflow_Cell">overflow cell</a>, then the balancing algorithm 
+             (see section <cite><a href="#btree_balancing_algorithm" title="B-Tree Balancing Algorithm">4.2.5</a></cite>) is run on the 
+             overflowing b-tree node page.
+      </ol>
+
+    <h4 id="section_4_2_4_2">4.2.4.2 B-Tree Delete Entry</h4>
+
+
+      <p>
+        This section describes the way in which entries may be removed from
+	a b-tree structure, as required when the sqlite3BtreeDelete (section
+        <cite><a href="#sqlite3BtreeDelete" title="sqlite3BtreeDelete">3.8.7</a></cite>) API is invoked. Removing an entry
+        from a b-tree table involves the following steps:
+
+      <ol>
+        <li> All overflow pages in the overflow page chain (if any) associated
+             with the entry must be moved to the database free-list. If the
+             database image is an autovacuum database, the pointer-map entries
+             that correspond to each overflow page in the chain must be updated.
+             
+        <li> The b-tree cell corresponding to the entry must be removed from
+             the b-tree structure.
+      </ol>
+
+      <p class=todo>
+	Note about the optimization that makes it possible to move overflow pages
+        to the free-list without reading their contents (i.e. without loading them
+        into the cache).
+
+      <p>
+        If the b-tree entry being removed is located on a leaf page (as is always the
+        case with table b-tree structures), then deleting an entry from a b-tree
+        is quite simple.
+
+      
+      <center>
+      <a name="figure_delete1"></a>
+      <object data="images/btreemodule_delete1.svg" type="image/svg+xml" width=901 height=231 style="overflow:hidden"></object>
+      <p><i>Figure 2 - Delete from an Internal Node</i>
+      </center>
+  
+
+    <h3 id="btree_balancing_algorithm">4.2.5 B-Tree Balancing Algorithm</h3>
+
+
+     <ul>
+       <li><p>The <b>balance deeper</b> sub-algorithm is used when the root page of
+           a b-tree is overfull. It creates a new page and copies the
+           entire contents of the overfull root page to it. The root page
+           is then zeroed and the new page installed as its only child.
+           The balancing algorithm is then run on the new child page (in case
+           it is overfull).
+
+       <li><p>The <b>balance shallower</b> sub-algorithm is used when the root page 
+           of a b-tree has only a single child page. If possible, the data from
+           the child page is copied into the root-page and the child page discarded.
+
+       <li><p>The <b>balance quick</b> sub-algorithm is used in a very specific,
+           but common scenario. It is used only for table b-trees, when a new entry that
+           has a key value greater than all existing keys in the b-tree is inserted and
+           causes the right-most leaf page of the b-tree structure to become overfull.
+
+       <li><p>The <b>balance siblings</b> sub-algorithm is run when a b-tree page that
+           is not the root-page of its b-tree structure is either overfull or underfull.
+
+
+
+
+     </ul>
+
+    <h4 id="section_4_2_5_1">4.2.5.1 Balance Deeper</h4>
+
+      <ol>
+        <li> Allocate a new page (the child-page).
+        <li> Copy page data from root-page to child-page (including <a class=defnlink href="#glossary_Overflow_Cell">overflow cells</a>).
+        <li> Fix pointer map entries associated with new child-page content.
+        <li> Zero the root-page.
+        <li> Set the right-child pointer of the root-page to point to the new child-page.
+        <li> Set the pointer map entry for the new child page.
+        <li> Execute the balance procedure on the new child page.
+      </ol>
+
+      
+      <center>
+      <a name="figure_balance_deeper"></a>
+      <object data="images/btreemodule_balance_deeper.svg" type="image/svg+xml" width=901 height=196 style="overflow:hidden"></object>
+      <p><i>Figure 3 - Example Balance Deeper Transform</i>
+      </center>
+  
+
+    <h4 id="section_4_2_5_2">4.2.5.2 Balance Shallower</h4>
+
+
+      <ol>
+        <li> Copy node data from child-page to root-page.
+        <li> Fix pointer map entries associated with new root-page content.
+        <li> Move child-page to database image free-list.
+      </ol>
+
+      
+      <center>
+      <a name="figure_balance_shallower"></a>
+      <object data="images/btreemodule_balance_shallower.svg" type="image/svg+xml" width=901 height=196 style="overflow:hidden"></object>
+      <p><i>Figure 4 - Example Balance Shallower Transform</i>
+      </center>
+  
+
+    <h4 id="section_4_2_5_3">4.2.5.3 Balance Quick</h4>
+
+
+      <ol>
+        <li> Allocate a new page (the new sibling-page).
+
+        <li> Populate the new sibling page with the new b-tree entry.
+
+	<li> Add a new divider cell to the parent. The divider cell contains a
+             pointer to the page that is currently the right-child of the parent.
+             The key in the new divider cell is a copy of the largest key in the
+             page that is currently the right-child of the parent.
+
+        <li> Set the right-child of the parent page to point to the new sibling page.
+
+	<li> If the database is an auto-vacuum database, set the pointer map
+	     entry associated with the new sibling page. If the cell on the new
+             sibling page contains a pointer to an overflow page, set the pointer map
+	     entry associated with the overflow page.
+
+        <li> Execute the balance procedure on the parent page.
+      </ol>
+
+      
+      <center>
+      <a name="figure_balance_quick"></a>
+      <object data="images/btreemodule_balance_quick.svg" type="image/svg+xml" width=901 height=292 style="overflow:hidden"></object>
+      <p><i>Figure 5 - Example Balance Quick Transform</i>
+      </center>
+  
+
+    <h4 id="balance_siblings">4.2.5.4 Balance Siblings</h4>
+
+
+      <p class=req id=L51001><span>The <a class=defnlink href="#glossary_Balance-Siblings_Algorithm">balance-siblings algorithm</a> shall redistribute the b-tree cells currently 
+stored on a overfull or underfull page and up to two sibling pages, adding
+or removing siblings as required, such that no sibling page is overfull and
+the minimum possible number of sibling pages is used to store the 
+redistributed b-tree cells.</span></p>
+
+    <p class=todo>
+      The following description describes how balance() is to be implemented. This
+      represents (I think) the lowest level of detail that should be in this document.
+      One skilled in the art could use this description to reimplement SQLite's
+      <a class=defnlink href="#glossary_Balance-Siblings_Algorithm">balance-siblings algorithm</a>. We also need requirements at a higher level
+      of detail in this section. Something to test!
+
+    <p>
+      The <a class=defnlink href="#glossary_Balance-Siblings_Algorithm">balance-siblings algorithm</a>, as implemented by SQLite, is described as
+      a series of steps below.  <span class=todo> there are a few terms used
+      below that need definitions/clarifications.</span>
+
+      <ol>
+        <li> Determine the set of sibling pages to redistribute the cells of, using 
+             the following rules:
+        <ol type="a">
+          <li> If the parent page has three or fewer child pages, then all child 
+               pages are deemed to be sibling pages for the purposes of the <a class=defnlink href="#glossary_Balance-Siblings_Algorithm">balance-siblings
+               algorithm</a>.
+	  <li> If the page being balanced is the left-most child of the parent
+               page, then the three left-most child pages are used as the siblings.
+	  <li> If the page being balanced is the right-most child of the parent
+               page, then the three right-most child pages are used as the siblings.
+	  <li> Otherwise, if none of the above three conditions are true, then the
+               sibling pages are page being balanced and the child pages immediately
+               to the left and right of it.
+        </ol>
+
+        <li> Determine an ordered list of cells to redistribute. There are several
+             variations of this step, depending on the type of page being balanced.
+        <ol type="a">
+	  <li> If the page being balanced is a leaf page of a table b-tree,
+	       then the list of cells to redistribute is simply the concatenation
+               of the ordered lists of cells stored on each sibling page, in order
+               from left-most sibling to right-most.
+	  <li> If the page being balanced is a leaf page of an index b-tree, then 
+               the list of cells to redistribute is comprised of the cells on each
+               of the sibling pages and the divider cells in the parent page that 
+               contain the pointers to each sibling page except the right-most. The
+               list is arranged so that it contains: 
+           <ul>
+             <li> The cells from the left-most sibling page, in order, followed by
+             <li> the divider cell from the parent page that contains the pointer 
+		  to the left-most sibling (if there is more than one sibling
+                  page), followed by
+	     <li> the divider cell that contains the pointer to the second left-most
+                  sibling and the cells from the remaining sibling page (if there are three
+                  sibling pages).
+           </ul>
+	  <li> If the page being balanced is an internal b-tree node, then the list of
+               cells to redistribute is determined as described in the previous case.
+               However, when balancing an internal node each cell is associated with
+               the page number of a child page of one of the sibling pages. The page 
+               number associated with cells stored on a sibling page is the same as
+               the page number stored as the first four bytes of the cell. The page
+               number associated with a divider cell within the parent page is the page
+               number of the right-child page of the sibling page to which the divider
+               cell contains a pointer.
+        </ol>
+
+        <li> Determine the new cell distribution, using the following steps:
+        <ol type="a">
+          <li> Assign as may cells as will fit from the start of the ordered list of 
+               cells to the left-most sibling page. Then, if any cells remain, assign
+               one to be a divider cell, and as many as will fit to the next sibling 
+	       page. Repeat until all cells have been assigned a location.
+               <span class=todo> no divider cells for table b-tree leaf balance</span>
+
+          <li> The previous step generates a distribution that is biased towards the
+	       left-hand side. The right-most sibling may even be completely
+	       empty (if the last cell in the ordered list was assigned to be a
+               divider cell). To rectify this, cells are moved out of the second 
+               right-most sibling page and into the right-most, one at a time, until
+               there is at least one cell in the right-most sibling page and to move
+               another cell would mean that the right-most sibling page is more full
+               than the next to right-most sibling page. This is repeated for the next
+               right-most pair of sibling pages, shifting cells out of the third 
+               right-most sibling page and into the second right-most, and so on.
+               <span class=todo> note about divider cells </span>
+        </ol>
+
+        <li> Determine the set of database pages to use as the new sibling pages. 
+
+        <ol type="a">
+	   <li> If there were an equal or greater number of siblings identified
+                in step 1 than are required by the distribution calculated in step 3, 
+                reuse as many as possible, starting with the left-most. If step 3
+                calculated a distribution that requires more sibling pages than were
+                identified in step 1, allocate the required extra pages using the
+                <span class=todo>Refer to ???</span> algorithm.
+
+	   <li> Arrange the new sibling pages from left to right in ascending
+                page number order. The new sibling page with the smallest page number
+                becomes the left-most sibling page, and so forth.
+        </ol>
+
+        <li> Populate the new sibling pages.
+        <ol type="a">
+	   <li> Populate each new sibling page with the required set of cells. If the
+                page being balanced is not a leaf page, then the child-page pointer
+                field of each cell is populated with the page-number associated with
+                the cell as part of step 2 above. 
+
+	   <li> If the page being balanced is not a leaf page, then the right-child 
+                pointer stored in the page header of each new sibling page must also
+                be populated. For each new sibling page except the right-most, this 
+                field is set to the page number associated with the cell that 
+                immediately follows the cells stored on the page (the cell that was
+                assigned to be divider cell in step 3). For the right-most sibling page,
+                the right-child pointer is set to the value that was stored in the
+                right-child pointer of the right-most original sibling page identified
+                in step 1.
+        </ol>
+        <li> Populate the parent page.
+        <ol type="a">
+	  <li> If the page being balanced is (was) not a leaf page of a table
+	       b-tree, the cells that contained pointers to the old sibling
+               pages are replaced by the cells designated as divider cells as part
+               of step 3. The right-child pointer field of the first divider cell
+               is overwritten with the page number of the first new sibling page, and 
+               so on.
+
+	  <li> If the page being balanced is (was) a leaf page of a table
+	       b-tree, the cells that contained pointers to the old sibling
+               pages are replaced by a divider cell associated with all but the
+               right-most sibling page. The child-page number stored in each divider
+               cell is set to the page number of the associated sibling. The ingeger key 
+               value stored in each divider cell is a copy of the largest integer key
+               value stored on the associated sibling page.
+
+	  <li> Before balancing, the parent page contained a pointer to the right-most
+               sibling page, either as part of a cell or as the right-child pointer
+               stored in the page header. Either way, this value must be overwritten
+               with the page number of the new right-most sibling page.
+               
+        </ol>
+
+        <li> Populate pointer map entries.
+        <ol type="a">
+          <li> For each sibling page that was not also an original sibling page, the
+               associated pointer-map entry must be updated. Similarly, the pointer-map
+               entry associated with each original sibling page that is no longer a
+               sibling page must be updated.
+          <li> For each cell containing an overflow pointer that has been moved from one 
+               page to another, the pointer-map entry associated with the overflow page 
+               must be updated.
+          <li> If the page being balanced is (was) not a leaf, then for each cell that
+               has moved from one page to another the pointer-map entry associated with
+               the cell's child page must be updated.
+          <li> If the page being balanced is (was) not a leaf, then the pointer-map entry
+               associated with each sibling's right-child page may need to be updated.
+        </ol>
+      </ol>
+
+    <h3 id="section_4_2_6">4.2.6 Page Allocation and Deallocation</h3>
+
+
+     <p class=todo>
+       Amongst other things, this section needs to explain our old pals the
+       DontWrite() and DontRollback() optimizations.
+
+    <h4 id="free_overflow_chain">4.2.6.1 Moving an overflow-chain to the free-list</h4>
+
+
+     <p class=todo>
+       Describe how this can sometimes be done without reading the content of
+       overflow pages.
+
+    <h3 id="section_4_2_7">4.2.7 Incremental Vacuum Step</h3>
+
+
+
+
+
+  <h2 id="section_4_3">4.3 Transactions and Savepoints</h2>
+
+
+     <p class=todo>
+       Requirements surrounding how transactions are made atomic and isolated.
+       Also how savepoints are implemented. What happens to active cursors after
+       a rollback or savepoint-rollback.
+
+  <h1 id="section_5">5 References</h1>
+
+
+  <table id="refs" style="width:auto; margin: 1em 5ex">
+    <tr><td style="width:5ex ; vertical-align:top" id="ref_file_format">[1]<td>
+      SQLite Online Documentation,<u>SQLite Database File Format</u>,
+      <a href="fileformat.html">http://www.sqlite.org/fileformat.html</a>.
+    
+    <tr><td style="width:5ex ; vertical-align:top" id="ref_pcache_interface">[2]<td>
+      SQLite Online Documentation,<u>Application Defined <a class=defnlink href="#glossary_Page_cache">Page Cache</a></u>,
+      <a href="c3ref/pcache_methods.html">http://www.sqlite.org/c3ref/pcache_methods.html</a>.
+    
+    <tr><td style="width:5ex ; vertical-align:top" id="ref_os_interface">[3]<td>
+      SQLite Online Documentation,<u>OS Interface Object</u>,
+      <a href="c3ref/vfs.html">http://www.sqlite.org/c3ref/vfs.html</a>.
+    
+
+  </table>
+
+  
+

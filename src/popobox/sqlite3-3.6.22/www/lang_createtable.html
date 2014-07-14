@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Query Language: CREATE TABLE</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>CREATE TABLE</h2><h4><a href="syntaxdiagrams.html#create-table-stmt">create-table-stmt:</a></h4><blockquote> <img alt="syntax diagram create-table-stmt" src="images/syntax/create-table-stmt.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#column-def">column-def:</a></h4><blockquote> <img alt="syntax diagram column-def" src="images/syntax/column-def.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#type-name">type-name:</a></h4><blockquote> <img alt="syntax diagram type-name" src="images/syntax/type-name.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#column-constraint">column-constraint:</a></h4><blockquote> <img alt="syntax diagram column-constraint" src="images/syntax/column-constraint.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#table-constraint">table-constraint:</a></h4><blockquote> <img alt="syntax diagram table-constraint" src="images/syntax/table-constraint.gif"></img> </blockquote>
+<h4><a href="syntaxdiagrams.html#foreign-key-clause">foreign-key-clause:</a></h4><blockquote> <img alt="syntax diagram foreign-key-clause" src="images/syntax/foreign-key-clause.gif"></img> </blockquote>
+
+
+<p>A CREATE TABLE statement is basically the keywords "CREATE TABLE"
+followed by the name of a new table and a parenthesized list of column
+definitions and constraints.  
+Tables names that begin with "<b>sqlite_</b>" are reserved
+for use by SQLite itself and cannot normally
+appear in a CREATE TABLE statement.</p>
+
+<p>Each column definition is the name of the column optionally followed by the
+<a href="datatype3.html">datatype</a> for that column, then one or more optional column constraints.
+SQLite uses <a href="datatype3.html">dynamic typing</a>; 
+the datatype for the column does not restrict what data may be put
+in that column.
+The UNIQUE constraint causes an unique index to be created on the specified
+columns.  All NULL values are considered different from each other and from
+all other values for the purpose of determining uniqueness, hence a UNIQUE
+column may contain multiple entries with the value of NULL.
+The COLLATE clause specifies what text 
+<a href="datatype3.html#collation">collating function</a> to use when comparing text entries for the column.  
+The built-in <a href="datatype3.html#collation">BINARY</a> collating function is used by default.
+<p>
+The DEFAULT constraint specifies a default value to use when doing an <a href="lang_insert.html">INSERT</a>.
+The value may be NULL, a string constant, a number, or a constant expression
+enclosed in parentheses.
+The default value may also be one of the special case-independant
+keywords CURRENT_TIME, CURRENT_DATE or CURRENT_TIMESTAMP.  If the value is
+NULL, a string constant or number, it is inserted into the column
+whenever an INSERT statement that does not specify a value for the column is
+executed. If the value is CURRENT_TIME, CURRENT_DATE or CURRENT_TIMESTAMP, then
+the current UTC date and/or time is inserted into the columns. For
+CURRENT_TIME, the format is HH:MM:SS. For CURRENT_DATE, YYYY-MM-DD.
+The format for CURRENT_TIMESTAMP is "YYYY-MM-DD HH:MM:SS".
+</p>
+
+<p>The PRIMARY KEY attribute normally creates a UNIQUE index on
+the column or columns that are specified as the PRIMARY KEY.  The only
+exception to this behavior is special <a href="lang_createtable.html#rowid">INTEGER PRIMARY KEY</a> column,
+described below.
+According to the SQL standard, PRIMARY KEY should imply NOT NULL.
+Unfortunately, due to a long-standing coding oversight, this is not 
+the case in SQLite.  SQLite allows NULL values
+in a PRIMARY KEY column.  We could change SQLite to conform to the
+standard (and we might do so in the future), but by the time the
+oversight was discovered, SQLite was in such wide use that we feared
+breaking legacy code if we fixed the problem.  So for now we have
+chosen to continue allowing NULLs in PRIMARY KEY columns.
+Developers should be aware, however, that we may change SQLite to
+conform to the SQL standard in future and should design new programs
+accordingly.</p>
+
+<p>SQLite uses <a href="datatype3.html">dynamic typing</a> instead of static typing.  Except for the
+special case of <a href="lang_createtable.html#rowid">INTEGER PRIMARY KEY</a>, SQLite will allow values of any
+type to be stored in any column regardless of the declared datatype of
+that column.  The declared datatype is a <a href="datatype3.html#affinity">type affinity</a> that
+SQLite attempts to comply with, but the operation will proceed even if
+compliance is not possible.</p>
+
+<p>If the "TEMP" or "TEMPORARY" keyword occurs in between "CREATE"
+and "TABLE" then the table that is created is only visible
+within that same database connection
+and is automatically deleted when
+the database connection is closed.  Any indices created on a temporary table
+are also temporary.  Temporary tables and indices are stored in a
+separate file distinct from the main database file.</p>
+
+<p> If a &lt;database-name&gt; is specified, then the table is created in 
+the named database. It is an error to specify both a &lt;database-name&gt;
+and the TEMP keyword, unless the &lt;database-name&gt; is "temp". If no
+database name is specified and the TEMP keyword is not present then
+the table is created in the main database.</p>
+
+<p>The optional <a href="lang_conflict.html">conflict clause</a> following each constraint
+allows the specification of an alternative default
+constraint conflict resolution algorithm for that constraint.
+If no conflict clause is specified, the ABORT algorithm is used.
+Different constraints within the same
+table may have different conflict resolution algorithms.
+If an <a href="lang_insert.html">INSERT</a> or <a href="lang_update.html">UPDATE</a> statement specifies a conflict
+resolution algorithm, then the algorithm specified on the INSERT or
+UPDATE statement overrides the algorithm specified in the 
+CREATE TABLE statement.
+See the section titled
+<a href="lang_conflict.html">ON CONFLICT</a> for additional information.</p>
+
+<p>CHECK constraints are supported as of <a href="releaselog/3_3_0.html">version 3.3.0</a>.  Prior
+to version 3.3.0, CHECK constraints were parsed but not enforced.</p>
+
+<p>The number of columns in a table is limited by the
+<a href="limits.html#max_column">SQLITE_MAX_COLUMN</a> compile-time parameter.
+A single row of a table cannot store more than
+<a href="limits.html#max_length">SQLITE_MAX_LENGTH</a> bytes of data.
+Both of these limits can be lowered at runtime using the
+<a href="c3ref/limit.html">sqlite3_limit()</a> C/C++ interface.</p>
+
+
+<p>The CREATE TABLE AS form defines the table to be
+the result set of a query.  The names of the table columns are
+the names of the columns in the result.</p>
+
+<p>If the optional IF NOT EXISTS clause is present and another table
+with the same name aleady exists, then this command becomes a no-op.</p>
+
+<p>Tables are removed using the <a href="lang_droptable.html">DROP TABLE</a> statement.  </p>
+
+<a name="rowid"></a>
+
+<h3>ROWIDs and the INTEGER PRIMARY KEY</h3>
+
+<p>Every row of every SQLite table has a 64-bit signed integer key 
+that is unique within the same table.
+This integer is usually called the "rowid".  The rowid is the actual key used
+in the B-Tree that implements an SQLite table.  Rows are stored in
+rowid order. The
+rowid value can be accessed using one of the special names
+"<b>ROWID</b>", "<b>OID</b>", or "<b>_ROWID_</b>" assuming those names
+are no used by other conventional table columns.</p>
+
+<p>
+If a column is declared to be an INTEGER PRIMARY KEY, then that column is not
+a "real" database column but instead becomes
+an alias for the rowid.  Unlike normal SQLite columns, the rowid
+must be a non-NULL integer value.  The rowid is not able to hold
+floating point values, strings, BLOBs, or NULLs.</p>
+
+<blockquote><i>
+An INTEGER PRIMARY KEY column is an alias for the 64-bit signed integer rowid.
+</i></blockquote>
+
+<p>An INTEGER PRIMARY KEY column can also include the
+keyword <a href="autoinc.html">AUTOINCREMENT</a>.  The <a href="autoinc.html">AUTOINCREMENT</a> keyword modified the way
+that B-Tree keys are automatically generated.  Additional detail
+on automatic B-Tree key generation is available
+<a href="autoinc.html">separately</a>.</p>
+
+<p>The special behavior of INTEGER PRIMARY KEY
+is only available if the type name is exactly "INTEGER" in any mixture
+of upper and lower case.  Other integer type names
+like "INT" or "BIGINT" or "SHORT INTEGER" or "UNSIGNED INTEGER"
+causes the primary key column to behave as an ordinary table column with
+integer <a href="datatype3.html#affinity">affinity</a> and a unique index, not as an alias for the rowid.
+The special behavior of INTEGER PRIMARY KEY is only available if the
+primary key is a single column.  Multi-column primary keys do not become
+aliases for the rowid.
+The AUTOINCREMENT keyword only works on a column that is an alias
+for the rowid.</p>
+
+<p>Note that searches against a rowid are generally about twice as
+fast as searches against any other PRIMARY KEY or indexed value.
+</p>
+
+<p><b>Goofy behavior alert:</b>  The following three declarations all cause
+the column "x" be an alias for the rowid:</p>
+
+<ul>
+<li><tt>CREATE TABLE t(x INTEGER PRIMARY KEY ASC, y, z);</tt>
+<li><tt>CREATE TABLE t(x INTEGER, y, z, PRIMARY KEY(x ASC));</tt>
+<li><tt>CREATE TABLE t(x INTEGER, y, z, PRIMARY KEY(x DESC));</tt>
+</ul>
+
+<p>But, in contrast, the following declaration does <u>not</u> result in
+"x" being an alias for the rowid:</p>
+
+<ul>
+<li><tt>CREATE TABLE t(x INTEGER PRIMARY KEY DESC, y, z);</tt>
+</ul>
+
+<p>This asymmetrical behavior is unfortunate and is really due to a bug
+in the parser in early versions of SQLite.  But fixing the bug would
+result in very serious backwards incompatibilities.  The SQLite developers
+feel that goofy behavior in an corner case is far better than
+a compatibility break, so the original behavior is retained.</p>
+
+

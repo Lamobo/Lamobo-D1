@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Opening A New Database Connection</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Opening A New Database Connection</h2><blockquote><pre>int sqlite3_open(
+  const char *filename,   /* Database filename (UTF-8) */
+  sqlite3 **ppDb          /* OUT: SQLite db handle */
+);
+int sqlite3_open16(
+  const void *filename,   /* Database filename (UTF-16) */
+  sqlite3 **ppDb          /* OUT: SQLite db handle */
+);
+int sqlite3_open_v2(
+  const char *filename,   /* Database filename (UTF-8) */
+  sqlite3 **ppDb,         /* OUT: SQLite db handle */
+  int flags,              /* Flags */
+  const char *zVfs        /* Name of VFS module to use */
+);
+</pre></blockquote><p>
+These routines open an SQLite database file whose name is given by the
+filename argument. The filename argument is interpreted as UTF-8 for
+sqlite3_open() and sqlite3_open_v2() and as UTF-16 in the native byte
+order for sqlite3_open16(). A <a href="../c3ref/sqlite3.html">database connection</a> handle is usually
+returned in *ppDb, even if an error occurs.  The only exception is that
+if SQLite is unable to allocate memory to hold the <a href="../c3ref/sqlite3.html">sqlite3</a> object,
+a NULL will be written into *ppDb instead of a pointer to the <a href="../c3ref/sqlite3.html">sqlite3</a>
+object. If the database is opened (and/or created) successfully, then
+<a href="../c3ref/c_abort.html">SQLITE_OK</a> is returned.  Otherwise an <a href="../c3ref/c_abort.html">error code</a> is returned. The
+<a href="../c3ref/errcode.html">sqlite3_errmsg()</a> or <a href="../c3ref/errcode.html">sqlite3_errmsg16()</a> routines can be used to obtain
+an English language description of the error following a failure of any
+of the sqlite3_open() routines.</p>
+
+<p>The default encoding for the database will be UTF-8 if
+sqlite3_open() or sqlite3_open_v2() is called and
+UTF-16 in the native byte order if sqlite3_open16() is used.</p>
+
+<p>Whether or not an error occurs when it is opened, resources
+associated with the <a href="../c3ref/sqlite3.html">database connection</a> handle should be released by
+passing it to <a href="../c3ref/close.html">sqlite3_close()</a> when it is no longer required.</p>
+
+<p>The sqlite3_open_v2() interface works like sqlite3_open()
+except that it accepts two additional parameters for additional control
+over the new database connection.  The flags parameter to
+sqlite3_open_v2() can take one of
+the following three values, optionally combined with the
+<a href="../c3ref/c_open_create.html">SQLITE_OPEN_NOMUTEX</a>, <a href="../c3ref/c_open_create.html">SQLITE_OPEN_FULLMUTEX</a>, <a href="../c3ref/c_open_create.html">SQLITE_OPEN_SHAREDCACHE</a>,
+and/or <a href="../c3ref/c_open_create.html">SQLITE_OPEN_PRIVATECACHE</a> flags:</p>
+
+<p><dl>
+<dt><a href="../c3ref/c_open_create.html">SQLITE_OPEN_READONLY</a></dt>
+<dd>The database is opened in read-only mode.  If the database does not
+already exist, an error is returned.</dd></p>
+
+<p><dt><a href="../c3ref/c_open_create.html">SQLITE_OPEN_READWRITE</a></dt>
+<dd>The database is opened for reading and writing if possible, or reading
+only if the file is write protected by the operating system.  In either
+case the database must already exist, otherwise an error is returned.</dd></p>
+
+<p><dt><a href="../c3ref/c_open_create.html">SQLITE_OPEN_READWRITE</a> | <a href="../c3ref/c_open_create.html">SQLITE_OPEN_CREATE</a></dt>
+<dd>The database is opened for reading and writing, and is creates it if
+it does not already exist. This is the behavior that is always used for
+sqlite3_open() and sqlite3_open16().</dd>
+</dl></p>
+
+<p>If the 3rd parameter to sqlite3_open_v2() is not one of the
+combinations shown above or one of the combinations shown above combined
+with the <a href="../c3ref/c_open_create.html">SQLITE_OPEN_NOMUTEX</a>, <a href="../c3ref/c_open_create.html">SQLITE_OPEN_FULLMUTEX</a>,
+<a href="../c3ref/c_open_create.html">SQLITE_OPEN_SHAREDCACHE</a> and/or <a href="../c3ref/c_open_create.html">SQLITE_OPEN_SHAREDCACHE</a> flags,
+then the behavior is undefined.</p>
+
+<p>If the <a href="../c3ref/c_open_create.html">SQLITE_OPEN_NOMUTEX</a> flag is set, then the database connection
+opens in the multi-thread <a href="../threadsafe.html">threading mode</a> as long as the single-thread
+mode has not been set at compile-time or start-time.  If the
+<a href="../c3ref/c_open_create.html">SQLITE_OPEN_FULLMUTEX</a> flag is set then the database connection opens
+in the serialized <a href="../threadsafe.html">threading mode</a> unless single-thread was
+previously selected at compile-time or start-time.
+The <a href="../c3ref/c_open_create.html">SQLITE_OPEN_SHAREDCACHE</a> flag causes the database connection to be
+eligible to use <a href="../sharedcache.html">shared cache mode</a>, regardless of whether or not shared
+cache is enabled using <a href="../c3ref/enable_shared_cache.html">sqlite3_enable_shared_cache()</a>.  The
+<a href="../c3ref/c_open_create.html">SQLITE_OPEN_PRIVATECACHE</a> flag causes the database connection to not
+participate in <a href="../sharedcache.html">shared cache mode</a> even if it is enabled.</p>
+
+<p>If the filename is ":memory:", then a private, temporary in-memory database
+is created for the connection.  This in-memory database will vanish when
+the database connection is closed.  Future versions of SQLite might
+make use of additional special filenames that begin with the ":" character.
+It is recommended that when a database filename actually does begin with
+a ":" character you should prefix the filename with a pathname such as
+"./" to avoid ambiguity.</p>
+
+<p>If the filename is an empty string, then a private, temporary
+on-disk database will be created.  This private database will be
+automatically deleted as soon as the database connection is closed.</p>
+
+<p>The fourth parameter to sqlite3_open_v2() is the name of the
+<a href="../c3ref/vfs.html">sqlite3_vfs</a> object that defines the operating system interface that
+the new database connection should use.  If the fourth parameter is
+a NULL pointer then the default <a href="../c3ref/vfs.html">sqlite3_vfs</a> object is used.</p>
+
+<p><b>Note to Windows users:</b>  The encoding used for the filename argument
+of sqlite3_open() and sqlite3_open_v2() must be UTF-8, not whatever
+codepage is currently defined.  Filenames containing international
+characters must be converted to UTF-8 prior to passing them into
+sqlite3_open() or sqlite3_open_v2().
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

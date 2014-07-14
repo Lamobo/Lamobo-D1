@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Features Of SQLite</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+<h1 align=center>Features Of SQLite</h1>
+
+<p><ul>
+<li><a href="transactional.html">Transactions</a>
+    are atomic, consistent, isolated, and durable (ACID)
+    even after system crashes and power failures.</li>
+<li><a href="zeroconf.html">Zero-configuration</a>
+     - no setup or administration needed.</li>
+<li>Implements most of SQL92.
+    (<a href="omitted.html">Features not supported</a>)</li>
+<li>A complete database is stored in a 
+    <a href="onefile.html">single cross-platform disk file</a>.</li>
+<li>Supports terabyte-sized databases and gigabyte-sized strings
+    and blobs.  (See <a href="limits.html">limits.html</a>.)
+<li>Small code footprint: 
+    <a href="http://www.sqlite.org/cvstrac/wiki?p=SizeOfSqlite">
+    less than 300KiB</a> fully configured or less
+    than 180KiB with optional features omitted.</li>
+<li><a href="speed.html">Faster</a> than popular client/server database
+    engines for most common operations.</li>
+<li>Simple, easy to use <a href="c3ref/intro.html">API</a>.</li>
+<li>Written in ANSI-C.  <a href="tclsqlite.html">TCL bindings</a> included.
+    Bindings for dozens of other languages 
+    <a href="http://www.sqlite.org/cvstrac/wiki?p=SqliteWrappers">
+    available separately.</a></li>
+<li>Well-commented source code with
+    <a href="testing.html#coverage">100% branch test coverage</a>.</li>
+<li>Available as a 
+    <a href="amalgamation.html">single ANSI-C source-code file</a> 
+    that you can easily drop into another project.
+<li><a href="selfcontained.html">Self-contained</a>:
+    no external dependencies.</li>
+<li>Cross-platform: Unix (Linux and Mac OS X), OS/2, and Windows
+    (Win32 and WinCE)
+    are supported out of the box.  Easy to port to other systems.
+<li>Sources are in the <a href="copyright.html">public domain</a>.
+    Use for any purpose.</li>
+<li>Comes with a standalone <a href="sqlite.html">command-line interface</a>
+    (CLI) client that can be used to administer SQLite databases.</li>
+</ul>
+</p>
+
+<h2>Suggested Uses For SQLite:</h2>
+
+<p><ul>
+<li><p><b>Application File Format.</b>
+Rather than using fopen() to write XML or some proprietary format into
+disk files used by your application, use an SQLite database instead.
+You'll avoid having to write and troubleshoot a parser, your data
+will be more easily accessible and cross-platform, and your updates
+will be transactional.</p></li>
+
+<li><p><b>Database For Gadgets.</b>
+SQLite is popular choice for the database engine in cellphones,
+PDAs, MP3 players, set-top boxes, and other electronic gadgets.
+SQLite has a small code footprint, makes efficient use of memory,
+disk space, and disk bandwidth, is highly reliable, and requires
+no maintenance from a Database Adminstrator.</p></li>
+
+<li><p><b>Website Database.</b>
+Because it requires no configuration and stores information in ordinary
+disk files, SQLite is a popular choice as the database to back small
+to medium-sized websites.</p></li>
+
+<li><p><b>Stand-in For An Enterprise RDBMS.</b>
+SQLite is often used as a surrogate for an enterprise RDBMS for
+demonstration purposes or for testing.  SQLite is fast and requires
+no setup, which takes a lot of the hassle out of testing and which
+makes demos perky and easy to launch.</p></li>
+</ul>
+

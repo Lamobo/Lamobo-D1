@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Release 3.4.0 On 2007 June 18 (3.4.0)</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<h2>SQLite Release 3.4.0 On 2007 June 18 (3.4.0)</h2><p>Changes associated with this release include the following:</p><p><ul>
+<li>Fix a bug that can lead to database corruption if an <a href="../c3ref/c_abort.html">SQLITE_BUSY</a> error
+    occurs in the middle of an explicit transaction and that transaction
+    is later committed.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2409">Ticket #2409</a>.
+    See the
+    <a href="http://www.sqlite.org/cvstrac/wiki?p=CorruptionFollowingBusyError">
+    CorruptionFollowingBusyError</a> wiki page for details.</i>
+<li>Fix a bug that can lead to database corruption if autovacuum mode is
+    on and a malloc() failure follows a CREATE TABLE or CREATE INDEX statement
+    which itself follows a cache overflow inside a transaction.  See
+    <a href="http://www.sqlite.org/cvstrac/tktview?tn=2418">ticket #2418</a>. 
+    </li>
+<li>Added explicit <a href="../limits.html">upper bounds</a> on the sizes and
+    quantities of things SQLite can process.  This change might cause
+    compatibility problems for
+    applications that use SQLite in the extreme, which is why the current
+    release is 3.4.0 instead of 3.3.18.</li>
+<li>Added support for <a href="../c3ref/blob_open.html">Incremental BLOB I/O</a>.</li>
+<li>Added the <a href="../c3ref/bind_blob.html">sqlite3_bind_zeroblob()</a> API</a>
+    and the <a href="../lang_expr.html#zeroblob">zeroblob()</a> SQL function.</li>
+<li>Added support for <a href="../pragma.html#pragma_incremental_vacuum">
+    Incremental Vacuum</a>.</li>
+<li>Added the SQLITE_MIXED_ENDIAN_64BIT_FLOAT compile-time option to support
+    ARM7 processors with goofy endianness.</li>
+<li>Removed all instances of sprintf() and strcpy() from the core library.</li>
+<li>Added support for
+    <a href="http://www.icu-project.org/">International Components for Unicode (ICU)</a>
+    to the full-text search extensions.
+</ul><p>
+<ul type="circle">
+<li>In the Windows OS driver, reacquire a SHARED lock if an attempt to
+    acquire an EXCLUSIVE lock fails.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2354">Ticket #2354</a></li>
+<li>Fix the REPLACE() function so that it returns NULL if the second argument
+    is an empty string.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2324">Ticket #2324</a>.</li>
+<li>Document the hazards of type conversions in
+    <a href="../c3ref/column_blob.html">sqlite3_column_blob()</a>
+    and related APIs.  Fix unnecessary type conversions.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2321">Ticket #2321</a>.</li>
+<li>Internationalization of the TRIM() function.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2323">Ticket #2323</a></li>
+<li>Use memmove() instead of memcpy() when moving between memory regions
+    that might overlap.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2334">Ticket #2334</a></li>
+<li>Fix an optimizer bug involving subqueries in a compound SELECT that has
+    both an ORDER BY and a LIMIT clause.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2339">Ticket #2339</a>.</li>
+<li>Make sure the <a href="../c3ref/mprintf.html">sqlite3_snprintf()</a>
+    interface does not zero-terminate the buffer if the buffer size is
+    less than 1.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2341">Ticket #2341</a></li>
+<li>Fix the built-in printf logic so that it prints "NaN" not "Inf" for
+    floating-point NaNs.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2345">Ticket #2345</a></li>
+<li>When converting BLOB to TEXT, use the text encoding of the main database.
+    <a href="http://www.sqlite.org/cvstrac/tktview?tn=2349">Ticket #2349</a></li>
+<li>Keep the full precision of integers (if possible) when casting to
+    NUMERIC.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2364">Ticket #2364</a></li>
+<li>Fix a bug in the handling of UTF16 codepoint 0xE000</li>
+<li>Consider explicit collate clauses when matching WHERE constraints
+    to indices in the query optimizer.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2391">Ticket #2391</a></li>
+<li>Fix the query optimizer to correctly handle constant expressions in 
+    the ON clause of a LEFT JOIN.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2403">Ticket #2403</a></li>
+<li>Fix the query optimizer to handle rowid comparisons to NULL
+    correctly.  <a href="http://www.sqlite.org/cvstrac/tktview?tn=2404">Ticket #2404</a></li>
+<li>Fix many potential segfaults that could be caused by malicious SQL
+    statements.</li>
+</ul></p>
+      <p>A <a href="../changes.html">complete list of SQLite releases</a>
+      in a single pages is also available.  A detailed history of every
+      check-in is available at
+      <a href="http://www.sqlite.org/src/timeline">
+      http://www.sqlite.org/src/timeline</a>.</p>
+    

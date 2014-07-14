@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Binding Values To Prepared Statements</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Binding Values To Prepared Statements</h2><blockquote><pre>int sqlite3_bind_blob(sqlite3_stmt*, int, const void*, int n, void(*)(void*));
+int sqlite3_bind_double(sqlite3_stmt*, int, double);
+int sqlite3_bind_int(sqlite3_stmt*, int, int);
+int sqlite3_bind_int64(sqlite3_stmt*, int, sqlite3_int64);
+int sqlite3_bind_null(sqlite3_stmt*, int);
+int sqlite3_bind_text(sqlite3_stmt*, int, const char*, int n, void(*)(void*));
+int sqlite3_bind_text16(sqlite3_stmt*, int, const void*, int, void(*)(void*));
+int sqlite3_bind_value(sqlite3_stmt*, int, const sqlite3_value*);
+int sqlite3_bind_zeroblob(sqlite3_stmt*, int, int n);
+</pre></blockquote><p>
+In the SQL statement text input to <a href="../c3ref/prepare.html">sqlite3_prepare_v2()</a> and its variants,
+literals may be replaced by a <a href="../lang_expr.html#varparam">parameter</a> that matches one of following
+templates:</p>
+
+<p><ul>
+<li>  ?
+<li>  ?NNN
+<li>  :VVV
+<li>  @VVV
+<li>  $VVV
+</ul></p>
+
+<p>In the templates above, NNN represents an integer literal,
+and VVV represents an alphanumeric identifer.  The values of these
+parameters (also called "host parameter names" or "SQL parameters")
+can be set using the sqlite3_bind_*() routines defined here.</p>
+
+<p>The first argument to the sqlite3_bind_*() routines is always
+a pointer to the <a href="../c3ref/stmt.html">sqlite3_stmt</a> object returned from
+<a href="../c3ref/prepare.html">sqlite3_prepare_v2()</a> or its variants.</p>
+
+<p>The second argument is the index of the SQL parameter to be set.
+The leftmost SQL parameter has an index of 1.  When the same named
+SQL parameter is used more than once, second and subsequent
+occurrences have the same index as the first occurrence.
+The index for named parameters can be looked up using the
+<a href="../c3ref/bind_parameter_index.html">sqlite3_bind_parameter_index()</a> API if desired.  The index
+for "?NNN" parameters is the value of NNN.
+The NNN value must be between 1 and the <a href="../c3ref/limit.html">sqlite3_limit()</a>
+parameter <a href="../c3ref/c_limit_attached.html">SQLITE_LIMIT_VARIABLE_NUMBER</a> (default value: 999).</p>
+
+<p>The third argument is the value to bind to the parameter.</p>
+
+<p>In those routines that have a fourth argument, its value is the
+number of bytes in the parameter.  To be clear: the value is the
+number of <u>bytes</u> in the value, not the number of characters.
+If the fourth parameter is negative, the length of the string is
+the number of bytes up to the first zero terminator.</p>
+
+<p>The fifth argument to sqlite3_bind_blob(), sqlite3_bind_text(), and
+sqlite3_bind_text16() is a destructor used to dispose of the BLOB or
+string after SQLite has finished with it. If the fifth argument is
+the special value <a href="../c3ref/c_static.html">SQLITE_STATIC</a>, then SQLite assumes that the
+information is in static, unmanaged space and does not need to be freed.
+If the fifth argument has the value <a href="../c3ref/c_static.html">SQLITE_TRANSIENT</a>, then
+SQLite makes its own private copy of the data immediately, before
+the sqlite3_bind_*() routine returns.</p>
+
+<p>The sqlite3_bind_zeroblob() routine binds a BLOB of length N that
+is filled with zeroes.  A zeroblob uses a fixed amount of memory
+(just an integer to hold its size) while it is being processed.
+Zeroblobs are intended to serve as placeholders for BLOBs whose
+content is later written using
+<a href="../c3ref/blob_open.html">incremental BLOB I/O</a> routines.
+A negative value for the zeroblob results in a zero-length BLOB.</p>
+
+<p>If any of the sqlite3_bind_*() routines are called with a NULL pointer
+for the <a href="../c3ref/stmt.html">prepared statement</a> or with a prepared statement for which
+<a href="../c3ref/step.html">sqlite3_step()</a> has been called more recently than <a href="../c3ref/reset.html">sqlite3_reset()</a>,
+then the call will return <a href="../c3ref/c_abort.html">SQLITE_MISUSE</a>.  If any sqlite3_bind_()
+routine is passed a <a href="../c3ref/stmt.html">prepared statement</a> that has been finalized, the
+result is undefined and probably harmful.</p>
+
+<p>Bindings are not cleared by the <a href="../c3ref/reset.html">sqlite3_reset()</a> routine.
+Unbound parameters are interpreted as NULL.</p>
+
+<p>The sqlite3_bind_* routines return <a href="../c3ref/c_abort.html">SQLITE_OK</a> on success or an
+<a href="../c3ref/c_abort.html">error code</a> if anything goes wrong.
+<a href="../c3ref/c_abort.html">SQLITE_RANGE</a> is returned if the parameter
+index is out of range.  <a href="../c3ref/c_abort.html">SQLITE_NOMEM</a> is returned if malloc() fails.</p>
+
+<p>See also: <a href="../c3ref/bind_parameter_count.html">sqlite3_bind_parameter_count()</a>,
+<a href="../c3ref/bind_parameter_name.html">sqlite3_bind_parameter_name()</a>, and <a href="../c3ref/bind_parameter_index.html">sqlite3_bind_parameter_index()</a>.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

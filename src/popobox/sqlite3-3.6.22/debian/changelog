@@ -1,0 +1,472 @@
+sqlite3 (3.6.22-1) unstable; urgency=low
+
+  * New upstream release (closes: #568061).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Tue, 02 Feb 2010 18:44:27 +0000
+
+sqlite3 (3.6.21-2) unstable; urgency=medium
+
+  * Run autoreconf to prevent FTBFS with new libtool (closes: #560660).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Fri, 11 Dec 2009 14:34:09 +0000
+
+sqlite3 (3.6.21-1) unstable; urgency=medium
+
+  * New upstream release, SQLITE_SECURE_DELETE compile-time option fixed to
+    make sure that content is deleted even when the truncate optimization
+    applies (closes: #555955).
+  * Add 11-manpage-refers-to-sqlite3-doc.patch patch to fix manpage to refer
+    to sqlite3-doc (closes: #560132).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Wed, 09 Dec 2009 14:55:17 +0000
+
+sqlite3 (3.6.20-1) unstable; urgency=low
+
+  * New upstream release (may fix #546599).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Tue, 10 Nov 2009 22:48:13 +0000
+
+sqlite3 (3.6.19-3) unstable; urgency=low
+
+  * Build conflict with tcl8.4{,-dev}, SQLite3 picks up the wrong version
+    despite of specifying tcl8.5 to use (closes: #552304).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Mon, 26 Oct 2009 05:58:04 +0000
+
+sqlite3 (3.6.19-2) unstable; urgency=low
+
+  * Compile with secure deletion option enabled (closes: #551968).
+  * Make libsqlite3-tcl build with tcl8.5 (closes: #547445).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Fri, 23 Oct 2009 07:45:19 +0000
+
+sqlite3 (3.6.19-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 18 Oct 2009 07:11:18 +0000
+
+sqlite3 (3.6.18-1) unstable; urgency=low
+
+  * New upstream release.
+  * Change readline build dependency to plain libreadline-dev (version 6 ATM)
+    and standards-version to 3.8.3 .
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 13 Sep 2009 14:47:20 +0000
+
+sqlite3 (3.6.17-2) unstable; urgency=low
+
+  * Reintroduce libtool and auto{conf,make} updates of CDBS
+    (closes: #541684, #541731), patches modify configure.ac and Makefile.in .
+  * Update patches to match this upstream release.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 16 Aug 2009 15:55:30 +0000
+
+sqlite3 (3.6.17-1) unstable; urgency=low
+
+  * New upstream release.
+  * Don't ask CDBS to run libtool, autoconf nor automake (closes: #541413), no
+    need to build-depend on these tools anymore.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sat, 15 Aug 2009 04:23:42 +0000
+
+sqlite3 (3.6.16-1) unstable; urgency=low
+
+  * New upstream release (closes: #536661).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Fri, 10 Jul 2009 22:44:19 +0000
+
+sqlite3 (3.6.14.2-1) unstable; urgency=low
+
+  * New upstream release. Disable ICU support, it causes more trouble than
+    good.
+  * Add 20-hurd-locking-style.patch for proper locking on Hurd
+    (closes: #529734).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 31 May 2009 16:28:06 +0000
+
+sqlite3 (3.6.13-1) unstable; urgency=low
+
+  * New upstream release (closes: #524617), fixing segfault when table
+    contains default value (closes: 524166).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 19 Apr 2009 07:18:50 +0000
+
+sqlite3 (3.6.12-1) unstable; urgency=low
+
+  * New upstream release, remove 10-install-libsqlite3-first.patch as fixed
+    upstream in a different way.
+  * Remove generated files in clean target.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Tue, 31 Mar 2009 18:33:15 +0000
+
+sqlite3 (3.6.11-4) unstable; urgency=low
+
+  * Fix that .la file (closes: #520478) (really).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 29 Mar 2009 23:53:53 +0000
+
+sqlite3 (3.6.11-3) unstable; urgency=low
+
+  * Really remove transitive dependencies from .la files (closes: #520478).
+  * Set section and priority fields matching override.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Fri, 27 Mar 2009 20:11:06 +0000
+
+sqlite3 (3.6.11-2) unstable; urgency=low
+
+  [ Zack Weinberg ]
+  * Fix ordering in "make install" (closes: #520153).
+  * Link libsqlite3.so with libdl (closes: #520466).
+  * Prune transitive dependencies from .la files (closes: #520478).
+  * Tweak ICU linkage to eliminate dpkg-shlibdeps complaints (closes: #521082). 
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 26 Mar 2009 20:12:02 +0000
+
+sqlite3 (3.6.11-1) unstable; urgency=low
+
+  * New upstream release, upload to unstable.
+  * Enable ICU support (closes: #494987).
+  * Update debhelper compatibility level to 5 as 4 is deprecated now.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sat, 14 Mar 2009 21:18:18 +0000
+
+sqlite3 (3.6.10-1) experimental; urgency=low
+
+  * New upstream release, enable the R*Tree module (closes: #501099).
+  * Remove 01-sqlite3.pc-version-to-release.patch , applied upstream.
+  * Rework 02-lemon-snprintf.patch to match this release.
+  * Remove 03-restore-documentation.patch as documentation can not be built
+    anymore, but merged into .orig.tar.gz .
+  * Rework 04-loadextension-links-dl.patch to still link with libdl if load
+    extension is enabled.
+  * Remove 05-improve-nan-testing-on-x86.patch and
+    06-fix-distinct-on-indexes.patch, this release contains these fixes.
+  * Remove own pkgIndex.tcl , use the original after correcting its path.
+  * Add ${misc:Depends} to packages.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sat, 17 Jan 2009 08:06:05 +0000
+
+sqlite3 (3.5.9-6) unstable; urgency=low
+
+  * Make sqlite3 depends on the exact Debian version of libsqlite3-0
+    (closes: #502370).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 16 Oct 2008 15:44:09 +0000
+
+sqlite3 (3.5.9-5) unstable; urgency=low
+
+  * Backport fix for distinct on indexes (closes: #500792).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Wed, 01 Oct 2008 20:16:18 +0000
+
+sqlite3 (3.5.9-4) unstable; urgency=low
+
+  * Backport improved NaN testing for highly optimized GCC on x86
+    (closes: #488864).
+  * Remove rpath from sqlite3 binary.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 24 Aug 2008 11:03:56 +0000
+
+sqlite3 (3.5.9-3) unstable; urgency=low
+
+  * Enable full text search (closes: #487914).
+  * Update Standards-Version to 3.8.0 , no changes needed.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Wed, 25 Jun 2008 11:41:54 +0200
+
+sqlite3 (3.5.9-2) unstable; urgency=low
+
+  * Set correct version for TCL (closes: #483990).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Mon, 02 Jun 2008 16:33:24 +0000
+
+sqlite3 (3.5.9-1) unstable; urgency=medium
+
+  * New upstream release, contains the backported fix for 3.5.8-4 thus
+    drop 05-busy-handler-update-retry-fix.patch .
+  * Urgency set to medium due to fixing a buffer-overrun problem in
+    sqlite3_mprintf() and fixing a big performance regression on LEFT JOIN
+    (closes: #479184).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sat, 17 May 2008 16:42:51 +0000
+
+sqlite3 (3.5.8-4) unstable; urgency=low
+
+  * Backport busy handler fix from upstream CVS (closes: #480007).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 08 May 2008 20:36:40 +0200
+
+sqlite3 (3.5.8-3) unstable; urgency=low
+
+  * Add 04-loadextension-links-dl.patch to link against dl when
+    loadextension enabled (closes: #478980).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sat, 03 May 2008 09:19:31 +0200
+
+sqlite3 (3.5.8-2) unstable; urgency=low
+
+  * Re-enable extension mechanism (closes: #478337, #475084).
+  * Create and install a more complete documentation (closes: #478492).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Tue, 29 Apr 2008 01:12:34 +0200
+
+sqlite3 (3.5.8-1) unstable; urgency=low
+
+  * New upstream release, re-merge source and documentation.
+  * Remove 04-fix-tcl-interface.patch , this release contains it.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 27 Apr 2008 21:52:30 +0200
+
+sqlite3 (3.5.7-2) unstable; urgency=low
+
+  * Backport TCL interface fix from upstream CVS (closes: #473988).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sun, 06 Apr 2008 20:20:07 +0200
+
+sqlite3 (3.5.7-1) unstable; urgency=low
+
+  * New upstream release.
+  * Redo 03-restore-documentation.patch as upstream Makefile.in changed big.
+  * Fix Makefile.in for rebuild.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sat, 22 Mar 2008 10:32:05 +0000
+
+sqlite3 (3.5.6-3) unstable; urgency=low
+
+  * Add debug library package, thanks to Luis Rodrigo Gallardo Cruz
+    (closes: #447829).
+  * Correct snprintf use in 02-lemon-snprintf.patch thanks to Thorsten Glaser.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 28 Feb 2008 18:50:44 +0000
+
+sqlite3 (3.5.6-2) unstable; urgency=low
+
+  * Upload to unstable.
+  * Add Makefile.in snippets to generate C interface documentation again
+    (closes: #466938).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 28 Feb 2008 14:44:43 +0100
+
+sqlite3 (3.5.6-1) experimental; urgency=low
+
+  * New upstream release.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 14 Feb 2008 16:30:39 +0100
+
+sqlite3 (3.5.4-1) experimental; urgency=low
+
+  * New upstream release, re-merge source and documentation.
+  * Register with doc-base (closes: #452391).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Fri, 21 Dec 2007 22:40:30 +0200
+
+sqlite3 (3.5.1-1) experimental; urgency=low
+
+  * New upstream release.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu,  4 Oct 2007 09:27:05 +0200
+
+sqlite3 (3.4.2-2) unstable; urgency=low
+
+  * Fixed upstream Makefile.in not to lose doc/lemon.html and
+    doc/report1.txt on rebuilds (closes: #441726).
+  * Added debian/watch file.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu,  4 Oct 2007 08:54:16 +0200
+
+sqlite3 (3.4.2-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Mon, 20 Aug 2007 16:12:00 +0300
+
+sqlite3 (3.4.1-1) unstable; urgency=low
+
+  * New upstream release (closes: #436165).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Sat, 28 Jul 2007 08:51:35 +0300
+
+sqlite3 (3.3.17-1) unstable; urgency=low
+
+  * New upstream release.
+  * Use minor version as well in sqlite3.pc (closes: #424235).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 17 May 2007 02:01:42 +0300
+
+sqlite3 (3.3.16-1) unstable; urgency=medium
+
+  * New upstream release with important bugfixes.
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 19 Apr 2007 09:13:29 +0000
+
+sqlite3 (3.3.15-1) unstable; urgency=low
+
+  * New upstream release (closes: #419534).
+  * Force enable extensions; not supposed to work on *BSD, but well...
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Tue, 17 Apr 2007 15:56:30 +0000
+
+sqlite3 (3.3.14-1) unstable; urgency=low
+
+  * New upstream release (closes: #406436). Accept Otavio's upload
+    (closes: #397531).
+  * Include all header files in -dev (closes: #404242), add missing image to
+    -doc (closes: #368211).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Wed, 04 Apr 2007 17:57:08 +0000
+
+sqlite3 (3.3.8-1.1) unstable; urgency=low
+
+  * NMU
+  * Revert PRAGMA table_info format change on a minor version release
+    (closes: #397531)
+
+ -- Otavio Salvador <otavio@debian.org>  Tue,  6 Mar 2007 08:53:43 -0300
+
+sqlite3 (3.3.8-1) unstable; urgency=low
+
+  * New upstream version.
+  * Create lang_* files for documentation (closes: #310603).
+  * Enable column metadata functions (closes: #375352).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu, 12 Oct 2006 21:55:37 +0000
+
+sqlite3 (3.3.7-1) unstable; urgency=low
+
+  * New upstream release (closes: #378247).
+  * New maintainer with ACK from Tomas, close my own NMU fixes
+    (closes: #339369, #364196, #361412, #352317).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Tue,  8 Aug 2006 04:51:14 +0200
+
+sqlite3 (3.3.5-0.2) unstable; urgency=medium
+
+  * NMU to fix package problems:
+    - correct Tcl provides (closes: #361412);
+    - compile correctly on 64 bit archs, thanks to Matthias Klose
+      (closes: #364196).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Mon,  1 May 2006 10:47:59 +0000
+
+sqlite3 (3.3.5-0.1) unstable; urgency=medium
+
+  * NMU for new upstream release; fixes thread segfault (in tests) on hppa
+    (closes: #339369).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Thu,  6 Apr 2006 17:16:42 +0000
+
+sqlite3 (3.3.4-0.1) unstable; urgency=low
+
+  * NMU for new upstream release (closes: #352317).
+
+ -- Laszlo Boszormenyi (GCS) <gcs@debian.hu>  Wed,  5 Apr 2006 01:46:45 +0200
+
+sqlite3 (3.2.8-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Tomas Fasth <tomfa@debian.org>  Thu, 29 Dec 2005 03:09:18 +0000
+
+sqlite3 (3.2.7-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Tomas Fasth <tomfa@debian.org>  Sun, 25 Sep 2005 12:08:21 +0000
+
+sqlite3 (3.2.5-1) unstable; urgency=low
+
+  * New upstream release.
+  * Removed debian/patches/10-main-timeout.patch, fixed upstream.
+  * Removed debian/patches/01-configure.ac-version_number.patch, fixed
+    upstream.
+
+ -- Tomas Fasth <tomfa@debian.org>  Sun, 28 Aug 2005 21:23:03 +0000
+
+sqlite3 (3.2.2-3) unstable; urgency=low
+
+  * Closes: #321487: missing dependency on debconf
+    The file debian/libsqlite3-0.preinst has been removed. It was
+    originally part of the ancestor sqlite 2.x source package, which
+    still exist in parallel with sqlite3. It has now been removed
+    together with debian/libsqlite3-0.postinst that was created in a
+    first missguided attempt by me to correct this policy violation.
+
+ -- Tomas Fasth <tomfa@debian.org>  Sat,  6 Aug 2005 22:16:33 +0000
+
+sqlite3 (3.2.2-2) unstable; urgency=low
+
+  * Closes: #314856: Missing pre-dependency on debconf.
+  * Closes: #319897: /usr/include/sqlite3.h: SQLITE_VERSION_NUMBER is
+    3000000
+
+ -- Tomas Fasth <tomfa@debian.org>  Tue,  2 Aug 2005 00:48:25 +0000
+
+sqlite3 (3.2.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * New maintainer.
+  * Closes: #314856: Missing pre-dependency on debconf.
+    Moving upgrade notification from debian/libsqlite3-0.preinst to
+    debian/libsqlite3-0.postinst.
+  * Closes: #316348: Timeout does not expire on SQLLITE_BUSY.
+    Adding patch with correct type cast for timeout in src/main.c[283].
+  * Closes: #317594: sqlite3-3.2.1-1 SIGBUS on 64-bit machines (fixed
+    upstream)
+  * Closes: #318341: New upstream version 3.2.2
+
+ -- Tomas Fasth <tomfa@debian.org>  Mon,  1 Aug 2005 20:03:20 +0000
+
+sqlite3 (3.2.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Andreas Rottmann <rotty@debian.org>  Sat,  2 Apr 2005 02:41:15 +0200
+
+sqlite3 (3.1.6-1) unstable; urgency=high
+
+  * New upstream release.
+  * Fixes two database corruption bugs (in 3.1.4 and 3.1.6), hence urgency
+    high.
+
+ -- Andreas Rottmann <rotty@debian.org>  Thu, 17 Mar 2005 20:00:16 +0100
+
+sqlite3 (3.1.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Now building with automake1.9 and against libreadline5-dev.
+
+ -- Andreas Rottmann <rotty@debian.org>  Wed, 16 Feb 2005 17:04:19 +0100
+
+sqlite3 (3.0.8-3) unstable; urgency=medium
+
+  * Fix threadsafe enabling, now works through configure option (closes:
+    #285913).
+  * Medium urgency to get this fix into sarge.
+
+ -- Andreas Rottmann <rotty@debian.org>  Sat,  1 Jan 2005 13:12:10 +0100
+
+sqlite3 (3.0.8-2) unstable; urgency=low
+
+  * libsqlite3-dev: Suggest sqlite3-doc instead of sqlite-doc (closes:
+    #285771).
+  * libsqlite3-0: Don't Pre-Depend on debconf (closes: #284976).
+  * sqlite3-doc: Now comes with sqlite.gif and links to 
+    http://sqlite.org/contrib instead of locally (closes: #285769).
+  
+ -- Andreas Rottmann <rotty@debian.org>  Thu, 16 Dec 2004 12:24:02 +0100
+  
+sqlite3 (3.0.8-1) unstable; urgency=low
+
+  * Initial release of SQLite3 (closes: #272271, #282351).
+    - Now packaged as a new source package, since SQLite 3 
+      is incompatible (database- and API-wise) with SQLite 2.
+    - Remove debian/lemon.html, this is now shipped by upstream in doc/.
+    - Adapted manpage for 3.0 (thanks to Laszlo 'GCS' Boszormeny).
+  
+ -- Andreas Rottmann <rotty@debian.org>  Sun,  7 Nov 2004 13:49:52 +0100
+sqlite3 (3.5.8-3) unstable; urgency=low
+
+  * Link.
+
+ -- root <gcs@debian.hu>  Sat, 03 May 2008 09:33:37 +0200

@@ -1,0 +1,315 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>How To Compile SQLite</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+          
+
+
+<h1 align=center>How To Compile SQLite</h1>
+
+<p>
+SQLite is ANSI-C source code.
+It must be compiled into machine code before it is useful.
+This article is a guide to the various ways of compiling SQLite.
+</p>
+
+<p>This article does not contain a step-by-step recipe for compiling
+SQLite.  That would be difficult since each development situation
+is different.
+Rather, this article describes and illustrates the principals behind the
+compilation of SQLite.  Typical compilation commands are provided as examples
+with the expectation that application developers can use these examples
+as guidance for developing their own custom compilation procedures.
+In other words, this article provides ideas and insights, not turnkey
+solutions.</p>
+
+<h2>Amalgamation Versus Individual Source Files</h2> 
+
+<p>SQLite is built from literally hundreds of files of C code and script
+spread across multiple directories.  The implementation of SQLite is pure
+ANSI-C, but many of the C-language source code files are either either
+generated or transformed by auxiliary C programs and AWK, SED, and TCL 
+scripts prior to being incorporated into the finished SQLite library.
+Building the necessary C programs and transforming and/or creating the
+C-language source code for SQLite is a complex process.</p>
+
+<p>To simplify matters, SQLite is also available as a pre-packaged
+<a href="amalgamation.html">amalgamation</a> source code file: <b>sqlite3.c</b>.  The amalgamation is
+a single file of ANSI-C code that implements the entire SQLite library.
+The amalgamation is much easier to deal with.  Everything is contained
+within a single code files, so it is easy to drop into the source tree
+of a larger C or C++ program.  All the code generation and transformation
+steps have already been carried out so there are no auxiliary C programs
+to configure and compile and no scripts to run.  And, because the entire
+library is contained in a single translation unit, compilers are able to
+do more advanced optimizations resulting in a 5% to 10% performance 
+improvement.  For these reasons, the amalgamation source file 
+("<b>sqlite3.c</b>") is recommended for all applications.</p>
+
+<blockquote><i>
+The use of the <a href="amalgamation.html">amalgamation</a> is recommended for all applications.
+</i></blockquote>
+
+<p>Building SQLite directly from individual source code files is certainly
+possible, but it is not recommended.  For some specialized applications, it
+might be necessary to modify the build process in ways that cannot be done
+using just the prebuilt amalgamation source file downloaded from the website.
+For those situations, it is recommended that a customized amalgamation be
+built (as described <a href="howtocompile.html#amal">below</a>)
+and used.  In other words, even if a project requires building SQLite 
+beginning with individual source files, it is still recommended that an
+amalgamation source file be used as an intermediate step.</p>
+
+<a name="cli"></a>
+
+<h2>Compiling The Command-Line Interface</h2>
+
+<p>A build of the <a href="sqlite.html">command-line interface</a> requires three source
+files:</p>
+
+<ul>
+<li><b>sqlite3.c</b>: The SQLite amalgamation source file
+<li><b>sqlite3.h</b>: The header files that accompanies sqlite3.c and 
+defines the C-language interfaces to SQLite.
+<li><b>shell.c</b>: The command-line interface program itself.
+This is the C source code file that contains the definition of
+the <b>main()</b> routine and the loop that prompts for user input
+and passes that input into the SQLite database engine for processing.
+</ul>
+
+<p>All three of the above source files are contained in the
+<a href="download.html">amalgamation tarball</a> available on the <a href="download.html">download page</a>.</p>
+
+<p>To build the CLI, simply put these three files in the same directory
+and compile them together.  The command to compile C programs varies from
+one machine to the next but on unix systems typically looks 
+something like this:</p>
+
+<blockquote><pre>
+gcc shell.c sqlite3.c -lpthread -ldl
+</pre></blockquote>
+
+<p>The pthreads library is needed to make SQLite threadsafe.  But
+since the CLI is single threaded,  we could instruct SQLite to build
+in a non-threadsafe mode and thereby omit the pthreads library:</p>
+
+<blockquote><pre>
+gcc -DSQLITE_THREADSAFE=0 shell.c sqlite3.c -ldl
+</pre></blockquote>
+
+<p>The -ldl library is needed to support dynamic loading, the
+<a href="c3ref/load_extension.html">sqlite3_load_extension()</a> interface and the
+<a href="lang_corefunc.html#load_extension">load_extension() SQL function</a>.  If these features are not required,
+then they can be omitted using <a href="compile.html#omit_load_extension">SQLITE_OMIT_LOAD_EXTENSION</a> compile-time
+option:</p>
+
+<blockquote><pre>
+gcc -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION shell.c sqlite3.c
+</pre></blockquote>
+
+<p>One might want to provide other <a href="compile.html">compile-time options</a> such as
+<a href="compile.html#enable_fts3">SQLITE_ENABLE_FTS3</a> for full-text search or <a href="compile.html#enable_rtree">SQLITE_ENABLE_RTREE</a>
+for the R*Tree search engine extension.  And one would normally to
+specify some compiler optimization switches too.  (The precompiled
+CLI available for download from the SQLite website uses "-Os".)
+There are countless possible variations here.</p>
+
+<p>The key point is this:  Building the CLI consists of compiling 
+together two C-language files.   The <b>shell.c</b> file contains the
+definition of the entry point and the user input loop and the
+SQLite amalgamation <b>sqlite3.c</b> contains the complete implementation
+of the SQLite library.</p>
+
+<a name="tcl"></a>
+
+<h2>Compiling The TCL Interface</h2>
+
+<p>The TCL interface for SQLite is a small module that is added into
+the regular amalgamation.  The result is a new amalgamated source
+file called "<b>tclsqlite3.c</b>".  This single source file is all that
+is needed to generate a shared library that can be loaded into a
+standard 
+<a href="http://wiki.tcl.tk/2541">tclsh</a> or 
+<a href="http://wiki.tcl.tk/2364">wish</a> using the 
+<a href="http://wiki.tcl.tk/9830">TCL load command</a>, or to generate a
+standalone tclsh that comes with SQLite built in.
+A copy of the tcl amalgamation
+is included on the <a href="download.html">download page</a> as a file in the <a href="download.html">TEA tarball</a>.</p>
+
+<p>To generate a TCL-loadable library for SQLite on linux, the following
+command will suffice:</p>
+
+<blockquote><pre>
+gcc -o libtclsqlite3.so -shared tclsqlite3.c -lpthread -ldl -ltcl
+</pre></blockquote>
+
+<p>Building shared libraries for Mac OSX and Windows is not nearly so simple,
+unfortunately.  For those platforms it is best to use the configure script
+and makefile that is included with the <a href="download.html">TEA tarball</a>.</p>
+
+<p>To generate a standalone tclsh that is statically linked with SQLite,
+use this compiler invocation:</p>
+
+<blockquote><pre>
+gcc -DTCLSH=1 tclsqlite3.c -ltcl -lpthread -ldl -lz -lm
+</pre></blockquote>
+
+<p>The trick here is the -DTCLSH=1 option.  The TCL interface module for
+SQLite includes a <b>main()</b> procedure that initializes a TCL interpreter
+and enters a command-line loop when it is compiled with -DTCLSH=1.  The
+command above works on both Linux and Mac OSX, though one may need to adjust
+the library options depending on the platform and which version of TCL one
+is linking against.</p>
+
+<a name="amal"></a>
+
+<h2>Building The Amalgamation</h2>
+
+<p>The versions of the SQLite amalgamation that are supplied on the
+<a href="download.html">download page</a> are normally adequate for most users.  However, some
+projects may want or need to build their own amalgamations.  A common
+reason for building a custom amalgamation is in order to use certain
+<a href="compile.html">compile-time options</a> to customize the SQLite library.  Recall that
+the SQLite amalgamation contains a lot of C-code that is generated by
+auxiliary programs and scripts.  Many of the compile-time
+options effect this generated code and must be supplied to the code
+generators before the amalgamation is assemblied.  The set of 
+compile-time options that must be passed into the code generators can
+vary from one release of SQLite to the next, but at the time of this
+writing (circa SQLite 3.6.20, 2009-11-04) the set of options that must
+be known by the code generators includes:</p>
+
+<ul>
+<li><a href="compile.html#enable_update_delete_limit">SQLITE_ENABLE_UPDATE_DELETE_LIMIT</a>
+<li><a href="compile.html#omit_altertable">SQLITE_OMIT_ALTERTABLE</a>
+<li><a href="compile.html#omit_analyze">SQLITE_OMIT_ANALYZE</a>
+<li><a href="compile.html#omit_attach">SQLITE_OMIT_ATTACH</a>
+<li><a href="compile.html#omit_autoincrement">SQLITE_OMIT_AUTOINCREMENT</a>
+<li><a href="compile.html#omit_cast">SQLITE_OMIT_CAST</a>
+<li><a href="compile.html#omit_compound_select">SQLITE_OMIT_COMPOUND_SELECT</a>
+<li><a href="compile.html#omit_conflict_clause">SQLITE_OMIT_CONFLICT_CLAUSE</a>
+<li><a href="compile.html#omit_explain">SQLITE_OMIT_EXPLAIN</a>
+<li><a href="compile.html#omit_foreign_key">SQLITE_OMIT_FOREIGN_KEY</a>
+<li><a href="compile.html#omit_pragma">SQLITE_OMIT_PRAGMA</a>
+<li><a href="compile.html#omit_reindex">SQLITE_OMIT_REINDEX</a>
+<li><a href="compile.html#omit_subquery">SQLITE_OMIT_SUBQUERY</a>
+<li><a href="compile.html#omit_tempdb">SQLITE_OMIT_TEMPDB</a>
+<li><a href="compile.html#omit_trigger">SQLITE_OMIT_TRIGGER</a>
+<li><a href="compile.html#omit_vacuum">SQLITE_OMIT_VACUUM</a>
+<li><a href="compile.html#omit_view">SQLITE_OMIT_VIEW</a>
+<li><a href="compile.html#omit_virtualtable">SQLITE_OMIT_VIRTUALTABLE</a>
+</ul>
+
+<p>To build a custom amalgamation, first download the original individual
+source files onto a unix or unix-like development platform.  (Any linux or
+mac osx machine will suffice.  Windows will work if loaded with
+<a href="http://www.cygwin.com/">cygwin</a>.)  Be sure to get the original source
+files not the "preprocessed source files".  One can obtain the complete
+set of original source files either from the <a href="download.html">download page</a> or directly
+from the <a href="http://www.sqlite.org/src">configuration management system</a>.</p>
+
+<p>Suppose the SQLite source tree is stored in a directory named "sqlite".
+Plan to construct the amalgamation in a parallel directory named (for
+example) "bld".  First construct an appropriate Makefile by either
+running the configure script at the top of the SQLite source tree, or by
+making a copy of one of the template Makefiles at the top of the source tree.
+Then hand edit this Makefile to include the desired compile-time options.
+Finally run:</p>
+
+<blockquote><pre>
+make sqlite3.c
+</pre></blockquote>
+
+<p>The "sqlite3.c" make target will automatically construct the regular
+"<b>sqlite3.c</b>" amalgamation source file, its header file
+"<b>sqlite3.h</b>", and the "<b>tclsqlite3.c</b>" amalgamation source
+file that includes the TCL interface.
+Afterwards, the needed files can be copied into project directories and
+compiled according to the procedures outlined above.</p>
+

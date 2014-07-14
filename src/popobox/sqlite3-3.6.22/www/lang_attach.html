@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Query Language: ATTACH DATABASE</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<h1 align="center">SQL As Understood By SQLite</h1><p><a href="lang.html">[Top]</a></p><h2>ATTACH DATABASE</h2><h4><a href="syntaxdiagrams.html#attach-stmt">attach-stmt:</a></h4><blockquote> <img alt="syntax diagram attach-stmt" src="images/syntax/attach-stmt.gif"></img> </blockquote>
+
+
+<p> The ATTACH DATABASE statement adds another database 
+file to the current <a href="c3ref/sqlite3.html">database connection</a>. 
+The database-names 'main' and 
+'temp' refer to the main database and the database used for 
+temporary tables.  The main and temp databases cannot be attached or
+detached.</p>
+
+<p> You cannot create a new table with the same name as a table in 
+an attached database, but you can attach a database which contains
+tables whose names are duplicates of tables in the main database.  If
+the system is not running in <a href="sharedcache.html">shared cache mode</a>, it is also permissible 
+to attach the same database file multiple times.</p>
+
+<p> Tables in an attached database can be referred to using the syntax 
+<i>database-name.table-name</i>.  If the name of the table is unique
+across all attached databases and the main and temp databases, then the
+<i>database-name</i> prefix is not required.  When a database is attached, 
+all tables which don't have duplicate names become the default table
+of that name.  Any tables of that name attached afterwards require the
+database prefix. If the default table of a given name is detached, then
+the last table of that name attached becomes the new default.</p>
+
+<p>
+Transactions involving multiple attached databases are atomic,
+assuming that the main database is not "<a href="inmemorydb.html">:memory:</a>".  If the main
+database is ":memory:" then 
+transactions continue to be atomic within each individual
+database file. But if the host computer crashes in the middle
+of a <a href="lang_transaction.html">COMMIT</a> where two or more database files are updated,
+some of those files might get the changes where others
+might not.
+</p>
+
+<p> There is a compile-time limit of <a href="limits.html#max_attached">SQLITE_MAX_ATTACHED</a>
+attached database files.</p>
+
+

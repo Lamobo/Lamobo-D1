@@ -1,0 +1,277 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Online Backup API.</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Online Backup API.</h2><blockquote><pre>sqlite3_backup *sqlite3_backup_init(
+  sqlite3 *pDest,                        /* Destination database handle */
+  const char *zDestName,                 /* Destination database name */
+  sqlite3 *pSource,                      /* Source database handle */
+  const char *zSourceName                /* Source database name */
+);
+int sqlite3_backup_step(sqlite3_backup *p, int nPage);
+int sqlite3_backup_finish(sqlite3_backup *p);
+int sqlite3_backup_remaining(sqlite3_backup *p);
+int sqlite3_backup_pagecount(sqlite3_backup *p);
+</pre></blockquote><p><b>Important:</b> This interface is <a href="../c3ref/experimental.html">experimental</a> and is subject to change without notice.</p><p>
+The backup API copies the content of one database into another.
+It is useful either for creating backups of databases or
+for copying in-memory databases to or from persistent files.</p>
+
+<p>See Also: <a href="../backup.html">Using the SQLite Online Backup API</a></p>
+
+<p>Exclusive access is required to the destination database for the
+duration of the operation. However the source database is only
+read-locked while it is actually being read; it is not locked
+continuously for the entire backup operation. Thus, the backup may be
+performed on a live source database without preventing other users from
+reading or writing to the source database while the backup is underway.</p>
+
+<p>To perform a backup operation:
+<ol>
+<li><b>sqlite3_backup_init()</b> is called once to initialize the
+backup,
+<li><b>sqlite3_backup_step()</b> is called one or more times to transfer
+the data between the two databases, and finally
+<li><b>sqlite3_backup_finish()</b> is called to release all resources
+associated with the backup operation.
+</ol>
+There should be exactly one call to sqlite3_backup_finish() for each
+successful call to sqlite3_backup_init().</p>
+
+<p><b>sqlite3_backup_init()</b></p>
+
+<p>The D and N arguments to sqlite3_backup_init(D,N,S,M) are the
+<a href="../c3ref/sqlite3.html">database connection</a> associated with the destination database
+and the database name, respectively.
+The database name is "main" for the main database, "temp" for the
+temporary database, or the name specified after the AS keyword in
+an <a href="../lang_attach.html">ATTACH</a> statement for an attached database.
+The S and M arguments passed to
+sqlite3_backup_init(D,N,S,M) identify the <a href="../c3ref/sqlite3.html">database connection</a>
+and database name of the source database, respectively.
+The source and destination <a href="../c3ref/sqlite3.html">database connections</a> (parameters S and D)
+must be different or else sqlite3_backup_init(D,N,S,M) will file with
+an error.</p>
+
+<p>If an error occurs within sqlite3_backup_init(D,N,S,M), then NULL is
+returned and an error code and error message are store3d in the
+destination <a href="../c3ref/sqlite3.html">database connection</a> D.
+The error code and message for the failed call to sqlite3_backup_init()
+can be retrieved using the <a href="../c3ref/errcode.html">sqlite3_errcode()</a>, <a href="../c3ref/errcode.html">sqlite3_errmsg()</a>, and/or
+<a href="../c3ref/errcode.html">sqlite3_errmsg16()</a> functions.
+A successful call to sqlite3_backup_init() returns a pointer to an
+<a href="../c3ref/backup.html">sqlite3_backup</a> object.
+The <a href="../c3ref/backup.html">sqlite3_backup</a> object may be used with the sqlite3_backup_step() and
+sqlite3_backup_finish() functions to perform the specified backup
+operation.</p>
+
+<p><b>sqlite3_backup_step()</b></p>
+
+<p>Function sqlite3_backup_step(B,N) will copy up to N pages between
+the source and destination databases specified by <a href="../c3ref/backup.html">sqlite3_backup</a> object B.
+If N is negative, all remaining source pages are copied.
+If sqlite3_backup_step(B,N) successfully copies N pages and there
+are still more pages to be copied, then the function resturns <a href="../c3ref/c_abort.html">SQLITE_OK</a>.
+If sqlite3_backup_step(B,N) successfully finishes copying all pages
+from source to destination, then it returns <a href="../c3ref/c_abort.html">SQLITE_DONE</a>.
+If an error occurs while running sqlite3_backup_step(B,N),
+then an <a href="../c3ref/c_abort.html">error code</a> is returned. As well as <a href="../c3ref/c_abort.html">SQLITE_OK</a> and
+<a href="../c3ref/c_abort.html">SQLITE_DONE</a>, a call to sqlite3_backup_step() may return <a href="../c3ref/c_abort.html">SQLITE_READONLY</a>,
+<a href="../c3ref/c_abort.html">SQLITE_NOMEM</a>, <a href="../c3ref/c_abort.html">SQLITE_BUSY</a>, <a href="../c3ref/c_abort.html">SQLITE_LOCKED</a>, or an
+<a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_XXX</a> extended error code.</p>
+
+<p>The sqlite3_backup_step() might return <a href="../c3ref/c_abort.html">SQLITE_READONLY</a> if the destination
+database was opened read-only or if
+the destination is an in-memory database with a different page size
+from the source database.</p>
+
+<p>If sqlite3_backup_step() cannot obtain a required file-system lock, then
+the <a href="../c3ref/busy_handler.html">busy-handler function</a>
+is invoked (if one is specified). If the
+busy-handler returns non-zero before the lock is available, then
+<a href="../c3ref/c_abort.html">SQLITE_BUSY</a> is returned to the caller. In this case the call to
+sqlite3_backup_step() can be retried later. If the source
+<a href="../c3ref/sqlite3.html">database connection</a>
+is being used to write to the source database when sqlite3_backup_step()
+is called, then <a href="../c3ref/c_abort.html">SQLITE_LOCKED</a> is returned immediately. Again, in this
+case the call to sqlite3_backup_step() can be retried later on. If
+<a href="../c3ref/c_ioerr_access.html">SQLITE_IOERR_XXX</a>, <a href="../c3ref/c_abort.html">SQLITE_NOMEM</a>, or
+<a href="../c3ref/c_abort.html">SQLITE_READONLY</a> is returned, then
+there is no point in retrying the call to sqlite3_backup_step(). These
+errors are considered fatal.  The application must accept
+that the backup operation has failed and pass the backup operation handle
+to the sqlite3_backup_finish() to release associated resources.</p>
+
+<p>The first call to sqlite3_backup_step() obtains an exclusive lock
+on the destination file. The exclusive lock is not released until either
+sqlite3_backup_finish() is called or the backup operation is complete
+and sqlite3_backup_step() returns <a href="../c3ref/c_abort.html">SQLITE_DONE</a>.  Every call to
+sqlite3_backup_step() obtains a <a href="../lockingv3.html#shared_lock">shared lock</a> on the source database that
+lasts for the duration of the sqlite3_backup_step() call.
+Because the source database is not locked between calls to
+sqlite3_backup_step(), the source database may be modified mid-way
+through the backup process.  If the source database is modified by an
+external process or via a database connection other than the one being
+used by the backup operation, then the backup will be automatically
+restarted by the next call to sqlite3_backup_step(). If the source
+database is modified by the using the same database connection as is used
+by the backup operation, then the backup database is automatically
+updated at the same time.</p>
+
+<p><b>sqlite3_backup_finish()</b></p>
+
+<p>When sqlite3_backup_step() has returned <a href="../c3ref/c_abort.html">SQLITE_DONE</a>, or when the
+application wishes to abandon the backup operation, the application
+should destroy the <a href="../c3ref/backup.html">sqlite3_backup</a> by passing it to sqlite3_backup_finish().
+The sqlite3_backup_finish() interfaces releases all
+resources associated with the <a href="../c3ref/backup.html">sqlite3_backup</a> object.
+If sqlite3_backup_step() has not yet returned <a href="../c3ref/c_abort.html">SQLITE_DONE</a>, then any
+active write-transaction on the destination database is rolled back.
+The <a href="../c3ref/backup.html">sqlite3_backup</a> object is invalid
+and may not be used following a call to sqlite3_backup_finish().</p>
+
+<p>The value returned by sqlite3_backup_finish is <a href="../c3ref/c_abort.html">SQLITE_OK</a> if no
+sqlite3_backup_step() errors occurred, regardless or whether or not
+sqlite3_backup_step() completed.
+If an out-of-memory condition or IO error occurred during any prior
+sqlite3_backup_step() call on the same <a href="../c3ref/backup.html">sqlite3_backup</a> object, then
+sqlite3_backup_finish() returns the corresponding <a href="../c3ref/c_abort.html">error code</a>.</p>
+
+<p>A return of <a href="../c3ref/c_abort.html">SQLITE_BUSY</a> or <a href="../c3ref/c_abort.html">SQLITE_LOCKED</a> from sqlite3_backup_step()
+is not a permanent error and does not affect the return value of
+sqlite3_backup_finish().</p>
+
+<p><b>sqlite3_backup_remaining(), sqlite3_backup_pagecount()</b></p>
+
+<p>Each call to sqlite3_backup_step() sets two values inside
+the <a href="../c3ref/backup.html">sqlite3_backup</a> object: the number of pages still to be backed
+up and the total number of pages in the source databae file.
+The sqlite3_backup_remaining() and sqlite3_backup_pagecount() interfaces
+retrieve these two values, respectively.</p>
+
+<p>The values returned by these functions are only updated by
+sqlite3_backup_step(). If the source database is modified during a backup
+operation, then the values are not updated to account for any extra
+pages that need to be updated or the size of the source database file
+changing.</p>
+
+<p><b>Concurrent Usage of Database Handles</b></p>
+
+<p>The source <a href="../c3ref/sqlite3.html">database connection</a> may be used by the application for other
+purposes while a backup operation is underway or being initialized.
+If SQLite is compiled and configured to support threadsafe database
+connections, then the source database connection may be used concurrently
+from within other threads.</p>
+
+<p>However, the application must guarantee that the destination
+<a href="../c3ref/sqlite3.html">database connection</a> is not passed to any other API (by any thread) after
+sqlite3_backup_init() is called and before the corresponding call to
+sqlite3_backup_finish().  SQLite does not currently check to see
+if the application incorrectly accesses the destination <a href="../c3ref/sqlite3.html">database connection</a>
+and so no error code is reported, but the operations may malfunction
+nevertheless.  Use of the destination database connection while a
+backup is in progress might also also cause a mutex deadlock.</p>
+
+<p>If running in <a href="../sharedcache.html">shared cache mode</a>, the application must
+guarantee that the shared cache used by the destination database
+is not accessed while the backup is running. In practice this means
+that the application must guarantee that the disk file being
+backed up to is not accessed by any connection within the process,
+not just the specific connection that was passed to sqlite3_backup_init().</p>
+
+<p>The <a href="../c3ref/backup.html">sqlite3_backup</a> object itself is partially threadsafe. Multiple
+threads may safely make multiple concurrent calls to sqlite3_backup_step().
+However, the sqlite3_backup_remaining() and sqlite3_backup_pagecount()
+APIs are not strictly speaking threadsafe. If they are invoked at the
+same time as another thread is invoking sqlite3_backup_step() it is
+possible that they return invalid values.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

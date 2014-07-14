@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Application Defined Page Cache.</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Application Defined Page Cache.</h2><blockquote><pre>typedef struct sqlite3_pcache_methods sqlite3_pcache_methods;
+struct sqlite3_pcache_methods {
+  void *pArg;
+  int (*xInit)(void*);
+  void (*xShutdown)(void*);
+  sqlite3_pcache *(*xCreate)(int szPage, int bPurgeable);
+  void (*xCachesize)(sqlite3_pcache*, int nCachesize);
+  int (*xPagecount)(sqlite3_pcache*);
+  void *(*xFetch)(sqlite3_pcache*, unsigned key, int createFlag);
+  void (*xUnpin)(sqlite3_pcache*, void*, int discard);
+  void (*xRekey)(sqlite3_pcache*, void*, unsigned oldKey, unsigned newKey);
+  void (*xTruncate)(sqlite3_pcache*, unsigned iLimit);
+  void (*xDestroy)(sqlite3_pcache*);
+};
+</pre></blockquote><p><b>Important:</b> This interface is <a href="../c3ref/experimental.html">experimental</a> and is subject to change without notice.</p><p>
+The <a href="../c3ref/config.html">sqlite3_config</a>(<a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_PCACHE</a>, ...) interface can
+register an alternative page cache implementation by passing in an
+instance of the sqlite3_pcache_methods structure. The majority of the
+heap memory used by SQLite is used by the page cache to cache data read
+from, or ready to be written to, the database file. By implementing a
+custom page cache using this API, an application can control more
+precisely the amount of memory consumed by SQLite, the way in which
+that memory is allocated and released, and the policies used to
+determine exactly which parts of a database file are cached and for
+how long.</p>
+
+<p>The contents of the sqlite3_pcache_methods structure are copied to an
+internal buffer by SQLite within the call to <a href="../c3ref/config.html">sqlite3_config</a>.  Hence
+the application may discard the parameter after the call to
+<a href="../c3ref/config.html">sqlite3_config()</a> returns.</p>
+
+<p>The xInit() method is called once for each call to <a href="../c3ref/initialize.html">sqlite3_initialize()</a>
+(usually only once during the lifetime of the process). The xInit()
+method is passed a copy of the sqlite3_pcache_methods.pArg value.
+The xInit() method can set up up global structures and/or any mutexes
+required by the custom page cache implementation.</p>
+
+<p>The xShutdown() method is called from within <a href="../c3ref/initialize.html">sqlite3_shutdown()</a>,
+if the application invokes this API. It can be used to clean up
+any outstanding resources before process shutdown, if required.</p>
+
+<p>SQLite holds a <a href="../c3ref/c_mutex_fast.html">SQLITE_MUTEX_RECURSIVE</a> mutex when it invokes
+the xInit method, so the xInit method need not be threadsafe.  The
+xShutdown method is only called from <a href="../c3ref/initialize.html">sqlite3_shutdown()</a> so it does
+not need to be threadsafe either.  All other methods must be threadsafe
+in multithreaded applications.</p>
+
+<p>SQLite will never invoke xInit() more than once without an intervening
+call to xShutdown().</p>
+
+<p>The xCreate() method is used to construct a new cache instance.  SQLite
+will typically create one cache instance for each open database file,
+though this is not guaranteed. The
+first parameter, szPage, is the size in bytes of the pages that must
+be allocated by the cache.  szPage will not be a power of two.  szPage
+will the page size of the database file that is to be cached plus an
+increment (here called "R") of about 100 or 200.  SQLite will use the
+extra R bytes on each page to store metadata about the underlying
+database page on disk.  The value of R depends
+on the SQLite version, the target platform, and how SQLite was compiled.
+R is constant for a particular build of SQLite.  The second argument to
+xCreate(), bPurgeable, is true if the cache being created will
+be used to cache database pages of a file stored on disk, or
+false if it is used for an in-memory database. The cache implementation
+does not have to do anything special based with the value of bPurgeable;
+it is purely advisory.  On a cache where bPurgeable is false, SQLite will
+never invoke xUnpin() except to deliberately delete a page.
+In other words, a cache created with bPurgeable set to false will
+never contain any unpinned pages.</p>
+
+<p>The xCachesize() method may be called at any time by SQLite to set the
+suggested maximum cache-size (number of pages stored by) the cache
+instance passed as the first argument. This is the value configured using
+the SQLite "<a href="../pragma.html#pragma_cache_size">PRAGMA cache_size</a>" command.  As with the bPurgeable
+parameter, the implementation is not required to do anything with this
+value; it is advisory only.</p>
+
+<p>The xPagecount() method should return the number of pages currently
+stored in the cache.</p>
+
+<p>The xFetch() method is used to fetch a page and return a pointer to it.
+A 'page', in this context, is a buffer of szPage bytes aligned at an
+8-byte boundary. The page to be fetched is determined by the key. The
+mimimum key value is 1. After it has been retrieved using xFetch, the page
+is considered to be "pinned".</p>
+
+<p>If the requested page is already in the page cache, then the page cache
+implementation must return a pointer to the page buffer with its content
+intact.  If the requested page is not already in the cache, then the
+behavior of the cache implementation is determined by the value of the
+createFlag parameter passed to xFetch, according to the following table:</p>
+
+<p><table border=1 width=85% align=center>
+<tr><th> createFlag <th> Behaviour when page is not already in cache
+<tr><td> 0 <td> Do not allocate a new page.  Return NULL.
+<tr><td> 1 <td> Allocate a new page if it easy and convenient to do so.
+Otherwise return NULL.
+<tr><td> 2 <td> Make every effort to allocate a new page.  Only return
+NULL if allocating a new page is effectively impossible.
+</table></p>
+
+<p>SQLite will normally invoke xFetch() with a createFlag of 0 or 1.  If
+a call to xFetch() with createFlag==1 returns NULL, then SQLite will
+attempt to unpin one or more cache pages by spilling the content of
+pinned pages to disk and synching the operating system disk cache. After
+attempting to unpin pages, the xFetch() method will be invoked again with
+a createFlag of 2.</p>
+
+<p>xUnpin() is called by SQLite with a pointer to a currently pinned page
+as its second argument. If the third parameter, discard, is non-zero,
+then the page should be evicted from the cache. In this case SQLite
+assumes that the next time the page is retrieved from the cache using
+the xFetch() method, it will be zeroed. If the discard parameter is
+zero, then the page is considered to be unpinned. The cache implementation
+may choose to evict unpinned pages at any time.</p>
+
+<p>The cache is not required to perform any reference counting. A single
+call to xUnpin() unpins the page regardless of the number of prior calls
+to xFetch().</p>
+
+<p>The xRekey() method is used to change the key value associated with the
+page passed as the second argument from oldKey to newKey. If the cache
+previously contains an entry associated with newKey, it should be
+discarded. Any prior cache entry associated with newKey is guaranteed not
+to be pinned.</p>
+
+<p>When SQLite calls the xTruncate() method, the cache must discard all
+existing cache entries with page numbers (keys) greater than or equal
+to the value of the iLimit parameter passed to xTruncate(). If any
+of these pages are pinned, they are implicitly unpinned, meaning that
+they can be safely discarded.</p>
+
+<p>The xDestroy() method is used to delete a cache allocated by xCreate().
+All resources associated with the specified cache should be freed. After
+calling the xDestroy() method, SQLite considers the <a href="../c3ref/pcache.html">sqlite3_pcache*</a>
+handle invalid, and will not use it with any other sqlite3_pcache_methods
+functions.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

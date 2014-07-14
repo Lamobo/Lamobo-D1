@@ -1,0 +1,61 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/buildcore.mk
+include /usr/share/cdbs/1/class/autotools.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
+
+so_version := 0
+
+# Make sure libsqlite0 is built before packages depending on it
+binary/sqlite3 binary/libsqlite3-dev binary/libsqlite3-tcl:: binary/libsqlite3-$(so_version)
+
+clean::
+	rm -f config.status config.log libtool .target_source \
+	  Makefile config.h sqlite3.c \
+	  sqlite3.pc pkgIndex.tcl
+common-install-arch::
+	install -d debian/tmp/usr/lib/sqlite3/
+	install -m 0664 libtclsqlite3.la `pwd`/debian/tmp/usr/lib/sqlite3
+	chrpath -d debian/tmp/usr/bin/sqlite3
+	chrpath -d ./debian/tmp/usr/share/tcltk/tcl8.5/sqlite3/libtclsqlite3.so
+	install -d debian/tmp/usr/share/lemon
+	install -m 0664 tool/lempar.c debian/tmp/usr/share/lemon
+	install -m 0775 lemon debian/tmp/usr/bin
+	install -d debian/tmp/usr/share/man/man1/
+	install -m 0644 sqlite3.1 debian/tmp/usr/share/man/man1
+#install/libsqlite3-dev::
+#	sed -e 's/-licui18n -licuuc //' \
+	  ./debian/tmp/usr/lib/libsqlite3.la \
+	  >./debian/tmp/usr/lib/libsqlite3.la.tmp
+#	mv ./debian/tmp/usr/lib/libsqlite3.la.tmp \
+	./debian/tmp/usr/lib/libsqlite3.la \
+
+install/libsqlite3-tcl::
+	sed -e 's/share/lib/' -e 's/tcl[^/]*\///g' \
+	  ./debian/tmp/usr/share/tcltk/tcl8.5/sqlite3/pkgIndex.tcl \
+	  >./debian/libsqlite3-tcl/usr/lib/sqlite3/pkgIndex.tcl
+
+DEB_AUTO_UPDATE_LIBTOOL = pre
+DEB_AUTO_UPDATE_AUTOCONF = 2.50
+DEB_AUTO_UPDATE_AUTOMAKE = 1.11
+
+#DEB_CONFIGURE_SCRIPT_ENV += LDFLAGS="-licui18n -licuuc"
+DEB_CONFIGURE_EXTRA_FLAGS = --with-tcl=/usr/lib/tcl8.5 --enable-threadsafe --enable-load-extension
+
+DEB_MAKE_BUILD_TARGET = all libtclsqlite3.la doc
+#DEB_MAKE_CHECK_TARGET = test
+
+DEB_DH_INSTALL_ARGS := --sourcedir=debian/tmp
+
+DEB_ALL_CHANGELOG = doc/changes.html
+
+DEB_DH_MAKESHLIBS_ARGS := -V -X"libtclsqlite3.so*"
+
+DEB_SHLIBDEPS_LIBRARY_sqlite := libsqlite3-$(so_version)
+DEB_SHLIBDEPS_INCLUDE_sqlite := debian/libsqlite3-$(so_version)/usr/lib/
+
+#DEB_OPT_FLAG := -O2 -fno-strict-aliasing -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_RTREE=1 -DSQLITE_ENABLE_ICU=1
+DEB_OPT_FLAG := -O2 -fno-strict-aliasing -DSQLITE_SECURE_DELETE -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_RTREE=1
+
+DEB_DH_STRIP_ARGS := --dbg-package=libsqlite3-$(so_version)-dbg

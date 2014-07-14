@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>No Title</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<!-- title>Notes On How To Build MinGW As A Cross-Compiler</title -->
+
+<h1 align=center>
+Notes On How To Build MinGW As A Cross-Compiler
+</h1>
+
+<p><a href="http://www.mingw.org/">MinGW</a>, also known as
+<a href="http://www.mingw.org/">Minimalist GNU For Windows</a>,
+is a version of the popular GCC compiler that builds Win95/Win98/WinNT
+binaries.  See the website for details.</p>
+
+<p>This page describes how you can build MinGW 
+from sources as a cross-compiler
+running under Linux.  Doing so will allow you to construct
+WinNT binaries from the comfort and convenience of your
+Unix desktop.</p>
+
+
+
+<p>Here are the steps:</p>
+
+<ol>
+<li>
+<p>Get a copy of source code.  You will need the binutils, the
+compiler, and the MinGW runtime.  Each are available separately.
+As of this writing, Mumit Khan has collected everything you need
+together in one FTP site:
+
+<a href="ftp://ftp.nanotech.wisc.edu/pub/khan/gnu-win32/mingw32/snapshots/gcc-2.95.2-1">ftp://ftp.nanotech.wisc.edu/pub/khan/gnu-win32/mingw32/snapshots/gcc-2.95.2-1</a>
+
+The three files you will need are:</p>
+<ul>
+<li>
+  <a href="ftp://ftp.nanotech.wisc.edu/pub/khan/gnu-win32/mingw32/snapshots/gcc-2.95.2-1/binutils-19990818-1-src.tar.gz">binutils-19990818-1-src.tar.gz</a></li><li><a href="ftp://ftp.nanotech.wisc.edu/pub/khan/gnu-win32/mingw32/snapshots/gcc-2.95.2-1/gcc-2.95.2-1-src.tar.gz">gcc-2.95.2-1-src.tar.gz</a></li><li><a href="ftp://ftp.nanotech.wisc.edu/pub/khan/gnu-win32/mingw32/snapshots/gcc-2.95.2-1/mingw-20000203.zip">mingw-20000203.zip</a>
+</li>
+</ul>
+
+<p>Put all the downloads in a directory out of the way.  The sequel
+will assume all downloads are in a directory named
+<b>~/mingw/download</b>.</p>
+</li>
+
+<li>
+<p>
+Create a directory in which to install the new compiler suite and make
+the new directory writable.
+Depending on what directory you choose, you might need to become
+root.  The example shell commands that follow
+will assume the installation directory is
+<b>/opt/mingw</b> and that your user ID is <b>drh</b>.</p>
+<blockquote><pre>
+su
+mkdir /opt/mingw
+chown drh /opt/mingw
+exit
+</pre></blockquote>
+</li>
+
+<li>
+<p>Unpack the source tarballs into a separate directory.</p>
+<blockquote><pre>
+mkdir ~/mingw/src
+cd ~/mingw/src
+tar xzf ../download/binutils-*.tar.gz
+tar xzf ../download/gcc-*.tar.gz
+unzip ../download/mingw-*.zip
+</pre></blockquote>
+</li>
+
+<li>
+<p>Create a directory in which to put all the build products.</p>
+<blockquote><pre>
+mkdir ~/mingw/bld
+</pre></blockquote>
+</li>
+
+<li>
+<p>Configure and build binutils and add the results to your PATH.</p>
+<blockquote><pre>
+mkdir ~/mingw/bld/binutils
+cd ~/mingw/bld/binutils
+../../src/binutils/configure --prefix=/opt/mingw --target=i386-mingw32 -v
+make 2&gt;&amp;1 | tee make.out
+make install 2&gt;&amp;1 | tee make-install.out
+export PATH=$PATH:/opt/mingw/bin
+</pre></blockquote>
+</li>
+
+<li>
+<p>Manually copy the runtime include files into the installation directory
+before trying to build the compiler.</p>
+<blockquote><pre>
+mkdir /opt/mingw/i386-mingw32/include
+cd ~/mingw/src/mingw-runtime*/mingw/include
+cp -r * /opt/mingw/i386-mingw32/include
+</pre></blockquote>
+</li>
+
+<li>
+<p>Configure and build the compiler</p>
+<blockquote><pre>
+mkdir ~/mingw/bld/gcc
+cd ~/mingw/bld/gcc
+../../src/gcc-*/configure --prefix=/opt/mingw --target=i386-mingw32 -v
+cd gcc
+make installdirs
+cd ..
+make 2&gt;&amp;1 | tee make.out
+make install
+</pre></blockquote>
+</li>
+
+<li>
+<p>Configure and build the MinGW runtime</p>
+<blockquote><pre>
+mkdir ~/mingw/bld/runtime
+cd ~/mingw/bld/runtime
+../../src/mingw-runtime*/configure --prefix=/opt/mingw --target=i386-mingw32 -v
+make install-target-w32api
+make install
+</pre></blockquote>
+</li>
+</ol>
+
+<p>And you are done...</p>
+

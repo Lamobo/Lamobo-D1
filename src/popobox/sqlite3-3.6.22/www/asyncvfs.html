@@ -1,0 +1,259 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>An Asynchronous I/O Module For SQLite</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="index.html">
+<img class="logo" src="images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="about.html">About</a>
+    <a href="sitemap.html">Sitemap</a>
+    <a href="docs.html">Documentation</a>
+    <a href="download.html">Download</a>
+    <a href="copyright.html">License</a>
+    <a href="news.html">News</a>
+    <!-- <a href="dev.html">Developers</a> -->
+    <a href="support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+
+
+<h1 align="center">An Asynchronous I/O Module For SQLite</h1>
+
+<p>Normally, when SQLite writes to a database file, it waits until the write
+operation is finished before returning control to the calling application.
+Since writing to the file-system is usually very slow compared with CPU
+bound operations, this can be a performance bottleneck. The asynchronous I/O
+backend is an extension that causes SQLite to perform all write requests
+using a separate thread running in the background. Although this does not
+reduce the overall system resources (CPU, disk bandwidth etc.), it does
+allow SQLite to return control to the caller quickly even when writing to
+the database.
+
+<h2>1.0 FUNCTIONALITY</h2>
+
+<p>With asynchronous I/O, write requests are handled by a separate thread
+running in the background.  This means that the thread that initiates
+a database write does not have to wait for (sometimes slow) disk I/O
+to occur.  The write seems to happen very quickly, though in reality
+it is happening at its usual slow pace in the background.
+
+<p>Asynchronous I/O appears to give better responsiveness, but at a price.
+You lose the Durable property.  With the default I/O backend of SQLite,
+once a write completes, you know that the information you wrote is
+safely on disk.  With the asynchronous I/O, this is not the case.  If
+your program crashes or if a power loss occurs after the database
+write but before the asynchronous write thread has completed, then the
+database change might never make it to disk and the next user of the
+database might not see your change.
+
+<p>You lose Durability with asynchronous I/O, but you still retain the
+other parts of ACID:  Atomic,  Consistent, and Isolated.  Many
+appliations get along fine without the Durablity.
+
+<h3>1.1 How it Works</h3>
+
+<p>Asynchronous I/O works by creating an SQLite <a href="c3ref/vfs.html">VFS object</a>
+and registering it with <a href="c3ref/vfs_find.html">sqlite3_vfs_register()</a>.
+When files opened via 
+this VFS are written to (using the vfs xWrite() method), the data is not 
+written directly to disk, but is placed in the "write-queue" to be
+handled by the background thread.
+
+<p>When files opened with the asynchronous VFS are read from 
+(using the vfs xRead() method), the data is read from the file on 
+disk and the write-queue, so that from the point of view of
+the vfs reader the xWrite() appears to have already completed.
+
+<p>The asynchronous I/O VFS is registered (and unregistered) by calls to the 
+API functions sqlite3async_initialize() and sqlite3async_shutdown().
+See section "Compilation and Usage" below for details.
+
+<h3>1.2 Limitations</h3>
+
+<p>In order to gain experience with the main ideas surrounding asynchronous 
+IO, this implementation is deliberately kept simple. Additional 
+capabilities may be added in the future.
+
+<p>For example, as currently implemented, if writes are happening at a 
+steady stream that exceeds the I/O capability of the background writer
+thread, the queue of pending write operations will grow without bound.
+If this goes on for long enough, the host system could run out of memory. 
+A more sophisticated module could to keep track of the quantity of 
+pending writes and stop accepting new write requests when the queue of 
+pending writes grows too large.
+
+<h3>1.3 Locking and Concurrency</h3>
+
+<p>Multiple connections from within a single process that use this
+implementation of asynchronous IO may access a single database
+file concurrently. From the point of view of the user, if all
+connections are from within a single process, there is no difference
+between the concurrency offered by "normal" SQLite and SQLite
+using the asynchronous backend.
+
+<p>If file-locking is enabled (it is enabled by default), then connections
+from multiple processes may also read and write the database file.
+However concurrency is reduced as follows:
+
+<ul>
+<li><p> When a connection using asynchronous IO begins a database
+        transaction, the database is locked immediately. However the
+        lock is not released until after all relevant operations
+        in the write-queue have been flushed to disk. This means
+        (for example) that the database may remain locked for some 
+        time after a "<a href="lang_transaction.html">COMMIT</a>" or "<a href="lang_transaction.html">ROLLBACK</a>" is issued.
+
+<li><p> If an application using asynchronous IO executes transactions
+        in quick succession, other database users may be effectively
+        locked out of the database. This is because when a <a href="lang_transaction.html">BEGIN</a>
+        is executed, a database lock is established immediately. But
+        when the corresponding COMMIT or ROLLBACK occurs, the lock
+        is not released until the relevant part of the write-queue 
+        has been flushed through. As a result, if a COMMIT is followed
+        by a BEGIN before the write-queue is flushed through, the database 
+        is never unlocked,preventing other processes from accessing 
+        the database.
+</ul>
+
+<p>File-locking may be disabled at runtime using the sqlite3async_control()
+API (see below). This may improve performance when an NFS or other 
+network file-system, as the synchronous round-trips to the server be 
+required to establish file locks are avoided. However, if multiple 
+connections attempt to access the same database file when file-locking
+is disabled, application crashes and database corruption is a likely
+outcome.
+
+
+<h2>2.0 COMPILATION AND USAGE</h2>
+
+<p>
+The asynchronous IO extension consists of a single file of C code
+(sqlite3async.c), and a header file (sqlite3async.h), located in the
+<a href="http://www.sqlite.org/src/dir?name=ext/async">
+<tt>ext/async/</tt> subfolder</a> of the SQLite source tree, that defines the 
+C API used by applications to activate and control the modules 
+functionality.
+
+<p>
+To use the asynchronous IO extension, compile sqlite3async.c as
+part of the application that uses SQLite. Then use the APIs defined
+in sqlite3async.h to initialize and configure the module.
+
+<p>
+The asynchronous IO VFS API is described in detail in comments in 
+sqlite3async.h. Using the API usually consists of the following steps:
+
+<ol>
+<li><p>Register the asynchronous IO VFS with SQLite by calling the
+       sqlite3async_initialize() function.
+
+<li><p>Create a background thread to perform write operations and call
+       sqlite3async_run().
+
+<li><p>Use the normal SQLite API to read and write to databases via 
+       the asynchronous IO VFS.
+</ol>
+
+<p>Refer to comments in the
+<a href="http://www.sqlite.org/src/finfo?name=ext/async/sqlite3async.h">
+sqlite3async.h header file</a> for details.
+
+
+<h2>3.0 PORTING</h2>
+
+<p>Currently the asynchronous IO extension is compatible with win32 systems
+and systems that support the pthreads interface, including Mac OSX, Linux, 
+and other varieties of Unix. 
+
+<p>To port the asynchronous IO extension to another platform, the user must
+implement mutex and condition variable primitives for the new platform.
+Currently there is no externally available interface to allow this, but
+modifying the code within sqlite3async.c to include the new platforms
+concurrency primitives is relatively easy. Search within sqlite3async.c
+for the comment string "PORTING FUNCTIONS" for details. Then implement
+new versions of each of the following:
+
+<blockquote><pre>
+static void async_mutex_enter(int eMutex);
+static void async_mutex_leave(int eMutex);
+static void async_cond_wait(int eCond, int eMutex);
+static void async_cond_signal(int eCond);
+static void async_sched_yield(void);
+</pre></blockquote>
+
+<p>The functionality required of each of the above functions is described
+in comments in sqlite3async.c.
+

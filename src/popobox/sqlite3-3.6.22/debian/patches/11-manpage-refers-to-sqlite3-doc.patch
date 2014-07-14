@@ -1,0 +1,12 @@
+diff -Nur orig.sqlite3-3.6.21/sqlite3.1 sqlite3-3.6.21/sqlite3.1
+--- orig.sqlite3-3.6.21/sqlite3.1	2009-08-13 18:31:10.000000000 +0000
++++ sqlite3-3.6.21/sqlite3.1	2009-12-09 15:10:19.738805009 +0000
+@@ -222,7 +222,7 @@
+ .SH SEE ALSO
+ http://www.sqlite.org/
+ .br
+-The sqlite-doc package
++The sqlite3-doc package
+ .SH AUTHOR
+ This manual page was originally written by Andreas Rottmann
+ <rotty@debian.org>, for the Debian GNU/Linux system (but may be used

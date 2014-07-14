@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>SQLite Release 3.3.14 On 2007 April 2 (3.3.14)</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<h2>SQLite Release 3.3.14 On 2007 April 2 (3.3.14)</h2><p>Changes associated with this release include the following:</p><p><ul>
+<li>Fix a bug (<a href="http://www.sqlite.org/cvstrac/tktview?tn=2273">ticket #2273</a>)
+    that could cause a segfault when the IN operator
+    is used one one term of a two-column index and the right-hand side of
+    the IN operator contains a NULL.</li>
+<li>Added a new OS interface method for determining the sector size
+    of underlying media:  sqlite3OsSectorSize().</li>
+<li>A new algorithm for statements of the form
+    INSERT INTO <i>table1</i> SELECT * FROM <i>table2</i>
+    is faster and reduces fragmentation.  VACUUM uses statements of
+    this form and thus runs faster and defragments better.</li>
+<li>Performance enhancements through reductions in disk I/O:
+<ul>
+<li>Do not read the last page of an overflow chain when
+    deleting the row - just add that page to the freelist.</li>
+<li>Do not store pages being deleted in the 
+    rollback journal.</li>
+<li>Do not read in the (meaningless) content of
+    pages extracted from the freelist.</li>
+<li>Do not flush the page cache (and thus avoiding
+    a cache refill) unless another process changes the underlying
+    database file.</li>
+<li>Truncate rather than delete the rollback journal when committing
+    a transaction in exclusive access mode, or when committing the TEMP
+    database.</li>
+</ul></li>
+<li>Added support for exclusive access mode using
+    <a href="../pragma.html#pragma_locking_mode">
+    "PRAGMA locking_mode=EXCLUSIVE"</a></li>
+<li>Use heap space instead of stack space for large buffers in the
+    pager - useful on embedded platforms with  stack-space
+    limitations.</li>
+<li>Add a makefile target "sqlite3.c" that builds an amalgamation containing
+    the core SQLite library C code in a single file.</li>
+<li>Get the library working correctly when compiled 
+    with GCC option "-fstrict-aliasing".</li>
+<li>Removed the vestigal SQLITE_PROTOCOL error.</li>
+<li>Improvements to test coverage, other minor bugs fixed,
+    memory leaks plugged,
+    code refactored and/or recommended in places for easier reading.</li>
+</ul></p>
+      <p>A <a href="../changes.html">complete list of SQLite releases</a>
+      in a single pages is also available.  A detailed history of every
+      check-in is available at
+      <a href="http://www.sqlite.org/src/timeline">
+      http://www.sqlite.org/src/timeline</a>.</p>
+    

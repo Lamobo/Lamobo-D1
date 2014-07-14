@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Test To See If The Library Is Threadsafe</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Test To See If The Library Is Threadsafe</h2><blockquote><pre>int sqlite3_threadsafe(void);
+</pre></blockquote><p>
+The sqlite3_threadsafe() function returns zero if and only if
+SQLite was compiled mutexing code omitted due to the
+<a href="../compile.html#threadsafe">SQLITE_THREADSAFE</a> compile-time option being set to 0.</p>
+
+<p>SQLite can be compiled with or without mutexes.  When
+the <a href="../compile.html#threadsafe">SQLITE_THREADSAFE</a> C preprocessor macro is 1 or 2, mutexes
+are enabled and SQLite is threadsafe.  When the
+<a href="../compile.html#threadsafe">SQLITE_THREADSAFE</a> macro is 0,
+the mutexes are omitted.  Without the mutexes, it is not safe
+to use SQLite concurrently from more than one thread.</p>
+
+<p>Enabling mutexes incurs a measurable performance penalty.
+So if speed is of utmost importance, it makes sense to disable
+the mutexes.  But for maximum safety, mutexes should be enabled.
+The default behavior is for mutexes to be enabled.</p>
+
+<p>This interface can be used by an application to make sure that the
+version of SQLite that it is linking against was compiled with
+the desired setting of the <a href="../compile.html#threadsafe">SQLITE_THREADSAFE</a> macro.</p>
+
+<p>This interface only reports on the compile-time mutex setting
+of the <a href="../compile.html#threadsafe">SQLITE_THREADSAFE</a> flag.  If SQLite is compiled with
+SQLITE_THREADSAFE=1 or =2 then mutexes are enabled by default but
+can be fully or partially disabled using a call to <a href="../c3ref/config.html">sqlite3_config()</a>
+with the verbs <a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_SINGLETHREAD</a>, <a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MULTITHREAD</a>,
+or <a href="../c3ref/c_config_getmalloc.html">SQLITE_CONFIG_MUTEX</a>.  The return value of the
+sqlite3_threadsafe() function shows only the compile-time setting of
+thread safety, not any run-time changes to that setting made by
+sqlite3_config(). In other words, the return value from sqlite3_threadsafe()
+is unchanged by calls to sqlite3_config().</p>
+
+<p>See the <a href="../threadsafe.html">threading mode</a> documentation for additional information.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

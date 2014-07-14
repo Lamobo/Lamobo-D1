@@ -1,0 +1,90 @@
+Source: sqlite3
+Section: devel
+Priority: optional
+Maintainer: Laszlo Boszormenyi (GCS) <gcs@debian.hu>
+Build-Depends: cdbs (>= 0.4.15), debhelper (>= 5), autoconf (>= 2.59), libtool (>= 1.5.2), automake, autotools-dev, chrpath, libreadline-dev, tcl8.5-dev
+Build-Conflicts: tcl8.4, tcl8.4-dev
+Standards-Version: 3.8.4
+
+Package: lemon
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: The Lemon Parser Generator
+ Lemon is an LALR(1) parser generator for C or C++. It does the same
+ job as bison and yacc. But lemon is not another bison or yacc
+ clone. It uses a different grammar syntax which is designed to reduce
+ the number of coding errors. Lemon also uses a more sophisticated
+ parsing engine that is faster than yacc and bison and which is both
+ reentrant and thread-safe. Furthermore, Lemon implements features
+ that can be used to eliminate resource leaks, making is suitable for
+ use in long-running programs such as graphical user interfaces or
+ embedded controllers.
+
+Package: sqlite3
+Section: database
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: sqlite3-doc
+Description: A command line interface for SQLite 3
+ SQLite is a C library that implements an SQL database engine. 
+ Programs that link with the SQLite library can have SQL database 
+ access without running a separate RDBMS process.
+
+Package: sqlite3-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: sqlite3
+Description: SQLite 3 documentation
+ SQLite is a C library that implements an SQL database engine. 
+ Programs that link with the SQLite library can have SQL database 
+ access without running a separate RDBMS process.
+ .
+ This package contains the documentation that is also available on
+ the SQLite homepage.
+
+Package: libsqlite3-0-dbg
+Section: debug
+Architecture: any
+Priority: extra
+Depends: libsqlite3-0 (= ${binary:Version}), ${misc:Depends}
+Description: SQLite 3 debugging symbols
+ SQLite is a C library that implements an SQL database engine. 
+ Programs that link with the SQLite library can have SQL database 
+ access without running a separate RDBMS process.
+ .
+ This package contains the debugging symbols for the libraries.
+
+Package: libsqlite3-0
+Section: libs
+Architecture: any
+Priority: standard
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: SQLite 3 shared library
+ SQLite is a C library that implements an SQL database engine. 
+ Programs that link with the SQLite library can have SQL database 
+ access without running a separate RDBMS process.
+
+Package: libsqlite3-dev
+Suggests: sqlite3-doc
+Section: libdevel
+Architecture: any
+Depends: libsqlite3-0 (= ${binary:Version}), ${misc:Depends}, libc6-dev
+Description: SQLite 3 development files
+ SQLite is a C library that implements an SQL database engine. 
+ Programs that link with the SQLite library can have SQL database 
+ access without running a separate RDBMS process.
+ .
+ This package contains the development files (headers, static libraries)
+
+Package: libsqlite3-tcl
+Suggests: sqlite3-doc
+Section: interpreters
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: SQLite 3 Tcl bindings
+ SQLite is a C library that implements an SQL database engine. 
+ Programs that link with the SQLite library can have SQL database 
+ access without running a separate RDBMS process.
+ .
+ This package contains the Tcl bindings.

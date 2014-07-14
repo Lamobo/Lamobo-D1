@@ -1,0 +1,2 @@
+version=2
+http://www.sqlite.org/download.html sqlite-(3.[\d\.]*).tar.gz

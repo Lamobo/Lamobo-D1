@@ -1,0 +1,31 @@
+--- z/src/os_unix.c	2009-04-09 20:41:18.000000000 +0200
++++ z/src/os_unix.c	2009-05-21 01:24:01.000000000 +0200
+@@ -66,7 +66,7 @@
+ ** where the database is located.  
+ */
+ #if !defined(SQLITE_ENABLE_LOCKING_STYLE)
+-#  if defined(__APPLE__)
++#  if defined(__APPLE__) || defined(__GNU__)
+ #    define SQLITE_ENABLE_LOCKING_STYLE 1
+ #  else
+ #    define SQLITE_ENABLE_LOCKING_STYLE 0
+@@ -130,7 +130,9 @@
+ # else
+ #  include <sys/file.h>
+ #  include <sys/param.h>
+-#  include <sys/mount.h>
++#   if ! defined(__GNU__)
++#    include <sys/mount.h>
++#   endif
+ # endif
+ #endif /* SQLITE_ENABLE_LOCKING_STYLE */
+ 
+@@ -5107,6 +5109,8 @@
+   static sqlite3_vfs aVfs[] = {
+ #if SQLITE_ENABLE_LOCKING_STYLE && (OS_VXWORKS || defined(__APPLE__))
+     UNIXVFS("unix",          autolockIoFinder ),
++#elif SQLITE_ENABLE_LOCKING_STYLE && defined(__GNU__)
++    UNIXVFS("unix",          flockIoFinder ),
+ #else
+     UNIXVFS("unix",          posixIoFinder ),
+ #endif

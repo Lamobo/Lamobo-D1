@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Result Values From A Query</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Result Values From A Query</h2><blockquote><pre>const void *sqlite3_column_blob(sqlite3_stmt*, int iCol);
+int sqlite3_column_bytes(sqlite3_stmt*, int iCol);
+int sqlite3_column_bytes16(sqlite3_stmt*, int iCol);
+double sqlite3_column_double(sqlite3_stmt*, int iCol);
+int sqlite3_column_int(sqlite3_stmt*, int iCol);
+sqlite3_int64 sqlite3_column_int64(sqlite3_stmt*, int iCol);
+const unsigned char *sqlite3_column_text(sqlite3_stmt*, int iCol);
+const void *sqlite3_column_text16(sqlite3_stmt*, int iCol);
+int sqlite3_column_type(sqlite3_stmt*, int iCol);
+sqlite3_value *sqlite3_column_value(sqlite3_stmt*, int iCol);
+</pre></blockquote><p>
+These routines form the "result set" interface.</p>
+
+<p>These routines return information about a single column of the current
+result row of a query.  In every case the first argument is a pointer
+to the <a href="../c3ref/stmt.html">prepared statement</a> that is being evaluated (the <a href="../c3ref/stmt.html">sqlite3_stmt*</a>
+that was returned from <a href="../c3ref/prepare.html">sqlite3_prepare_v2()</a> or one of its variants)
+and the second argument is the index of the column for which information
+should be returned. The leftmost column of the result set has the index 0.
+The number of columns in the result can be determined using
+<a href="../c3ref/column_count.html">sqlite3_column_count()</a>.</p>
+
+<p>If the SQL statement does not currently point to a valid row, or if the
+column index is out of range, the result is undefined.
+These routines may only be called when the most recent call to
+<a href="../c3ref/step.html">sqlite3_step()</a> has returned <a href="../c3ref/c_abort.html">SQLITE_ROW</a> and neither
+<a href="../c3ref/reset.html">sqlite3_reset()</a> nor <a href="../c3ref/finalize.html">sqlite3_finalize()</a> have been called subsequently.
+If any of these routines are called after <a href="../c3ref/reset.html">sqlite3_reset()</a> or
+<a href="../c3ref/finalize.html">sqlite3_finalize()</a> or after <a href="../c3ref/step.html">sqlite3_step()</a> has returned
+something other than <a href="../c3ref/c_abort.html">SQLITE_ROW</a>, the results are undefined.
+If <a href="../c3ref/step.html">sqlite3_step()</a> or <a href="../c3ref/reset.html">sqlite3_reset()</a> or <a href="../c3ref/finalize.html">sqlite3_finalize()</a>
+are called from a different thread while any of these routines
+are pending, then the results are undefined.</p>
+
+<p>The sqlite3_column_type() routine returns the
+<a href="../c3ref/c_blob.html">datatype code</a> for the initial data type
+of the result column.  The returned value is one of <a href="../c3ref/c_blob.html">SQLITE_INTEGER</a>,
+<a href="../c3ref/c_blob.html">SQLITE_FLOAT</a>, <a href="../c3ref/c_blob.html">SQLITE_TEXT</a>, <a href="../c3ref/c_blob.html">SQLITE_BLOB</a>, or <a href="../c3ref/c_blob.html">SQLITE_NULL</a>.  The value
+returned by sqlite3_column_type() is only meaningful if no type
+conversions have occurred as described below.  After a type conversion,
+the value returned by sqlite3_column_type() is undefined.  Future
+versions of SQLite may change the behavior of sqlite3_column_type()
+following a type conversion.</p>
+
+<p>If the result is a BLOB or UTF-8 string then the sqlite3_column_bytes()
+routine returns the number of bytes in that BLOB or string.
+If the result is a UTF-16 string, then sqlite3_column_bytes() converts
+the string to UTF-8 and then returns the number of bytes.
+If the result is a numeric value then sqlite3_column_bytes() uses
+<a href="../c3ref/mprintf.html">sqlite3_snprintf()</a> to convert that value to a UTF-8 string and returns
+the number of bytes in that string.
+The value returned does not include the zero terminator at the end
+of the string.  For clarity: the value returned is the number of
+bytes in the string, not the number of characters.</p>
+
+<p>Strings returned by sqlite3_column_text() and sqlite3_column_text16(),
+even empty strings, are always zero terminated.  The return
+value from sqlite3_column_blob() for a zero-length BLOB is an arbitrary
+pointer, possibly even a NULL pointer.</p>
+
+<p>The sqlite3_column_bytes16() routine is similar to sqlite3_column_bytes()
+but leaves the result in UTF-16 in native byte order instead of UTF-8.
+The zero terminator is not included in this count.</p>
+
+<p>The object returned by <a href="../c3ref/column_blob.html">sqlite3_column_value()</a> is an
+<a href="../c3ref/value.html">unprotected sqlite3_value</a> object.  An unprotected sqlite3_value object
+may only be used with <a href="../c3ref/bind_blob.html">sqlite3_bind_value()</a> and <a href="../c3ref/result_blob.html">sqlite3_result_value()</a>.
+If the <a href="../c3ref/value.html">unprotected sqlite3_value</a> object returned by
+<a href="../c3ref/column_blob.html">sqlite3_column_value()</a> is used in any other way, including calls
+to routines like <a href="../c3ref/value_blob.html">sqlite3_value_int()</a>, <a href="../c3ref/value_blob.html">sqlite3_value_text()</a>,
+or <a href="../c3ref/value_blob.html">sqlite3_value_bytes()</a>, then the behavior is undefined.</p>
+
+<p>These routines attempt to convert the value where appropriate.  For
+example, if the internal representation is FLOAT and a text result
+is requested, <a href="../c3ref/mprintf.html">sqlite3_snprintf()</a> is used internally to perform the
+conversion automatically.  The following table details the conversions
+that are applied:</p>
+
+<p><blockquote>
+<table border="1">
+<tr><th> Internal<br>Type <th> Requested<br>Type <th>  Conversion</p>
+
+<p><tr><td>  NULL    <td> INTEGER   <td> Result is 0
+<tr><td>  NULL    <td>  FLOAT    <td> Result is 0.0
+<tr><td>  NULL    <td>   TEXT    <td> Result is NULL pointer
+<tr><td>  NULL    <td>   BLOB    <td> Result is NULL pointer
+<tr><td> INTEGER  <td>  FLOAT    <td> Convert from integer to float
+<tr><td> INTEGER  <td>   TEXT    <td> ASCII rendering of the integer
+<tr><td> INTEGER  <td>   BLOB    <td> Same as INTEGER->TEXT
+<tr><td>  FLOAT   <td> INTEGER   <td> Convert from float to integer
+<tr><td>  FLOAT   <td>   TEXT    <td> ASCII rendering of the float
+<tr><td>  FLOAT   <td>   BLOB    <td> Same as FLOAT->TEXT
+<tr><td>  TEXT    <td> INTEGER   <td> Use atoi()
+<tr><td>  TEXT    <td>  FLOAT    <td> Use atof()
+<tr><td>  TEXT    <td>   BLOB    <td> No change
+<tr><td>  BLOB    <td> INTEGER   <td> Convert to TEXT then use atoi()
+<tr><td>  BLOB    <td>  FLOAT    <td> Convert to TEXT then use atof()
+<tr><td>  BLOB    <td>   TEXT    <td> Add a zero terminator if needed
+</table>
+</blockquote></p>
+
+<p>The table above makes reference to standard C library functions atoi()
+and atof().  SQLite does not really use these functions.  It has its
+own equivalent internal routines.  The atoi() and atof() names are
+used in the table for brevity and because they are familiar to most
+C programmers.</p>
+
+<p>Note that when type conversions occur, pointers returned by prior
+calls to sqlite3_column_blob(), sqlite3_column_text(), and/or
+sqlite3_column_text16() may be invalidated.
+Type conversions and pointer invalidations might occur
+in the following cases:</p>
+
+<p><ul>
+<li> The initial content is a BLOB and sqlite3_column_text() or
+sqlite3_column_text16() is called.  A zero-terminator might
+need to be added to the string.</li>
+<li> The initial content is UTF-8 text and sqlite3_column_bytes16() or
+sqlite3_column_text16() is called.  The content must be converted
+to UTF-16.</li>
+<li> The initial content is UTF-16 text and sqlite3_column_bytes() or
+sqlite3_column_text() is called.  The content must be converted
+to UTF-8.</li>
+</ul></p>
+
+<p>Conversions between UTF-16be and UTF-16le are always done in place and do
+not invalidate a prior pointer, though of course the content of the buffer
+that the prior pointer points to will have been modified.  Other kinds
+of conversion are done in place when it is possible, but sometimes they
+are not possible and in those cases prior pointers are invalidated.</p>
+
+<p>The safest and easiest to remember policy is to invoke these routines
+in one of the following ways:</p>
+
+<p><ul>
+<li>sqlite3_column_text() followed by sqlite3_column_bytes()</li>
+<li>sqlite3_column_blob() followed by sqlite3_column_bytes()</li>
+<li>sqlite3_column_text16() followed by sqlite3_column_bytes16()</li>
+</ul></p>
+
+<p>In other words, you should call sqlite3_column_text(),
+sqlite3_column_blob(), or sqlite3_column_text16() first to force the result
+into the desired format, then invoke sqlite3_column_bytes() or
+sqlite3_column_bytes16() to find the size of the result.  Do not mix calls
+to sqlite3_column_text() or sqlite3_column_blob() with calls to
+sqlite3_column_bytes16(), and do not mix calls to sqlite3_column_text16()
+with calls to sqlite3_column_bytes().</p>
+
+<p>The pointers returned are valid until a type conversion occurs as
+described above, or until <a href="../c3ref/step.html">sqlite3_step()</a> or <a href="../c3ref/reset.html">sqlite3_reset()</a> or
+<a href="../c3ref/finalize.html">sqlite3_finalize()</a> is called.  The memory space used to hold strings
+and BLOBs is freed automatically.  Do <b>not</b> pass the pointers returned
+<a href="../c3ref/column_blob.html">sqlite3_column_blob()</a>, <a href="../c3ref/column_blob.html">sqlite3_column_text()</a>, etc. into
+<a href="../c3ref/free.html">sqlite3_free()</a>.</p>
+
+<p>If a memory allocation error occurs during the evaluation of any
+of these routines, a default value is returned.  The default value
+is either the integer 0, the floating point number 0.0, or a NULL
+pointer.  Subsequent calls to <a href="../c3ref/errcode.html">sqlite3_errcode()</a> will return
+<a href="../c3ref/c_abort.html">SQLITE_NOMEM</a>.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>

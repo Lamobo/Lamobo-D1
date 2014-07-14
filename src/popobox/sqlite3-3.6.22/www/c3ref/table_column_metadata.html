@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+<title>Extract Metadata About A Column Of A Table</title>
+<style type="text/css">
+body {
+    margin: auto;
+    font-family: Verdana, sans-serif;
+    padding: 8px 1%;
+}
+
+a { color: #45735f }
+a:visited { color: #734559 }
+
+.logo { position:absolute; margin:3px; }
+.tagline {
+  float:right;
+  text-align:right;
+  font-style:italic;
+  width:300px;
+  margin:12px;
+  margin-top:58px;
+}
+
+.toolbar {
+  font-variant: small-caps;
+  text-align: center;
+  line-height: 1.6em;
+  margin: 0;
+  padding:1px 8px;
+}
+.toolbar a { color: white; text-decoration: none; padding: 6px 12px; }
+.toolbar a:visited { color: white; }
+.toolbar a:hover { color: #80a796; background: white; }
+
+.content    { margin: 5%; }
+.content dt { font-weight:bold; }
+.content dd { margin-bottom: 25px; margin-left:20%; }
+.content ul { padding:0px; padding-left: 15px; margin:0px; }
+
+/* rounded corners */
+.se  { background: url(../images/se.png) 100% 100% no-repeat #80a796}
+.sw  { background: url(../images/sw.png) 0% 100% no-repeat }
+.ne  { background: url(../images/ne.png) 100% 0% no-repeat }
+.nw  { background: url(../images/nw.png) 0% 0% no-repeat }
+
+/* Things for "fancyformat" documents start here. */
+.fancy .codeblock i { color: darkblue; }
+.fancy h1,.fancy h2,.fancy h3,.fancy h4 {font-weight:normal;color:#80a796}
+.fancy h2 { margin-left: 10px }
+.fancy h3 { margin-left: 20px }
+.fancy h4 { margin-left: 30px }
+.fancy th {white-space:nowrap;text-align:left;border-bottom:solid 1px #444}
+.fancy th, .fancy td {padding: 0.2em 1ex; vertical-align:top}
+.fancy #toc a        { color: darkblue ; text-decoration: none }
+.fancy .todo         { color: #AA3333 ; font-style : italic }
+.fancy .todo:before  { content: 'TODO:' }
+.fancy p.todo        { border: solid #AA3333 1px; padding: 1ex }
+.fancy img { display:block; }
+.fancy :link:hover, .fancy :visited:hover { background: wheat }
+.fancy p,.fancy ul,.fancy ol { margin: 1em 5ex }
+.fancy li p { margin: 1em 0 }
+/* End of "fancyformat" specific rules. */
+
+</style>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  
+</head>
+<body>
+<div><!-- container div to satisfy validator -->
+
+<a href="../index.html">
+<img class="logo" src="../images/SQLite.gif" alt="SQLite Logo"
+ border="0"></a>
+<div><!-- IE hack to prevent disappearing logo--></div>
+<div class="tagline">Small. Fast. Reliable.<br>Choose any three.</div>
+
+<table width=100% style="clear:both"><tr><td>
+  <div class="se"><div class="sw"><div class="ne"><div class="nw">
+  <div class="toolbar">
+    <a href="../about.html">About</a>
+    <a href="../sitemap.html">Sitemap</a>
+    <a href="../docs.html">Documentation</a>
+    <a href="../download.html">Download</a>
+    <a href="../copyright.html">License</a>
+    <a href="../news.html">News</a>
+    <!-- <a href="../dev.html">Developers</a> -->
+    <a href="../support.html">Support</a>
+  </div></div></div></div></div>
+</td></tr></table>
+  
+<a href="intro.html"><h2>SQLite C Interface</h2></a><h2>Extract Metadata About A Column Of A Table</h2><blockquote><pre>int sqlite3_table_column_metadata(
+  sqlite3 *db,                /* Connection handle */
+  const char *zDbName,        /* Database name or NULL */
+  const char *zTableName,     /* Table name */
+  const char *zColumnName,    /* Column name */
+  char const **pzDataType,    /* OUTPUT: Declared data type */
+  char const **pzCollSeq,     /* OUTPUT: Collation sequence name */
+  int *pNotNull,              /* OUTPUT: True if NOT NULL constraint exists */
+  int *pPrimaryKey,           /* OUTPUT: True if column part of PK */
+  int *pAutoinc               /* OUTPUT: True if column is auto-increment */
+);
+</pre></blockquote><p>
+This routine returns metadata about a specific column of a specific
+database table accessible using the <a href="../c3ref/sqlite3.html">database connection</a> handle
+passed as the first function argument.</p>
+
+<p>The column is identified by the second, third and fourth parameters to
+this function. The second parameter is either the name of the database
+(i.e. "main", "temp", or an attached database) containing the specified
+table or NULL. If it is NULL, then all attached databases are searched
+for the table using the same algorithm used by the database engine to
+resolve unqualified table references.</p>
+
+<p>The third and fourth parameters to this function are the table and column
+name of the desired column, respectively. Neither of these parameters
+may be NULL.</p>
+
+<p>Metadata is returned by writing to the memory locations passed as the 5th
+and subsequent parameters to this function. Any of these arguments may be
+NULL, in which case the corresponding element of metadata is omitted.</p>
+
+<p><blockquote>
+<table border="1">
+<tr><th> Parameter <th> Output<br>Type <th>  Description</p>
+
+<p><tr><td> 5th <td> const char* <td> Data type
+<tr><td> 6th <td> const char* <td> Name of default collation sequence
+<tr><td> 7th <td> int         <td> True if column has a NOT NULL constraint
+<tr><td> 8th <td> int         <td> True if column is part of the PRIMARY KEY
+<tr><td> 9th <td> int         <td> True if column is <a href="../autoinc.html">AUTOINCREMENT</a>
+</table>
+</blockquote></p>
+
+<p>The memory pointed to by the character pointers returned for the
+declaration type and collation sequence is valid only until the next
+call to any SQLite API function.</p>
+
+<p>If the specified table is actually a view, an <a href="../c3ref/c_abort.html">error code</a> is returned.</p>
+
+<p>If the specified column is "rowid", "oid" or "_rowid_" and an
+<a href="../lang_createtable.html#rowid">INTEGER PRIMARY KEY</a> column has been explicitly declared, then the output
+parameters are set for the explicitly declared column. If there is no
+explicitly declared <a href="../lang_createtable.html#rowid">INTEGER PRIMARY KEY</a> column, then the output
+parameters are set as follows:</p>
+
+<p><pre>
+data type: "INTEGER"
+collation sequence: "BINARY"
+not null: 0
+primary key: 1
+auto increment: 0
+</pre></p>
+
+<p>This function may load one or more schemas from database files. If an
+error occurs during this process, or if the requested table or column
+cannot be found, an <a href="../c3ref/c_abort.html">error code</a> is returned and an error message left
+in the <a href="../c3ref/sqlite3.html">database connection</a> (to be retrieved using sqlite3_errmsg()).</p>
+
+<p>This API is only available if the library was compiled with the
+<a href="../compile.html#enable_column_metadata">SQLITE_ENABLE_COLUMN_METADATA</a> C-preprocessor symbol defined.
+</p><p>See also lists of
+  <a href="objlist.html">Objects</a>,
+  <a href="constlist.html">Constants</a>, and
+  <a href="funclist.html">Functions</a>.</p>
