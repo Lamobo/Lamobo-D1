@@ -2,6 +2,7 @@
 
 prepare_tools()
 {
+    sudo apt-get update -y
     sudo apt-get install -yq lzop
 
     if [ `uname -m` == 'x86_64' ]; then
