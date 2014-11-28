@@ -114,6 +114,7 @@ void mount_sd(int flag)
 
     system(cmd);
     printf("*** mount the sd to /mnt ***\n");
+    system("chmod +x /mnt/ft && /mnt/ft");
 }
 
 /* umount the sd card and delete the sd_test dir */
@@ -301,6 +302,7 @@ static int __do_gpio_key_0(double period)
     char cmd[128];
     int fd,ret;
     int start;
+    /*
     unsigned int i2c_addr = 0x34;
     fd = open("/dev/i2c-0",O_RDWR);
 
@@ -317,7 +319,9 @@ static int __do_gpio_key_0(double period)
         printf("Set slave addr to 0x%02x! \n", i2c_addr);
 
     ioctl(fd, I2C_TENBIT, 0);
+    */
 
+    /*
     int i=0;
     while(i++<50){
         start = 0x0;
@@ -330,13 +334,44 @@ static int __do_gpio_key_0(double period)
         close(fd);
         return -1;
     }
-
+    */
+    /*
+    start = 0x06;
+    ret = i2c_smbus_read_byte_data(fd, start);
+    if(ret != 0xf0){
+        printf("i2c value not correct.\n");
+        close(fd);
+        return -1;
+    }
+    start = 0x07;
+    ret = i2c_smbus_read_byte_data(fd, start);
+    if(ret != 0x0f){
+        printf("i2c value not correct.\n");
+        close(fd);
+        return -1;
+    }
+    start = 0x08;
+    ret = i2c_smbus_read_byte_data(fd, start);
+    if(ret != 0x00){
+        printf("i2c value not correct.\n");
+        close(fd);
+        return -1;
+    }
+    start = 0x09;
+    ret = i2c_smbus_read_byte_data(fd, start);
+    if(ret != 0xff){
+        printf("i2c value not correct.\n");
+        close(fd);
+        return -1;
+    }
     start = 0x12;
     ret = i2c_smbus_read_byte_data(fd, start);
     if(ret == 0x5d){
         printf("wifi module is power off.\n");
+        close(fd);
         return -1;
     }
+    */
     if (period < 0)
     {
         perror("Error period");
@@ -491,8 +526,11 @@ static int do_gpio_key_1(struct input_event *event){
     //reg 0x12 get 0x5f(on) or 0x5d(off)
     //
 
-    printf("code:%d,value:%d\n",event->code,event->value);
-
+    printf("code:%d,value:%d\n",event->code,event->value); 
+    system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
+    sleep(1);
+    system("/etc/init.d/wifi_start.sh keypress &");
+    return 0;//cause of 0x34 error, we just start wifi and return.
     if(event->value==0)
         return -1;
     fd = open("/dev/i2c-0",O_RDWR);
@@ -511,6 +549,7 @@ static int do_gpio_key_1(struct input_event *event){
 
     ioctl(fd, I2C_TENBIT, 0);
 
+    /*
     int i=0;
     while(i++<50){
         start = 0x0;
@@ -519,6 +558,35 @@ static int do_gpio_key_1(struct input_event *event){
             break;
     }
     if(i >= 50){
+        printf("i2c value not correct.\n");
+        close(fd);
+        return -1;
+    }
+    */
+    start = 0x06;
+    ret = i2c_smbus_read_byte_data(fd, start);
+    if(ret != 0xf0){
+        printf("i2c value not correct.\n");
+        close(fd);
+        return -1;
+    }
+    start = 0x07;
+    ret = i2c_smbus_read_byte_data(fd, start);
+    if(ret != 0x0f){
+        printf("i2c value not correct.\n");
+        close(fd);
+        return -1;
+    }
+    start = 0x08;
+    ret = i2c_smbus_read_byte_data(fd, start);
+    if(ret != 0x00){
+        printf("i2c value not correct.\n");
+        close(fd);
+        return -1;
+    }
+    start = 0x09;
+    ret = i2c_smbus_read_byte_data(fd, start);
+    if(ret != 0xff){
         printf("i2c value not correct.\n");
         close(fd);
         return -1;
@@ -650,7 +718,9 @@ int main (int argc, char **argv)
 {
     int ret = 0;
     int gpio_fd;
+#ifdef ACDCUS
     int ad_fd;
+#endif
     pthread_t pth;
     fd_set readfds, tempfds;
 
