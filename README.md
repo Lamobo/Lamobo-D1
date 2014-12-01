@@ -28,18 +28,16 @@ Tested OS
 
 1. Prepare
 
-    1. [D1] Make sure 2 DIP switches are both set "Off"
-    2. [PC] Connect D1 flashing port to PC via USB cable
-    3. [PC] Copy build result (zImage, root.sqsh4 and root.jffs2) to
+    1. [PC] Connect D1 flashing port to PC via USB cable
+    2. [PC] Copy build result (zImage, root.sqsh4 and root.jffs2) to
        the directory where BurnTool.exe resides
 
 2. Flash
 
     1. [PC] Start "Burn Tool" application by double-click "BurnTool.exe"
-    2. [D1] Power on D1 (press and hold "Boot/WPS" key before power on)
+    2. [D1] Power on D1 (press and hold "function" key before power on)
     3. [PC] Hold "Boot/WPS" key and wait until "Burn Tool" displays "Ready"
     4. [PC] Start flashing by click "Start" in "Burn Tool"
-    5. [D1] Make sure 2 DIP switches are both set "On"
 
 3. Complete
 
