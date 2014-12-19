@@ -479,6 +479,7 @@ static struct akgpio_keys_platform_data gpio_keys_platform_data = {
 static struct platform_device *ak3918_platform_devices[] __initdata = {
 	&akfha_char_device,
 	&ak39_uart0_device,
+	&ak39_uart1_device,
 	&ak39_motor0_device,
 	&ak39_motor1_device,
 	&ak39_spi1_device,
