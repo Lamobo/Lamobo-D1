@@ -3,6 +3,11 @@
 # mount jffs2 file-system. 
 /bin/mount -t jffs2 /dev/mtdblock2 /etc/jffs2
 # note: can't recommend running other app before `mount` command.
+
+echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-0/new_device
+hwclock -s
+ifconfig lo up
+
 /usr/bin/tcpsvd 0 21 ftpd /mnt &
 
 /usr/bin/telnetd
