@@ -28,7 +28,7 @@ build_kernel()
 {
     echo Building kernel...
     cd $DEV_ROOT/src/kernel
-    make aimer39_ak3918_D1s
+    make aimer39_ak3918_D1s_defconfig
     make LOCALVERSION=
     cd $DEV_ROOT/src
     cp -v kernel/arch/arm/boot/zImage $DEV_ROOT/output
