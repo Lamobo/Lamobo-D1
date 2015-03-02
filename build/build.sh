@@ -17,6 +17,13 @@ prepare_tools()
     fi
 }
 
+config_kernel()
+{
+    echo Configuring kernel...
+    cd $DEV_ROOT/src/kernel
+    make menuconfig
+}
+
 build_kernel()
 {
     echo Building kernel...
@@ -51,5 +58,6 @@ export PATH=$DEV_ROOT/compiler/arm-2009q3/bin:$PATH
 mkdir -p $DEV_ROOT/output
 
 prepare_tools
+#config_kernel
 build_kernel
 build_rootfs
