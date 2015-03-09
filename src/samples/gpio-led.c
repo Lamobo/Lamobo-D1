@@ -8,7 +8,9 @@
 #include <unistd.h>
 #include <plat-anyka/akgpios.h>
 
+#ifndef __u8
 typedef unsigned char __u8;
+#endif
 
 #define AK_WAKEUP_ENABLE		1
 #define AK_WAKEUP_DISABLE		0
