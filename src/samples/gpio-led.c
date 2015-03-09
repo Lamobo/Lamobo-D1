@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <plat-anyka/akgpios.h>
 
-
+typedef unsigned char __u8;
 
 #define AK_WAKEUP_ENABLE		1
 #define AK_WAKEUP_DISABLE		0
@@ -39,7 +39,7 @@ struct gpio_info {
     char pullup;
     char value;
     char dir;
-    char int_pol;	
+    char int_pol;
 };
 
 int main(int argc, char *argv[]){
