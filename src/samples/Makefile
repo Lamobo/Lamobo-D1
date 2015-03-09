@@ -4,7 +4,7 @@ CFLAGS = -Wall -g
 all: gpio-led i2c-test
 
 gpio-led:	gpio-led.c
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -I../kernel/include -o $@ $^
 
 i2c-test:	i2c-test.c
 	$(CC) $(CFLAGS) -o $@ $^

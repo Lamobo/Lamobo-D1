@@ -47,6 +47,16 @@ build_rootfs()
     cp -v ipcamera/rootfs/root.sqsh4 $DEV_ROOT/output
 }
 
+build_samples()
+{
+    echo Building samples...
+    cd $DEV_ROOT/src/samples
+    make clean
+    make
+    cp -v gpio-led $DEV_ROOT/output
+    cp -v i2c-test $DEV_ROOT/output
+}
+
 #
 # main
 #
@@ -61,3 +71,4 @@ prepare_tools
 #config_kernel
 build_kernel
 build_rootfs
+build_samples
