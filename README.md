@@ -16,6 +16,7 @@ Tested OS
 2. Check
 
     cd ~/lamobo-d1s/output
+
     ls -l zImage root.sqsh4 root.jffs2
 
 
@@ -43,4 +44,4 @@ Tested OS
 
     1. [D1s] Unplug power cable
     2. [D1s] Plug power cable to power on
-    3. [D1s] Now D1 started with the new firmware
+    3. [D1s] Now D1s started with the new firmware
