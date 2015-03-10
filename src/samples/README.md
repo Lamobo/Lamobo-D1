@@ -1,4 +1,4 @@
-#Lamobo D1s Samples Codes
+#Lamobo D1 Samples Codes
 
 ## Building Samples
 
