@@ -1,0 +1,23 @@
+# Ignore generated files
+akaimer39lib/
+akboalib/
+akmedialib/
+akuiolib/
+akwifilib/
+alsalib/
+create_fs_image.sh
+create_initramfs.sh
+create_jffs2fs.sh
+create_squashfs.sh
+dbgtoollib/
+extract.sh
+mkfs.jffs2
+mksquashfs
+gen_initramfs_list.sh
+mkyaffs2image
+mkyaffsimage
+root.jffs2
+root.sqsh4
+rootfs.tar.gz
+rootfs/
+striped_rootfs.tar.gz
