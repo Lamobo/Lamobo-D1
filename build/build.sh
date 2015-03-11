@@ -38,7 +38,7 @@ clean_kernel()
 {
     echo Cleaning kernel...
     cd $DEV_ROOT/src/kernel
-    make clean
+    make -s clean
     # restore kernel/lib/libakaec.a and kernel/lib/libfha.a
     git checkout lib
 }
@@ -66,16 +66,38 @@ clean_rootfs()
 build_samples()
 {
     echo Building samples...
-    cd $DEV_ROOT/src/samples
+
+    cd $DEV_ROOT/src/samples/gpio
     make
     cp -v gpio-led $DEV_ROOT/output
+
+    cd $DEV_ROOT/src/samples/i2c
+    make
     cp -v i2c-test $DEV_ROOT/output
+
+    cd $DEV_ROOT/src/samples/record_audio
+    make
+    cp -v ./BUILD_record_audio_EXEC/record_audio $DEV_ROOT/output
+
+    cd $DEV_ROOT/src/samples/record_video
+    make
+    cp -v ./BUILD_record_video_EXEC/record_video $DEV_ROOT/output
 }
 
 clean_samples()
 {
     echo Cleaning samples...
-    cd $DEV_ROOT/src/samples
+
+    cd $DEV_ROOT/src/samples/gpio
+    make -s clean
+
+    cd $DEV_ROOT/src/samples/i2c
+    make -s clean
+
+    cd $DEV_ROOT/src/samples/record_audio
+    make -s clean
+
+    cd $DEV_ROOT/src/samples/record_video
     make -s clean
 }
 

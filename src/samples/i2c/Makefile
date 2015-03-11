@@ -1,18 +1,15 @@
 CC=arm-none-linux-gnueabi-gcc
 CFLAGS = -Wall -g
 
-all: gpio-led i2c-test
+all: i2c-test
 
-gpio-led:	gpio-led.c
+gpio-led: gpio-led.c
 	$(CC) $(CFLAGS) -I../kernel/include -o $@ $^
 
-i2c-test:	i2c-test.c
+i2c-test: i2c-test.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-
-.PHONY : clean
+.PHONY: clean
 
 clean:
-	-rm -f gpio-led i2c-test $(OBJS)
-	
-
+	-rm -f i2c-test $(OBJS)
