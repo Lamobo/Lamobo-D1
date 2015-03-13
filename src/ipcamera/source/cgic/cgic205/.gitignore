@@ -1,0 +1,12 @@
+# Ignore generated files
+capture
+capture.o
+cgi_anyka.o
+cgic.o
+cgictest.cgi
+cgictest.o
+libcgic.a
+login
+login.o
+setting
+setting.o
