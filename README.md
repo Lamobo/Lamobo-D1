@@ -1,36 +1,53 @@
-Lamobo-D1 Development Environment
-=================================
+# Lamobo-D1 Development Environment
+---
 
-Firmware Build Steps
---------------------
+## Firmware Build Steps
+---
 
-Tested OS
+0. Tested OS
 
     - Ubuntu 12.04.3 32Bit
     - Ubuntu 12.04.3 64Bit
 
-1. Build
+1. Clone
 
-    ~/lamobo-d1/build/build.sh
+    ```
+    cd ~
+    git clone https://github.com/Lamobo/Lamobo-D1.git
+    ```
 
-2. Check
+2. Build
 
-    cd ~/lamobo-d1/output
+    ```
+    ~/Lamobo-D1/build/build.sh
+    ```
+
+3. Check
+
+    ```
+    cd ~/Lamobo-D1/output
     ls -l zImage root.sqsh4 root.jffs2
+    ```
 
+4. Clean
 
-Firmware Flash Steps
---------------------
+    ```
+    ~/Lamobo-D1/build/build.sh clean
+    ```
 
-Tested OS
+## Firmware Flash Steps
+---
 
+0. Tested OS
+
+    - Windows 7 Professional 32Bit
     - Windows 7 Professional 64Bit
 
 1. Prepare
 
     1. [PC] Connect D1 flashing port to PC via USB cable
-    2. [PC] Copy build result (zImage, root.sqsh4 and root.jffs2) to
-       the directory where BurnTool.exe resides
+    2. [PC] Copy build result (zImage, root.sqsh4 and root.jffs2)
+    to the directory where BurnTool.exe resides
 
 2. Flash
 
