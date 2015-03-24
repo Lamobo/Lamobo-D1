@@ -18,18 +18,36 @@
 #include <linux/uio_driver.h>
 #include <linux/akuio_driver.h>
 
+/**
+ * @brief: uart0 device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_uart0_device = {
     .name   = "ak39-uart",
     .id     = 0,
 };
 EXPORT_SYMBOL(ak39_uart0_device);
 
+/**
+ * @brief: uart1 device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_uart1_device = {
     .name   = "ak39-uart",
     .id     = 1,
 };
 EXPORT_SYMBOL(ak39_uart1_device);
 
+/**
+ * @brief: gpio uart device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_gpio_uart_device = {
     .name   = "gpio-uart",
     .id     = 0,
@@ -37,7 +55,12 @@ struct platform_device ak39_gpio_uart_device = {
 EXPORT_SYMBOL(ak39_gpio_uart_device);
 
 
-/* MCI platform data */
+/**
+ * @brief: MCI device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct resource ak39_mmc_resource[] = {
 	[0] = {
 		.start = 0x20100000,
@@ -58,7 +81,12 @@ struct platform_device ak39_mmc_device = {
 };
 EXPORT_SYMBOL(ak39_mmc_device);
 
-/* SDIO platform data */
+/**
+ * @brief: SDIO device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct resource ak39_sdio_resource[] = {
 	[0] = {
 		.start = 0x20108000,
@@ -79,7 +107,13 @@ struct platform_device ak39_sdio_device = {
 };
 EXPORT_SYMBOL(ak39_sdio_device);
 
-/* I2C */
+
+/**
+ * @brief: I2C device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 #if defined(CONFIG_I2C_AK39_HW)
 struct gpio_info i2c_gpios[] = {
 	{
@@ -160,7 +194,12 @@ EXPORT_SYMBOL(ak39_i2c_device);
 #endif
 
 
-/* USB udc device data */
+/**
+ * @brief: USB udc device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct resource usb_otg_udc_resource[] = {
 	[0] = {
 		.start	= 0x20200000,
@@ -187,7 +226,13 @@ struct platform_device ak39_usb_udc_device = {
 };
 EXPORT_SYMBOL(ak39_usb_udc_device);
 
-/* USB otg host data */
+
+/**
+ * @brief: USB otg host device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct resource usb_otg_hcd_resource[] = {
 	[0] = {
 		.start	= 0x20200000,
@@ -214,7 +259,12 @@ struct platform_device ak39_usb_otg_hcd_device = {
 };
 EXPORT_SYMBOL(ak39_usb_otg_hcd_device);
 
-/* MAC */
+/**
+ * @brief: MAC device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct resource ak39_mac_resource[] = {
 	[0] = {
 	   .start = 0x20300000,
@@ -236,7 +286,12 @@ struct platform_device ak39_mac_device = {
 };
 EXPORT_SYMBOL(ak39_mac_device);
 
-/* AK39 SPI device platform data */
+/**
+ * @brief: SPI device info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct resource ak39_spi1_resource[] = {
 	[0] = {
 		.start = 0x20120000,
@@ -259,7 +314,12 @@ struct platform_device ak39_spi1_device = {
 EXPORT_SYMBOL(ak39_spi1_device);
 
 
-/* Camera interface resource */
+/**
+ * @brief: Camera interface resource info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct resource ak39_camera_resource[] = {
 	[0] = {
 		.start = 0x20000000,
@@ -273,23 +333,23 @@ static struct resource ak39_camera_resource[] = {
 	},
 };
 
-static struct ak_camera_pdata ak39_camera_info = {
-	.mclk = 24,
-};
-
 /* camera interface */
 struct platform_device ak39_camera_interface = {
 	.name = "ak_camera",
 	.id   = 39,
 	.num_resources	= ARRAY_SIZE(ak39_camera_resource),	
-	.resource = ak39_camera_resource,
-	.dev = {
-		.platform_data = &ak39_camera_info,
-	}	
+	.resource = ak39_camera_resource,	
 };
 
 EXPORT_SYMBOL(ak39_camera_interface);
 
+
+/**
+ * @brief: PCM device resource info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 static u64 snd_dma_mask = DMA_BIT_MASK(32);
 
 struct platform_device ak39_pcm_device = {
@@ -303,6 +363,12 @@ struct platform_device ak39_pcm_device = {
 EXPORT_SYMBOL(ak39_pcm_device);
 
 
+/**
+ * @brief: ION device resource info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct ion_platform_data ak39_ion_pdata = {
 	.nr = 1,
 	.heaps = {
@@ -326,12 +392,24 @@ struct platform_device ak39_ion_device = {
 };
 EXPORT_SYMBOL(ak39_ion_device);
 
+/**
+ * @brief:  LDE device resource info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_led_pdev = {
 	.name		= "ak_led",
 	.id		= -1,
 };
 EXPORT_SYMBOL(ak39_led_pdev);
 
+/**
+ * @brief:  fha device resource info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 struct platform_device akfha_char_device = {
 	.name = "ak-fhachar",
 	.id = -1,
@@ -341,13 +419,24 @@ struct platform_device akfha_char_device = {
 };
 EXPORT_SYMBOL(akfha_char_device);
 
+/**
+ * @brief:  gpio buttons device resource info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_gpio_keys_device = {
 	.name	= "akgpio-keys",
 	.id	= -1,
 };
 EXPORT_SYMBOL(ak39_gpio_keys_device);
 
-/* battery_power supply */
+/**
+ * @brief:  battery device resource info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_battery_power = {
 	.name = "battery",
 	.id   = -1,
@@ -383,23 +472,66 @@ struct platform_device ak39_mmx_device = {
 };
 EXPORT_SYMBOL(ak39_mmx_device);
 
+/**
+ * @brief:  rtc device resource info
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_rtc_device = {
 	.name = "ak-rtc",
 	.id = -1,
 };
 EXPORT_SYMBOL(ak39_rtc_device);
 
+/**
+ * @brief: motor0  device resource info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_motor0_device = {
 	.name = "ak-motor",
 	.id = 0,
 };
 EXPORT_SYMBOL(ak39_motor0_device);
 
+/**
+ * @brief:  motor1 device resource info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 struct platform_device ak39_motor1_device = {
 	.name = "ak-motor",
 	.id = 1,
 };
 EXPORT_SYMBOL(ak39_motor1_device);
 
+/**
+ * @brief:  Crypto device resource info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
+static struct resource ak39_crypto_resource[] = {
+	[0] = {
+	       .start = 0x20180000,
+	       .end = 0x20180067,
+	       .flags = IORESOURCE_MEM,
+	       },
+	[1] = {
+	       .start = IRQ_ENCRYTION,
+	       .end = IRQ_ENCRYTION,
+	       .flags = IORESOURCE_IRQ,
+	       }
+};
 
+struct platform_device ak39_crypto_device = {
+	.name = "ak-crypto",
+	.id = -1,
+	.num_resources = ARRAY_SIZE(ak39_crypto_resource),
+	.resource = ak39_crypto_resource,
+};
+EXPORT_SYMBOL(ak39_crypto_device);
 

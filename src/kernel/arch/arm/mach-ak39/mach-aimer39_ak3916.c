@@ -43,7 +43,15 @@
 #include <mach/adc.h>
 #include <plat-anyka/akgpios.h>
 #include <mach/reboot.h>
+#include <plat-anyka/ak_crypto.h>
 
+
+/**
+ * @brief: spi device info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 #define SPI_ONCHIP_CS 	(0)		/*means not need gpio*/
 static unsigned long ak39_spidev_cs[AKSPI_CS_NUM] = {
 	[AKSPI_ONCHIP_CS] = SPI_ONCHIP_CS,	/*gpio 25, spidev0: ak-spiflash*/
@@ -58,11 +66,23 @@ struct ak_spi_info ak39_spi1_info = {
 	.xfer_mode = AKSPI_XFER_MODE_DMA,
 };
 
+/**
+ * @brief: spiflash device info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 static struct flash_platform_data ak39_spiflash_info= {
 	.bus_width = FLASH_BUS_WIDTH_4WIRE | FLASH_BUS_WIDTH_2WIRE | FLASH_BUS_WIDTH_1WIRE,
 	.type 	   = NULL,
 };
 
+/**
+ * @brief: spi bus device info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 static struct spi_board_info ak39_spi_board_dev[] = {
 	{ 		
 		.modalias = "ak-spiflash",	
@@ -74,6 +94,12 @@ static struct spi_board_info ak39_spi_board_dev[] = {
 	},
 };
 
+/**
+ * @brief: motor0 device info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 static struct ak_motor_plat_data ak39_motor0_pdata = {
 		.gpio_phase[0] = {
 			.pin = AK_GPIO_37,
@@ -131,7 +157,12 @@ static struct ak_motor_plat_data ak39_motor0_pdata = {
 };
 
 
-
+/**
+ * @brief: motor1 device info
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 static struct ak_motor_plat_data ak39_motor1_pdata = {
 		.gpio_phase[0] = {
 			.pin = AK_GPIO_56,
@@ -189,8 +220,12 @@ static struct ak_motor_plat_data ak39_motor1_pdata = {
 };
 
 
-
-/* SDIO  platform data*/
+/**
+ * @brief: SDIO device platform data
+ * 
+ * @author: lixinhai
+ * @date: 2014-01-09
+ */
 struct ak_mci_platform_data sdio_plat_data = {
 	.irq_cd_type = IRQ_TYPE_LEVEL_LOW,
 	.detect_mode = AKMCI_PLUGIN_ALWAY,
@@ -216,7 +251,13 @@ struct ak_mci_platform_data sdio_plat_data = {
     }
 };
 
-/* MMC/SD  platform data*/
+
+/**
+ * @brief: MMC/SD  platform data
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct ak_mci_platform_data mmc_plat_data = {
 	.irq_cd_type = IRQ_TYPE_LEVEL_LOW,
 	.detect_mode = AKMCI_DETECT_MODE_AD,
@@ -240,6 +281,12 @@ struct ak_mci_platform_data mmc_plat_data = {
         .dir = AK_GPIO_DIR_INPUT,
         .int_pol = -1,
     }
+};
+
+
+struct ak_crypto_plat_data akcrypto_pdata = {
+	.encrypt_mode = CRYPTO_SINGLE_GROUP_MODE,
+	/*.encrypt_mode = CRYPTO_MULTI_GROUP_MODE,*/
 };
 
 /* akwifi platform data */
@@ -286,6 +333,13 @@ struct akwifi_platform_data akwifi_pdata = {
 #endif
 };
 
+
+/**
+ * @brief: akwifi device info for wifi driver
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 struct platform_device anyka_wifi_device = {
 	.name = "anyka-wifi",
 	.id = -1,
@@ -294,6 +348,13 @@ struct platform_device anyka_wifi_device = {
 	},
 };
 
+
+/**
+ * @brief: usb bus device  platform data
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct akotghc_usb_platform_data akotghc_plat_data = {
 	.gpio_init = ak_gpio_set,
 	.gpio_pwr_on = {
@@ -320,6 +381,12 @@ static struct akotghc_usb_platform_data akotghc_plat_data = {
 	},
 };
 
+/**
+ * @brief: ethenet device  platform data
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct ak_mac_data ak39_mac_pdata = {
 	.gpio_init = ak_gpio_set,
 	.pwr_gpio = {
@@ -413,7 +480,12 @@ struct platform_device ak39_codec_device = {
 };
 
 
-/* camera platform data */
+/**
+ * @brief: sensor device  platform data, this info is fake.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct i2c_board_info ak_camara_devices[] = {
 	{
 		I2C_BOARD_INFO("aksensor", 0x1),
@@ -443,7 +515,12 @@ static struct platform_device soc_camera_interface = {
 	}
 };
 
-/* Set LED parameter and initialis status */
+/**
+ * @brief: LED platform data and initialis status
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct ak_led_data leds[] = {
 	{
 	.name		= "wps_led",
@@ -497,9 +574,11 @@ static struct platform_device ak39_custom_gpio = {
 };
 
 
-
 /**
- * GPIO buttons
+ * @brief: GPIO buttons platform data and initialis status
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
  */
 static struct gpio_keys_button gpio_keys_button[] = {
 	{
@@ -527,6 +606,8 @@ static struct akgpio_keys_platform_data gpio_keys_platform_data = {
 /**
 * @brief		ad-key platform device struct
 			we should initialize the correct voltage for each key.
+* @author: caolianming
+* @date: 2014-01-09
 */
 struct multi_addetect multi_det[] = {
 	{.unpress_min = 3220, .unpress_max = 3258, .fixkeys = NULL, .plugdev = PLUGIN_NODEV},	// = null		3251+/-20	
@@ -554,7 +635,12 @@ static struct platform_device ak39_adkey_device = {
 };
 
 
-/*ak39 battery mach info*/
+/**
+ * @brif: ak39 battery mach info
+ 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct ak_bat_mach_info ak39_bat_info = {
 	.gpio_init	= ak_gpio_set,
 	.usb_gpio	= {
@@ -627,6 +713,32 @@ static struct ak_bat_mach_info ak39_bat_info = {
 };
 
 
+/**
+ * @brief: camera platform data and initialis status
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
+static struct ak_camera_pdata ak39_camera_info = {
+	.mclk = 24,
+	.gpio_get = ak_gpio_getpin,
+	.gpio_set = ak_gpio_set,
+	.rf_led = {
+		.pin = -1,
+		.pulldown = -1,
+		.pullup = AK_PULLUP_DISABLE,
+		.value = -1,
+		.dir = AK_GPIO_DIR_INPUT,
+		.int_pol = AK_GPIO_INT_LOWLEVEL,
+	}
+};
+
+/**
+ * @brief: ak39 platform devices table
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static struct platform_device *ak3910_platform_devices[] __initdata = {
 	&akfha_char_device,
 	&ak39_uart0_device,
@@ -652,21 +764,36 @@ static struct platform_device *ak3910_platform_devices[] __initdata = {
 	&ak39_adkey_device,
 	&ak39_battery_power,
 	&ak39_rtc_device,
+	&ak39_crypto_device,
 	&ak39_gpio_uart_device,
 };
 
 void wdt_enable(void);
 void wdt_keepalive(unsigned int heartbeat);
 
+
+/**
+ * @brief: restart by "reboot" cmd 
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static void ak39_restart(char str, const char *cmd)
 {
 	//ak39_reboot_sys_by_soft();
-#ifdef CONFIG_AK39_WATCHDOG
+#if defined CONFIG_AK39_WATCHDOG || defined CONFIG_AK39_WATCHDOG_TOP
 	wdt_enable();
 	wdt_keepalive(2);
 #endif
 }
 
+
+/**
+ * @brief: initial ak3916 machine 
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ */
 static void __init ak3910_init_machine(void)
 {
 	adc1_init();
@@ -681,12 +808,16 @@ static void __init ak3910_init_machine(void)
 	ak39_mmc_device.dev.platform_data = &mmc_plat_data;
 	ak39_sdio_device.dev.platform_data = &sdio_plat_data;
 
+	ak39_crypto_device.dev.platform_data = &akcrypto_pdata;
+
 	ak39_usb_otg_hcd_device.dev.platform_data = &akotghc_plat_data;
 	ak39_mac_device.dev.platform_data = &ak39_mac_pdata;
 
 	ak39_led_pdev.dev.platform_data = &led_pdata;
 	ak39_gpio_keys_device.dev.platform_data = &gpio_keys_platform_data;	
 	ak39_battery_power.dev.platform_data = &ak39_bat_info;
+
+	ak39_camera_interface.dev.platform_data = &ak39_camera_info;
 	
 	platform_add_devices(ak3910_platform_devices, 
 				ARRAY_SIZE(ak3910_platform_devices));

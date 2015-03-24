@@ -171,9 +171,9 @@ typedef enum
  */
 typedef enum
 {
-    CAMERA_MIRROR_V = 0,
+    CAMERA_MIRROR_NORMAL = 0,
+    CAMERA_MIRROR_V,
     CAMERA_MIRROR_H,
-    CAMERA_MIRROR_NORMAL,
     CAMERA_MIRROR_FLIP,
     CAMERA_MIRROR_NUM
 }T_CAMERA_MIRROR;
@@ -185,15 +185,15 @@ typedef enum
 typedef enum
 {
     CAMERA_EFFECT_NORMAL = 0,
-    CAMERA_EFFECT_SEPIA,
-    CAMERA_EFFECT_ANTIQUE,
-    CAMERA_EFFECT_BLUE,
-    CAMERA_EFFECT_GREEN,
-    CAMERA_EFFECT_RED,
-    CAMERA_EFFECT_NEGATIVE,
-    CAMERA_EFFECT_BW,
-    CAMERA_EFFECT_BWN,    
-    CAMERA_EFFECT_AQUA,    // PO1200 additional mode add by Liub 20060918
+    CAMERA_EFFECT_SEPIA = 2,
+    CAMERA_EFFECT_ANTIQUE = 5,
+    CAMERA_EFFECT_BLUE = 6,
+    CAMERA_EFFECT_GREEN = 7,
+    CAMERA_EFFECT_RED = 8,
+    CAMERA_EFFECT_NEGATIVE = 3,
+    CAMERA_EFFECT_BW = 1,
+    CAMERA_EFFECT_BWN = 4,    
+    CAMERA_EFFECT_AQUA = 9,    // PO1200 additional mode add by Liub 20060918
     CAMERA_EFFECT_COOL,
     CAMERA_EFFECT_WARM,
     CAMERA_EFFECT_NUM
@@ -242,6 +242,8 @@ typedef struct
     T_VOID           (*cam_set_contrast_func)(T_CAMERA_CONTRAST contrast);
     T_VOID           (*cam_set_saturation_func)(T_CAMERA_SATURATION saturation);
     T_VOID           (*cam_set_sharpness_func)(T_CAMERA_SHARPNESS sharpness);
+	T_VOID           (*cam_set_hue)(T_U32 value);
+	T_VOID           (*cam_set_hue_auto)(T_U32 value);
     T_VOID           (*cam_set_AWB_func)(T_CAMERA_AWB awb);
     T_VOID           (*cam_set_mirror_func)(T_CAMERA_MIRROR mirror);
     T_VOID           (*cam_set_effect_func)(T_CAMERA_EFFECT effect);
@@ -254,6 +256,7 @@ typedef struct
     T_BOOL           (*cam_set_to_record_func)(T_U32 srcWidth, T_U32 srcHeight);
     T_CAMERA_TYPE    (*cam_get_type)(T_VOID);
 	T_VOID			 (*cam_set_sensor_param_func)(T_U32 cmd, T_U32 data);
+	T_U16			 (*cam_get_sensor_param_func)(T_U32 cmd);
 }T_CAMERA_FUNCTION_HANDLER;
 #endif
 

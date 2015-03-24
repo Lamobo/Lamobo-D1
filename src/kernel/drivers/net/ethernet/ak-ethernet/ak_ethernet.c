@@ -523,12 +523,15 @@ bool init_hw(struct net_device *ndev)
 	dbg("PHYSID1:0x%lx, PHYSID2:0x%lx\r\n", MIIRead(MII_PHYSID1), MIIRead(MII_PHYSID2));
 	dbg("PHYSID1:0x%lx, PHYSID2:0x%lx\r\n", MIIRead(MII_PHYSID1), MIIRead(MII_PHYSID2));
 	dbg("PHYSID1:0x%lx, PHYSID2:0x%lx\r\n", MIIRead(MII_PHYSID1), MIIRead(MII_PHYSID2));
+		dbg("PHYSID1:0x%lx, PHYSID2:0x%lx\r\n", MIIRead(MII_PHYSID1), MIIRead(MII_PHYSID2));
 	
 	db->phy_id = MIIRead(MII_PHYSID1);
-	printk("===PHY ID:0x%x===\r\n", db->phy_id);
+
+	
 	if(db->phy_id == 0x22)
 	{
 		MIIWrite(MII_BMCR, MIIRead(MII_BMCR) | 0x1000);
+			
 	}
 	else
 		{
@@ -668,10 +671,20 @@ bool init_hw(struct net_device *ndev)
 
 	REG32(pMacBase + REG_IMR)= 0x1d608;//Interrupt Mask 
 	macbug =  REG32(AK_VA_L2CTRL+0xFF0);
-	if(db->phy_id == 0x22)
+
+		if(db->phy_id == 0x22)
 		{
-	MIIWrite(0x1B, 0x0500);
-	MIIWrite(0x1F, 0x8300);
+			MIIWrite(0x1B, 0x0500);
+			MIIWrite(0x1F, 0x8300);
+		}
+	else if (db->phy_id == 0x243)
+		{
+			MIIWrite(20, 0x04);
+			MIIWrite(16, 0x6002);	
+			MIIWrite(20, 0x10);
+			MIIWrite(29, 0x186);
+			MIIWrite(17,0x8600);
+
 		}
 	else
 		{
@@ -695,26 +708,12 @@ bool MacInit(struct net_device *ndev)
 	volatile unsigned long count;
 
 	
-	int i=0;
 	//db = netdev_priv(ndev);
 	//close_2x();
 	
 
 
-	//to enable the 25MHz oscillator
-	//TODO: Need to be changed to new clock API
-	REG32(psysbase + 0x74) &= ~(3 << 2);
-		REG32(psysbase + 0x74) |= (1 << 2);
-		REG32(psysbase + 0x80) |= (1 << 2);
-	//REG32(psysbase + 0x14) |= (1 << 18);
-	//REG32(psysbase + 0x1c) |= (1 << 13);
-	REG32(psysbase + 0x14) |= (1 << 16|1 << 18);
-	REG32(psysbase + 0x1c) &= ~(1 << 13);
-   for(i=0;i<6;i++)
-   	{
-   	REG32(psysbase + 0x14) |= (1 << 20);
-	REG32(psysbase + 0x14) &= ~(1 << 20);
-   	}
+
 /*
 	
 	 reg_value = REG32(psysbase + 0x18);
@@ -1045,7 +1044,8 @@ ak_mac_hash_table(struct net_device *ndev)
 
 	if (ndev->flags & IFF_PROMISC) {
 		mac_ctrl_data |= FLAG(MAC_CTRL_PROM_MODE_OFF);
-	} else if (ndev->flags & IFF_ALLMULTI) {
+	} else if ((ndev->flags & IFF_ALLMULTI) || (ndev->flags&IFF_MULTICAST))
+	{
 		mac_ctrl_data |= FLAG(MAC_CTRL_MUTI_ALL_OFF);
 		mac_ctrl_data &= ~(FLAG(MAC_CTRL_PROM_MODE_OFF));
 	} else {
@@ -1230,9 +1230,14 @@ static irqreturn_t ak_mac_interrupt(int irq, void *dev_id)
 			{
 			 MIIRead(0x1B);
 			}
+		else if(db->phy_id==0x243)
+			{
+			 MIIRead(17);
+			
+			}
 		else
 			{
-			 MIIRead(MII_ISR);
+			 MIIRead(MII_ISR);				
 			}
 		//if(dwPHYIntStatus & (ISR_LINK_DOWN | ISR_LINK_UP)) {
 			schedule_work(&db->link_chg_task);
@@ -1327,6 +1332,7 @@ ak_mac_open(struct net_device *ndev)
 		return -ENOMEM;
 	} else
 		printk("mac init success!\n");
+	printk("ak_mac_open\r\n");
 
 	if (request_irq(ndev->irq, &ak_mac_interrupt, 0, ndev->name, ndev))
 		return -EAGAIN;
@@ -1442,6 +1448,7 @@ static int __devinit ak_mac_probe(struct platform_device *pdev)
 	struct net_device *ndev;
 	int ret = 0;
 	int iosize;
+	int i = 0;
 
 	//cpu_clk_2x_switch();
 	
@@ -1534,6 +1541,18 @@ static int __devinit ak_mac_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, ndev);
 	INIT_WORK(&db->link_chg_task, ak_mac_link_chg_task);
+	REG32(psysbase + 0x74) &= ~(3 << 2);
+		REG32(psysbase + 0x74) |= (1 << 2);
+		REG32(psysbase + 0x80) |= (1 << 2);
+	//REG32(psysbase + 0x14) |= (1 << 18);
+	//REG32(psysbase + 0x1c) |= (1 << 13);
+	REG32(psysbase + 0x14) |= (1 << 16|1 << 18);
+	REG32(psysbase + 0x1c) &= ~(1 << 13);
+   for(i=0;i<6;i++)
+   	{
+   	REG32(psysbase + 0x14) |= (1 << 20);
+	REG32(psysbase + 0x14) &= ~(1 << 20);
+   	}
 	ret = register_netdev(ndev);
 
 	if (ret == 0)

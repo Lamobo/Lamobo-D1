@@ -366,9 +366,7 @@ int jffs2_write_inode_range(struct jffs2_sb_info *c, struct jffs2_inode_info *f,
 		 * And, GC will work harder.
 		 * And, performance is bad
 		 */
-		//ret = jffs2_reserve_space(c, sizeof(*ri) + JFFS2_MIN_DATA_LEN,
-					//&alloclen, ALLOC_NORMAL, JFFS2_SUMMARY_INODE_SIZE);
-		ret = jffs2_reserve_space(c, writelen,
+		ret = jffs2_reserve_space(c, sizeof(*ri) + JFFS2_MIN_DATA_LEN,
 					&alloclen, ALLOC_NORMAL, JFFS2_SUMMARY_INODE_SIZE);
 		if (ret) {
 			jffs2_dbg(1, "jffs2_reserve_space returned %d\n", ret);

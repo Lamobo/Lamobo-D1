@@ -40,3 +40,15 @@ config SENSOR_AR0130
 	help
 	  This is a ar0130 sensor driver
 
+config SENSOR_H22
+	tristate "jx-h22 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a jx-h22 sensor driver
+
+config SENSOR_NT99141
+	tristate "nt99141 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a nt99141 sensor driver
+

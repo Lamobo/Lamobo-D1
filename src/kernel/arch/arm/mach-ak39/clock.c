@@ -32,6 +32,14 @@ static int clk_null_enable(struct clk *clk, int enable)
 	return 0;
 }
 
+
+/**
+ * @brief: enable module clock.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ */
 int clk_enable(struct clk *clk)
 {
 	unsigned long flags;
@@ -50,6 +58,13 @@ int clk_enable(struct clk *clk)
 	return 0;
 }
 
+/**
+ * @brief: disable module clock.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ */
 void clk_disable(struct clk *clk)
 {
 	unsigned long flags;
@@ -66,7 +81,13 @@ void clk_disable(struct clk *clk)
 	clk_disable(clk->parent);
 }
 
-
+/**
+ * @brief: get module clock.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ */
 unsigned long clk_get_rate(struct clk *clk)
 {
 	if (IS_ERR(clk))
@@ -116,11 +137,25 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
 	return ret;
 }
 
+/**
+ * @brief: get parent clock of module.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *clk: struct clk, module clock info
+ */
 struct clk *clk_get_parent(struct clk *clk)
 {
 	return clk->parent;
 }
 
+/**
+ * @brief: set parent clock of module.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ */
 int clk_set_parent(struct clk *clk, struct clk *parent)
 {
 	int ret = 0;
@@ -165,6 +200,16 @@ static int clk_default_setrate(struct clk *clk, unsigned long rate)
 	return 0;
 }
 
+
+/**
+ * @brief: setting module clock of drivers 
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] *reg: clock register address of SOC chip
+ * @param [in] enable: enable bit
+ */
 static int inline ak39xx_gate(void __iomem *reg, 
 			struct clk *clk, int enable)
 {
@@ -182,11 +227,29 @@ static int inline ak39xx_gate(void __iomem *reg,
 	return 0;
 }
 
+
+/**
+ * @brief: setting 12M clock 
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_12M_enable(struct clk *clk, int enable)
 {
 	return ak39xx_gate(CLOCK_PERI_PLL_CTRL1, clk, enable);
 }
 
+
+/**
+ * @brief: setting 25M clock 
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_25M_enable(struct clk *clk, int enable)
 {
 	unsigned int ctrlbit = clk->ctrlbit;
@@ -287,6 +350,14 @@ struct clk clk_asic = {
 };
 
 
+/**
+ * @brief: setting opclk clock 
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_opclk_ctrl(struct clk *clk, int enable)
 {
 	return ak39xx_gate(CLOCK_PERI_PLL_CTRL2, clk, enable);
@@ -300,26 +371,68 @@ struct clk clk_opclk = {
 	.ctrlbit	= AK_CLKCON_ASICCLK_MAC,
 };
 
+/**
+ * @brief: setting mclk clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_mclk_ctrl(struct clk *clk, int enable)
 {
 	return ak39xx_gate(CLOCK_GATE_CTRL1, clk, enable);
 }
 
+/**
+ * @brief: setting video module clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_video_ctrl(struct clk *clk, int enable)
 {
 	return ak39xx_gate(CLOCK_GATE_CTRL1, clk, enable);
 }
 
+
+/**
+ * @brief: setting camera module clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_camera_ctrl(struct clk *clk, int enable)
 {
 	return ak39xx_gate(CLOCK_GATE_CTRL1, clk, enable);
 }
 
+/**
+ * @brief: setting asic clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_asicclk_ctrl(struct clk *clk, int enable)
 {
 	return ak39xx_gate(CLOCK_GATE_CTRL1, clk, enable);
 }
 
+
+/**
+ * @brief: setting clk dac module clock 
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_clk_dac(struct clk *clk, int enable)
 {
 	u32 con;
@@ -337,6 +450,15 @@ static int ak39xx_clk_dac(struct clk *clk, int enable)
 	return 0;
 }
 
+
+/**
+ * @brief: setting hclk dac module clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_hclk_dac(struct clk *clk, int enable)
 {
 	u32 con;
@@ -354,6 +476,15 @@ static int ak39xx_hclk_dac(struct clk *clk, int enable)
 	return 0;
 }
 
+/**
+ * @brief: setting adc1 module clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] *reg: clock register address of SOC chip
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_clk_adc1(struct clk *clk, int enable)
 {
 	u32 con;
@@ -371,6 +502,15 @@ static int ak39xx_clk_adc1(struct clk *clk, int enable)
 	return 0;
 }
 
+
+/**
+ * @brief: setting adc2 module clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_clk_adc2(struct clk *clk, int enable)
 {
 	u32 con;
@@ -388,6 +528,14 @@ static int ak39xx_clk_adc2(struct clk *clk, int enable)
 	return 0;
 }
 
+/**
+ * @brief: setting hclk module clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_hclk_adc2(struct clk *clk, int enable)
 {
 	u32 con;
@@ -405,6 +553,14 @@ static int ak39xx_hclk_adc2(struct clk *clk, int enable)
 	return 0;
 }
 
+/**
+ * @brief: setting sensor module clock 
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *clk: struct clk, module clock info
+ * @param [in] enable: enable bit
+ */
 static int ak39xx_sensor_ctrl(struct clk *clk, int enable)
 {
 	unsigned int ctrlbit = clk->ctrlbit;

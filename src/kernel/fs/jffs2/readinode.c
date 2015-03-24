@@ -457,7 +457,6 @@ static int jffs2_build_inode_fragtree(struct jffs2_sb_info *c,
 	if (rii->mdata_tn) {
 		dbg_readinode("potential mdata is ver %d at %p\n", rii->mdata_tn->version, rii->mdata_tn);
 		/* FIXME: When it is not a regular file node, just do it. Otherwise, skip it */
-		if (rii->fds)
 			high_ver = rii->mdata_tn->version;
 		rii->latest_ref = rii->mdata_tn->fn->raw;
 	}

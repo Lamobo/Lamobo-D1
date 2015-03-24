@@ -22,6 +22,49 @@
 #define AK_L2MEM_IRQ_ENABLE		(AK_VA_L2CTRL + 0x9C)
 
 
+#ifdef CONFIG_FIQ
+/**
+ * s3c24xx_set_fiq - set the FIQ routing
+ * @irq: IRQ number to route to FIQ on processor.
+ * @on: Whether to route @irq to the FIQ, or to remove the FIQ routing.
+ *
+ * Change the state of the IRQ to FIQ routing depending on @irq and @on. If
+ * @on is true, the @irq is checked to see if it can be routed and the
+ * interrupt controller updated to route the IRQ. If @on is false, the FIQ
+ * routing is cleared, regardless of which @irq is specified.
+ */
+int ak39_set_fiq(unsigned int irq, bool on)
+{
+	u32 intmod;
+	unsigned offs;
+	unsigned long regval;
+
+	regval = __raw_readl(AK_IRQ_MASK);
+	if (on) 		
+		regval |= (1UL << d->irq);
+	else 
+		regval &= ~(1UL << d->irq);
+	__raw_writel(regval, AK_IRQ_MASK);
+
+#if 0	
+	if (on) {
+		offs = irq - FIQ_START;
+		if (offs > 31)
+			return -EINVAL;
+
+		intmod = 1 << offs;
+	} else {
+		intmod = 0;
+	}
+	__raw_writel(intmod, AK_FIQ_MASK);
+#endif
+	
+	return 0;
+}
+
+EXPORT_SYMBOL_GPL(ak39_set_fiq);
+#endif
+
 /*
  * Disable interrupt number "irq"
  */
@@ -103,6 +146,13 @@ static struct irq_chip ak39_sysctrl_chip = {
 	.irq_set_wake = sysctrl_set_wake,
 };
 
+/**
+ * @brief: system module irq handler
+ * 
+ * @author: caolianming
+ * @param [in] irq: irq number
+ * @param [in] *desc: irq info description
+ */
 static void ak39_sysctrl_handler(unsigned int irq, struct irq_desc *desc)
 {
 	unsigned long regval_mask, regval_sta;
@@ -126,6 +176,13 @@ static void ak39_sysctrl_handler(unsigned int irq, struct irq_desc *desc)
 	}
 }
 
+/**
+ * @brief: mask GPIO irq
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *d: system irq data info
+ */
 static void ak39_gpioirq_mask(struct irq_data *d)
 {
 	void __iomem *gpio_ctrl = AK_GPIO_INT_MASK1;
@@ -140,6 +197,13 @@ static void ak39_gpioirq_mask(struct irq_data *d)
 	__raw_writel(regval, gpio_ctrl);
 }
 
+/**
+ * @brief: unmask GPIO irq
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *d: system irq data info
+ */
 static void ak39_gpioirq_unmask(struct irq_data *d)
 {
 	void __iomem *gpio_ctrl = AK_GPIO_INT_MASK1;
@@ -154,6 +218,16 @@ static void ak39_gpioirq_unmask(struct irq_data *d)
 	__raw_writel(regval, gpio_ctrl);
 }
 
+
+/**
+ * @brief: setting irq polarity type
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *d: system irq data info
+ * @param [in] type: irq type: IRQ_TYPE_EDGE_RISING, IRQ_TYPE_EDGE_FALLING
+ *                            IRQ_TYPE_LEVEL_HIGH, IRQ_TYPE_LEVEL_LOW
+ */
 static int ak39_gpioirq_set_type(struct irq_data *d, unsigned int type)
 {
 	void __iomem *reg_irqmod = AK_GPIO_INT_MODE1;
@@ -202,6 +276,14 @@ static int ak39_gpioirq_set_type(struct irq_data *d, unsigned int type)
 	return 0;
 }
 
+/**
+ * @brief: setting wake up function of irq
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *d: system irq data info
+ * @param [in] on: enable
+ */
 static int ak39_gpio_irq_set_wake(struct irq_data *d, unsigned int on)
 {
 	unsigned long regval;
@@ -248,6 +330,15 @@ static struct irq_chip ak39_gpioirq_chip = {
 	.irq_set_wake = ak39_gpio_irq_set_wake,
 };
 
+
+/**
+ * @brief: GPIO irq handler function.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] irq: irq number
+ * @param [in] *desc: irq info description
+ */
 static void ak39_gpio_irqhandler(unsigned int irq, struct irq_desc *desc)
 {
 	unsigned long enabled_irq;
@@ -269,6 +360,14 @@ static void ak39_gpio_irqhandler(unsigned int irq, struct irq_desc *desc)
 	}
 }
 
+
+/**
+ * @brief: machine interrupt initial
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] void:
+ */
 void __init ak39_init_irq(void)
 {
 	int i;

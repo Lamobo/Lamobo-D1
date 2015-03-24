@@ -1143,58 +1143,86 @@ static const T_U8 SHARPNESS_6_TAB[] =
     END_FLAG, END_FLAG
 };
 
+/****************   Camera hue Table   ****************/
+static const T_U8 HUE_0_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_1_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_2_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_3_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_4_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_5_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_6_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_AUTO_0_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_AUTO_1_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
 /****************   Camera AWB Table   ****************/
 static const T_U8 AWB_AUTO_TAB[] = 
 {
-    0x5a, 0x56, 
-    0x5b, 0x40,
-    0x5c, 0x4a,            
-    0x22, 0x57,    
+    
     END_FLAG, END_FLAG
 };
 
 static const T_U8 AWB_SUNNY_TAB[] = 
 {
-    0x22, 0x55, 
-    0x5a, 0x74,
-    0x5b, 0x52,
-    0x5c, 0x40,
+
     END_FLAG, END_FLAG
 };
 
 static const T_U8 AWB_CLOUDY_TAB[] = 
 {
-    0x22, 0x55,
-    0x5a, 0x8c,
-    0x5b, 0x50,
-    0x5c, 0x40,
+
     END_FLAG, END_FLAG
 };
 
 static const T_U8 AWB_OFFICE_TAB[] = 
 {
-    0x22, 0x55,
-    0x5a, 0x40,
-    0x5b, 0x42,
-    0x5c, 0x50,
+
     END_FLAG, END_FLAG
 };
 
 static const T_U8 AWB_HOME_TAB[] = 
 {
-    0x22, 0x55, 
-    0x5a, 0x48,
-    0x5b, 0x40,
-    0x5c, 0x5c,
+
     END_FLAG, END_FLAG
 };
 
 static const T_U8 AWB_NIGHT_TAB[] = 
 {
-    0x22, 0x55, 
-    0x5a, 0x40,
-    0x5b, 0x54,
-    0x5c, 0x70,
+
     END_FLAG, END_FLAG
 };
 
@@ -1368,7 +1396,7 @@ static const T_U8 MIRROR_NORMAL_TAB[] =
 {
     //no mirror/flip
     0xfe, 0x00,//page0
-    0x14, 0x10,//0x13 180㷭ת
+    0x14, 0x10,//0x13 180㷭�?
     END_FLAG, END_FLAG
 };
 

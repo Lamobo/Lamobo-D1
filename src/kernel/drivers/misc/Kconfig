@@ -531,6 +531,12 @@ config AK_MOTOR
 	help
 	  If you say yes here you get support for the Anyka Motor device.
 
+config AK_DAC_CLOCK
+	tristate "Anyka Ak98 Dac Clock"
+	depends on ARCH_AK39
+	help
+	If you say yes here you retrieve the elapsed time in dac driver
+
 comment "user space generic gpio controller"
 config GPIOS_AKCUSTOM
 	tristate "Generic akgpio custom support"

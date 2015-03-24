@@ -426,6 +426,53 @@ static T_VOID cam_ov9712_set_sharpness(T_CAMERA_SHARPNESS sharpness)
     }
 }
 
+static T_VOID cam_ov9712_set_hue(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_1_TAB);
+            break;
+        case CAMERA_SHARPNESS_2:
+            camera_setup(HUE_2_TAB);
+            break;
+        case CAMERA_SHARPNESS_3:
+            camera_setup(HUE_3_TAB);
+            break;
+        case CAMERA_SHARPNESS_4:
+            camera_setup(HUE_4_TAB);
+            break;
+        case CAMERA_SHARPNESS_5:
+            camera_setup(HUE_5_TAB);
+            break;
+		case CAMERA_SHARPNESS_6:
+            camera_setup(HUE_6_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue parameter error!\n");
+            break;
+    }
+}
+
+static T_VOID cam_ov9712_set_hue_auto(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_AUTO_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_AUTO_1_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue auto parameter error!\n");
+            break;
+    }
+}
+
 /**
  * @brief Set camera AWB mode 
  * @author xia_wenting 
@@ -472,20 +519,24 @@ static T_VOID cam_ov9712_set_mirror(T_CAMERA_MIRROR mirror)
     switch(mirror)
     {
         case CAMERA_MIRROR_V:
-            camera_setbit(0x12, 4, 1);
-            camera_setbit(0x12, 5, 0);
+            camera_setbit(0x04, 6, 0);
+            camera_setbit(0x04, 7, 1);
+			camera_setbit(0x03, 0, 0x0a);
             break;
         case CAMERA_MIRROR_H:
-            camera_setbit(0x12, 4, 0);
-            camera_setbit(0x12, 5, 1);
+            camera_setbit(0x04, 6, 1);
+            camera_setbit(0x04, 7, 0);
+			camera_setbit(0x03, 0, 0x01);
             break;
         case CAMERA_MIRROR_NORMAL:
-            camera_setbit(0x12, 4, 0);
-            camera_setbit(0x12, 5, 0);
+            camera_setbit(0x04, 6, 1);
+            camera_setbit(0x04, 7, 1);
+			camera_setbit(0x03, 0, 0x01);
             break;
         case CAMERA_MIRROR_FLIP:
-            camera_setbit(0x12, 4, 1);
-            camera_setbit(0x12, 5, 1);
+            camera_setbit(0x04, 6, 0);
+            camera_setbit(0x04, 7, 0);
+			camera_setbit(0x03, 0, 0x0a);
             break;
         default:
             akprintf(C1, M_DRVSYS, "set mirror parameter error!\n");
@@ -566,6 +617,31 @@ static T_VOID cam_ov9712_set_night_mode(T_NIGHT_MODE mode)
         default:
             akprintf(C1, M_DRVSYS, "set night mode parameter error!\n");
             break;
+    }
+}
+
+static T_VOID cam_ov9712_set_anti_flicker(T_U32 value)
+{
+    switch(value) {
+    case V4L2_CID_POWER_LINE_FREQUENCY_DISABLED:
+        camera_setup(ANTI_FLICKER_DISABLE_TAB);
+		akprintf(C1, M_DRVSYS, "Anti-flicker not support 'Disable', Error."
+		" please select other frequency!\n");
+        break;
+    case V4L2_CID_POWER_LINE_FREQUENCY_50HZ:
+        camera_setup(ANTI_FLICKER_50HZ_TAB);
+        break;
+	case V4L2_CID_POWER_LINE_FREQUENCY_60HZ:
+        camera_setup(ANTI_FLICKER_60HZ_TAB);
+        break;
+    case V4L2_CID_POWER_LINE_FREQUENCY_AUTO:
+        camera_setup(ANTI_FLICKER_AUTO_TAB);
+		akprintf(C1, M_DRVSYS, "Anti-flicker not support 'Auto', Error."
+		" please select other frequency!\n");
+        break;
+    default:
+        akprintf(C1, M_DRVSYS, "set Anti-flicker parameter error!\n");
+        break;
     }
 }
 
@@ -666,6 +742,11 @@ static T_VOID cam_ov9712_set_sensor_param(T_U32 cmd, T_U32 data)
 	sccb_write_data(CAMERA_SCCB_ADDR, (T_U8)cmd, &value, 1);
 }
 
+static T_U16 cam_ov9712_get_sensor_param(T_U32 cmd)
+{
+	return sccb_read_data(CAMERA_SCCB_ADDR, (T_U8)cmd);
+}
+
 static T_CAMERA_FUNCTION_HANDLER ov9712_function_handler = 
 {
     OV9712_CAMERA_MCLK,
@@ -679,18 +760,21 @@ static T_CAMERA_FUNCTION_HANDLER ov9712_function_handler =
     cam_ov9712_set_contrast,
     cam_ov9712_set_saturation,
     cam_ov9712_set_sharpness,
+    cam_ov9712_set_hue,
+    cam_ov9712_set_hue_auto,
     cam_ov9712_set_AWB,
     cam_ov9712_set_mirror,
     cam_ov9712_set_effect,
     cam_ov9712_set_digital_zoom,
     cam_ov9712_set_night_mode,
     AK_NULL,
-    AK_NULL,
+    cam_ov9712_set_anti_flicker,
     cam_ov9712_set_to_cap,
     cam_ov9712_set_to_prev,
     cam_ov9712_set_to_record,
     cam_ov9712_get_type,
-    cam_ov9712_set_sensor_param
+    cam_ov9712_set_sensor_param,
+    cam_ov9712_get_sensor_param
 };
 
 #ifndef CONFIG_LINUX_AKSENSOR
@@ -739,18 +823,29 @@ static const char * resolution_menu[] = {
 };
 
 static const char * hflip_menu[] = {
-      [0] = "normal",
-      [1] = "horizontal flip",
+	[CAMERA_MIRROR_NORMAL] = "Normal",
+	[CAMERA_MIRROR_V] = "VFlip",
+    [CAMERA_MIRROR_H] = "Mirror",
+    [CAMERA_MIRROR_FLIP] = "H/VFlip",
 };
 
 static const char * vflip_menu[] = {
-      [0] = "normal",
-      [1] = "vertical flip",
+	[CAMERA_MIRROR_NORMAL] = "Normal",
+	[CAMERA_MIRROR_V] = "VFlip",
+    [CAMERA_MIRROR_H] = "Mirror",
+    [CAMERA_MIRROR_FLIP] = "H/VFlip",
 };
 
 static const char * night_menu[] = {
       [CAMERA_DAY_MODE] = "daylight",
       [CAMERA_NIGHT_MODE] = "night",
+};
+
+static const char * anti_flicker_menu[] = {
+      [V4L2_CID_POWER_LINE_FREQUENCY_DISABLED] = "Disable",
+      [V4L2_CID_POWER_LINE_FREQUENCY_50HZ] = "50Hz",
+      [V4L2_CID_POWER_LINE_FREQUENCY_60HZ] = "60Hz",
+      [V4L2_CID_POWER_LINE_FREQUENCY_AUTO] = "Auto",
 };
 
 static int ov9712_s_ctl(struct v4l2_ctrl *ctrl)
@@ -789,6 +884,18 @@ static int ov9712_s_ctl(struct v4l2_ctrl *ctrl)
 			ret = 0;
 		}
 		break;	
+	case V4L2_CID_HUE:
+		if (ov9712_function_handler.cam_set_hue) {
+			ov9712_function_handler.cam_set_hue(ctrl->val);
+			ret = 0;
+		}
+		break;	
+	case V4L2_CID_HUE_AUTO:
+		if (ov9712_function_handler.cam_set_hue_auto) {
+			ov9712_function_handler.cam_set_hue_auto(ctrl->val);
+			ret = 0;
+		}
+		break;
 	case V4L2_CID_SHARPNESS:
 		if (ov9712_function_handler.cam_set_sharpness_func) {
 			ov9712_function_handler.cam_set_sharpness_func(ctrl->val);
@@ -796,22 +903,21 @@ static int ov9712_s_ctl(struct v4l2_ctrl *ctrl)
 		}
 		break;	
 	case V4L2_CID_HFLIP:
-		if (ov9712_function_handler.cam_set_mirror_func) {
-			ov9712_function_handler.cam_set_mirror_func( 
-				ctrl->val ? CAMERA_MIRROR_H : CAMERA_MIRROR_NORMAL);
-			ret = 0;
-		}
-		break;
 	case V4L2_CID_VFLIP:
 		if (ov9712_function_handler.cam_set_mirror_func) {
-			ov9712_function_handler.cam_set_mirror_func(
-				ctrl->val ? CAMERA_MIRROR_V : CAMERA_MIRROR_NORMAL);
+			ov9712_function_handler.cam_set_mirror_func(ctrl->val);
 			ret = 0;
 		}
 		break;
 	case V4L2_CID_NIGHTMODE:
 		if (ov9712_function_handler.cam_set_night_mode_func) {
 			ov9712_function_handler.cam_set_night_mode_func(ctrl->val);
+			ret = 0;
+		}
+		break;
+	case V4L2_CID_POWER_LINE_FREQUENCY:
+		if (ov9712_function_handler.cam_set_anti_flicker_func) {
+			ov9712_function_handler.cam_set_anti_flicker_func(ctrl->val);
 			ret = 0;
 		}
 		break;
@@ -944,6 +1050,19 @@ static const struct v4l2_ctrl_config ov9712_ctrls[] = {
 		.max		= CAMERA_SHARPNESS_NUM -1,
 		.step		= 1,
 		.def		= 0,
+	},
+	{
+		.ops		= &ov9712_ctrl_ops,
+		.id			= V4L2_CID_POWER_LINE_FREQUENCY,
+		.type		= V4L2_CTRL_TYPE_MENU,
+		.name		= "anti flicker",
+		.min		= V4L2_CID_POWER_LINE_FREQUENCY_DISABLED,
+		.max		= V4L2_CID_POWER_LINE_FREQUENCY_AUTO,
+		.step		= 0,
+		.def		= V4L2_CID_POWER_LINE_FREQUENCY_50HZ,
+		.flags		= 0,
+		.menu_skip_mask = V4L2_CID_POWER_LINE_FREQUENCY_DISABLED,
+		.qmenu		= anti_flicker_menu,
 	}
 };
 

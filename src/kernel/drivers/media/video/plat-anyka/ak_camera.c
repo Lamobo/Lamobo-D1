@@ -71,6 +71,7 @@ struct ak_camera_dev {
 	struct list_head capture;	
 	struct ak_buffer	*active;
 	spinlock_t		lock;  /* for videobuf_queue , passed in init_videobuf */
+	spinlock_t		rfled_lock;
 	
 	/* personal members for platform relative */
 	unsigned long mclk;
@@ -79,6 +80,8 @@ struct ak_camera_dev {
 	enum isp_working_mode def_mode;
 	unsigned char *osd_swbuff;
 	unsigned char *osd_buff;
+	
+	struct timer_list timer;
 };
 
 struct ak_camera_cam {
@@ -96,7 +99,14 @@ static int irq_need_baffle = 0;
 
 extern void *getRecordSyncSamples(void);
 
-/* for ak_videobuf_release */
+/**
+ * @brief:  for ak_videobuf_release, free buffer if camera stopped.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *vq: V4L2 buffer queue information structure
+ * @param [in] *buf: ak camera drivers structure, include struct videobuf_buffer 
+ */
 static void free_buffer(struct videobuf_queue *vq, struct ak_buffer *buf)
 {
 	struct soc_camera_device *icd = vq->priv_data;
@@ -113,17 +123,27 @@ static void free_buffer(struct videobuf_queue *vq, struct ak_buffer *buf)
 	 * longer in STATE_QUEUED or STATE_ACTIVE */
 	if (vb->state == VIDEOBUF_ACTIVE && !pcdev->dma_running) {
 		printk("free_buffer: dma_running=%d, doesn't neee to wait\n", pcdev->dma_running);
-		vb->state = VIDEOBUF_ERROR;
+		//vb->state = VIDEOBUF_ERROR;
 		list_del(&vb->queue);
 	} else {
+		vb->state = VIDEOBUF_DONE;
 		videobuf_waiton(vq, vb, 0, 0);
 	}
 	videobuf_dma_contig_free(vq, vb);
 
 	vb->state = VIDEOBUF_NEEDS_INIT;
 }
+static void rfled_timer(unsigned long _data);
 
-/* Called when application apply buffers */
+/**
+ * @brief:  Called when application apply buffers, camera buffer initial.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *vq: V4L2 buffer queue information structure
+ * @param [in] *count: buffer's number
+ * @param [in] *size: buffer total size
+ */
 static int ak_videobuf_setup(struct videobuf_queue *vq, unsigned int *count, 
 								unsigned int *size)
 {
@@ -151,7 +171,15 @@ static int ak_videobuf_setup(struct videobuf_queue *vq, unsigned int *count,
 	return 0;
 }
 
-/* platform independent */
+/**
+ * @brief: Called when application apply buffers, camera buffer initial.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *vq: V4L2  buffer queue information structure
+ * @param [in] *vb: V4L2  buffer information structure
+ * @param [in] field: V4L2_FIELD_ANY 
+ */
 static int ak_videobuf_prepare(struct videobuf_queue *vq,
 			struct videobuf_buffer *vb, enum v4l2_field field)
 {
@@ -223,6 +251,14 @@ out:
 	return ret;
 }
 
+/**
+ * @brief: Called when application apply buffers, camera start data collection
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *vq: V4L2  buffer queue information structure
+ * @param [in] *vb: V4L2  buffer information structure
+ */
 static void ak_videobuf_queue(struct videobuf_queue *vq, 
 								struct videobuf_buffer *vb)
 {
@@ -300,18 +336,37 @@ static void ak_videobuf_queue(struct videobuf_queue *vq,
 	default:
 		printk("The working mode of ISP hasn't been initialized.\n");
 	}
+	if (pcdev->pdata->rf_led.pin > 0)
+		{
+	rfled_timer(pcdev);
+		}
 }
 
+/**
+ * @brief:  for ak_videobuf_release, free buffer if camera stopped.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *vq: V4L2 buffer queue information structure
+ * @param [in] *vb: V4L2  buffer information structure
+ */
 static void ak_videobuf_release(struct videobuf_queue *vq, 
 					struct videobuf_buffer *vb)
 {
 	struct ak_buffer *buf = container_of(vb, struct ak_buffer, vb);	
-//	struct soc_camera_device *icd = vq->priv_data;
+	struct soc_camera_device *icd = vq->priv_data;
 //	struct device *dev = icd->parent;
+	struct soc_camera_host *ici = to_soc_camera_host(icd->parent);
+	struct ak_camera_dev *pcdev = ici->priv;
+	unsigned long flags;
 	
 	isp_dbg("%s (vb=0x%p) buf[%d] 0x%08lx %d\n", 
 			__func__, vb, vb->i, vb->baddr, vb->bsize);
-	
+
+	spin_lock_irqsave(&pcdev->lock, flags);
+	isp_clear_irq(&pcdev->isp);
+	spin_unlock_irqrestore(&pcdev->lock, flags);
+
 	switch (vb->state) {
 	case VIDEOBUF_ACTIVE:
 		CAMDBG("vb status: ACTIVE\n");
@@ -337,7 +392,13 @@ static struct videobuf_queue_ops ak_videobuf_ops = {
 	.buf_release    = ak_videobuf_release,
 };
 
-/* platform code*/
+/**
+ * @brief: irq handler function, camera start data collection
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *pcdev:ak camera drivers structure, include soc camera structure
+ */
 static int ak_camera_setup_dma(struct ak_camera_dev *pcdev)
 {
 	struct videobuf_buffer *vb_active = &pcdev->active->vb;
@@ -386,7 +447,16 @@ out:
 	return 0;
 }
 
-/* platform code please fix me */
+/**
+ * @brief: irq handler function, camera start data collection.
+ * wake up wait queue.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *pcdev:ak camera drivers structure, include soc camera structure
+ * @param [in] *vb: V4L2  buffer information structure
+ * @param [in] *buf: ak camera drivers structure, include struct videobuf_buffer 
+ */
 static void ak_camera_wakeup(struct ak_camera_dev *pcdev,
 			      struct videobuf_buffer *vb,
 			      struct ak_buffer *buf)
@@ -452,14 +522,28 @@ static void ak_camera_wakeup(struct ak_camera_dev *pcdev,
 		isp_dbg("wakeup (vb=0x%p) buf[%d], baddr = 0x%08lx, bsize = %d\n",
 				vb, vb->i, vb->baddr, vb->bsize);
 	}
-	
+
+   if(pcdev->isp.cur_mode_class == ISP_RGB_CLASS)
+   	{
+   	 
+		/*33ms:read next frame params in 33ms later.*/
+		schedule_delayed_work(&pcdev->isp.awb_work, msecs_to_jiffies(33));
+		schedule_delayed_work(&pcdev->isp.ae_work, 0);
+   	}
+
 	pcdev->active = list_entry(pcdev->capture.next,
 					   struct ak_buffer, vb.queue);
 
 	ak_camera_setup_dma(pcdev);
 }
 
-/* fix me */
+/**
+ * @brief: camera irq handler function, camera start data collection.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *data: struct ak_camera_dev 
+ */
 static irqreturn_t ak_camera_dma_irq(int channel, void *data)
 {
 	struct ak_camera_dev *pcdev = data;
@@ -492,57 +576,92 @@ out:
 	return IRQ_HANDLED;
 }	
 
-static void isp_work(struct work_struct *work) 
+/**
+ * @brief: infrared light timer handler function.
+ * change mode between daylight and nightlight
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] _data: ak camera drivers structure, include soc camera structure
+ */
+static void rfled_timer(unsigned long _data)
 {
-	struct isp_struct *isp = container_of(work, struct isp_struct, work.work);
-
-	update_exposure_value(isp);
-}
-
-
-#if 0
-/* for debugging osd function of ISP */
-static int create_osd_picture(struct ak_camera_dev *pcdev)
-{
-	int startX, startY, endX, endY;
-	int picsize;
-	int osd_width, osd_height;
-	int i;
+	struct ak_camera_dev *pcdev = (struct ak_camera_dev *)_data;
+	struct v4l2_ctrl wb_ctrl, colorfx_ctrl;
 	
-	startX = startY = 0;
-	endX = endY = 100;
-	osd_width = endX - startX + 1;
-	osd_height = endY - startY + 1;
-	picsize = osd_width * osd_height;
-
-	if (!pcdev->osd_swbuff) {
-		pcdev->osd_swbuff = kmalloc(picsize, GFP_KERNEL);
-		if (!pcdev->osd_swbuff)
-			return -1;
+    if (pcdev->pdata->gpio_get(pcdev->pdata->rf_led.pin)) {
+		wb_ctrl.val = ISP_MANU_WB_0;
+		colorfx_ctrl.val = V4L2_COLORFX_NONE;
+		pcdev->isp.rfled_ison = 1;
+	} else {
+		wb_ctrl.val = ISP_MANU_WB_3;
+		colorfx_ctrl.val = V4L2_COLORFX_BW;
+		pcdev->isp.rfled_ison = 0;
 	}
 
-	if (!pcdev->osd_buff) {
-		pcdev->osd_buff = kmalloc(picsize / 2 + picsize %2, GFP_KERNEL);
-		if (!pcdev->osd_buff)
-			return -1;
-	}
-	memset(pcdev->osd_buff, 0, (picsize / 2 + picsize % 2));
-
-	for (i = 0; i <picsize/2; i++)
-		pcdev->osd_swbuff[i] = 3;
-
-	for (i = picsize/2; i <picsize; i++)
-		pcdev->osd_swbuff[i+1] = 4;
-		
-	for(i = 0; i<picsize/2; i++)
-		pcdev->osd_buff[i] = (pcdev->osd_swbuff[2*i] &0xf) | ((pcdev->osd_swbuff[2*i+1]&0xf)<<4);
-
-	if(picsize%2)
-		pcdev->osd_buff[i] = pcdev->osd_swbuff[2*i];
-
-	return 0;
+	isp_manu_set_wb_param(&pcdev->isp, &wb_ctrl, 1);
+	isp_set_uspecial_effect(&pcdev->isp, &colorfx_ctrl, 1);
 }
-#endif
+
+/**
+ * @brief: infrared light irq handler function. change irq polarity is here.
+ * change mode between daylight and nightlight
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] channel: irq number
+ * @param [in] *data: ak camera drivers structure, include soc camera structure
+ */
+static irqreturn_t ak_rfled_isr(int channel, void *data)
+{
+	struct ak_camera_dev *pcdev = data;
+	
+	spin_lock(&pcdev->rfled_lock);
+
+	if (pcdev->pdata->gpio_get(pcdev->pdata->rf_led.pin)) 
+		ak_gpio_set_intpol(pcdev->pdata->rf_led.pin, AK_GPIO_INT_LOWLEVEL);
+	else
+		ak_gpio_set_intpol(pcdev->pdata->rf_led.pin, AK_GPIO_INT_HIGHLEVEL);
+	
+	mod_timer(&pcdev->timer,
+			jiffies + msecs_to_jiffies(100));
+
+	spin_unlock(&pcdev->rfled_lock);
+	
+    return IRQ_HANDLED;
+}
+
+/**
+ * @brief: delay work queue, update image effects entry.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *work: struct isp_struct
+ */
+static void isp_awb_work(struct work_struct *work) 
+{
+	struct isp_struct *isp = container_of(work, struct isp_struct, awb_work.work);
+
+	if (isp->auto_wb_param_en) //by xc
+		isp_update_auto_wb_param(isp);
+}
+
+
+/**
+ * @brief: delay work queue, update image effects entry.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *work: struct isp_struct
+ */
+static void isp_ae_work(struct work_struct *work) 
+{
+struct isp_struct *isp = container_of(work, struct isp_struct, ae_work.work);
+//	struct isp_struct *isp = container_of(work, struct isp_struct, ae_work.work);
+
+    isp_update_auto_exposure_param(isp);
+	/*auto exposure.*/
+}
 
 static struct soc_camera_device *ctrl_to_icd(struct v4l2_ctrl *ctrl)
 {
@@ -550,6 +669,13 @@ static struct soc_camera_device *ctrl_to_icd(struct v4l2_ctrl *ctrl)
 							ctrl_handler);
 }
 
+/**
+ * @brief: get function supported of camera, the function is image adjust, color effect...
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *ctrl: V4L2 image effect control information structure
+ */
 static int ak_camera_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
 {
 //	struct soc_camera_device *icd = ctrl_to_icd(ctrl);
@@ -563,14 +689,21 @@ static int ak_camera_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
 	case V4L2_CID_BRIGHTNESS:
 		isp_dbg("%s(): V4L2_CID_BRIGHTNESS\n", __func__);
 		break;
-	case V4L2_CID_GAMMA:
-		isp_dbg("%s(): V4L2_CID_GAMMA\n", __func__);
+	case V4L2_CID_CONTRAST:
+		isp_dbg("%s(): V4L2_CID_CONTRAST\n", __func__);
 		break;
 	case V4L2_CID_SATURATION:
 		isp_dbg("%s(): V4L2_CID_SATURATION\n", __func__);
 		break;
 	case V4L2_CID_SHARPNESS:
 		isp_dbg("%s(): V4L2_CID_SHARPNESS\n", __func__);
+		break;
+	case V4L2_CID_HUE:
+		break;
+	case V4L2_CID_HUE_AUTO:
+		break;
+	case V4L2_CID_COLORFX:
+		isp_dbg("%s(): V4L2_CID_COLORFX\n", __func__);
 		break;
 	case V4L2_CID_DO_WHITE_BALANCE:
 		isp_dbg("%s(): V4L2_CID_DO_WHITE_BALANCE\n", __func__);
@@ -583,9 +716,14 @@ static int ak_camera_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
 	return 0;
 }
 
-/*
-  * @the isp standard control should be implemented here.
-  */
+/**
+ * @brief: the isp standard control should be implemented here.
+ * the function is image adjust, color effect...
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *ctrl: V4L2 image effect control information structure
+ */
 static int ak_camera_s_ctrl(struct v4l2_ctrl *ctrl)
 {
 	struct v4l2_control control;
@@ -596,33 +734,39 @@ static int ak_camera_s_ctrl(struct v4l2_ctrl *ctrl)
 	
 	isp_dbg("entry %s\n", __func__);
 
-	if (pcdev->isp.cur_mode_class == ISP_RGB_CLASS) {
-		switch (ctrl->id) {
-		case V4L2_CID_BRIGHTNESS:
-			if (isp_set_brightness(&pcdev->isp, ctrl) == 0)
-				return 0;
-			break;
-		case V4L2_CID_GAMMA:
-			if (isp_set_gamma(&pcdev->isp, ctrl) == 0)
-				return 0;
-			break;
-		case V4L2_CID_SATURATION:
-			if (isp_set_saturation(&pcdev->isp, ctrl) == 0)
-				return 0;
-			break;
-		case V4L2_CID_SHARPNESS:
-			if (isp_set_sharpness(&pcdev->isp, ctrl) == 0)
-				return 0;
-			break;
-		case V4L2_CID_DO_WHITE_BALANCE:
-			if (isp_manu_set_wb_param(&pcdev->isp, ctrl) == 0)
-				return 0;
-			break;
-		case V4L2_CID_AUTO_WHITE_BALANCE:
-			if (isp_auto_set_wb_param(&pcdev->isp, ctrl) == 0)
-				return 0;
-			break;
-		}
+	switch (ctrl->id) {
+	case V4L2_CID_BRIGHTNESS:
+		if (isp_set_brightness(&pcdev->isp, ctrl) == 0)
+			return 0;
+		break;
+	case V4L2_CID_CONTRAST:
+		if (isp_set_gamma(&pcdev->isp, ctrl) == 0)
+			return 0;
+		break;
+	case V4L2_CID_SATURATION:
+		if (isp_set_saturation(&pcdev->isp, ctrl) == 0)
+			return 0;
+		break;
+	case V4L2_CID_SHARPNESS:
+		if (isp_set_sharpness(&pcdev->isp, ctrl) == 0)
+			return 0;
+		break;
+	case V4L2_CID_HUE:
+		break;
+	case V4L2_CID_HUE_AUTO:
+		break;
+	case V4L2_CID_COLORFX:
+		if (isp_set_uspecial_effect(&pcdev->isp, ctrl, 0) == 0)
+			return 0;
+		break;
+	case V4L2_CID_DO_WHITE_BALANCE:
+		if (isp_manu_set_wb_param(&pcdev->isp, ctrl, 0) == 0)
+			return 0;
+		break;
+	case V4L2_CID_AUTO_WHITE_BALANCE:
+		if (isp_auto_set_wb_param(&pcdev->isp, ctrl) == 0)
+			return 0;
+		break;
 	}
 	
 	control.id = ctrl->id;
@@ -638,6 +782,13 @@ static const struct v4l2_ctrl_ops ak_camera_ctrl_ops = {
 	.s_ctrl				= ak_camera_s_ctrl,
 };
 
+/**
+ * @brief: set sensor clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] cis_sclk: sensor work clock
+ */
 static void set_sensor_cis_sclk(unsigned int cis_sclk)
 {
 	unsigned long regval;
@@ -656,10 +807,14 @@ static void set_sensor_cis_sclk(unsigned int cis_sclk)
 			__func__, cis_sclk, peri_pll, cis_sclk_div);
 }
 
-
-/*
-  * @Called when the /dev/videox is opened.
-  */
+/**
+ * @brief: Called when the /dev/videox is opened. initial ISP and sensor device.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *icd: soc_camera_device information structure, 
+ * akcamera depends on the soc driver.
+ */
 static int ak_camera_add_device(struct soc_camera_device *icd)
 {
 	struct soc_camera_host *ici = to_soc_camera_host(icd->parent);
@@ -710,21 +865,27 @@ static int ak_camera_add_device(struct soc_camera_device *icd)
 	if (!icd->host_priv) {
 		v4l2_ctrl_new_std(&icd->ctrl_handler, &ak_camera_ctrl_ops,
 			V4L2_CID_BRIGHTNESS, ISP_BRIGHTNESS_0, 
-			ISP_BRIGHTNESS_6, 1, ISP_BRIGHTNESS_2);
+			ISP_BRIGHTNESS_6, 1, ISP_BRIGHTNESS_3);
 		v4l2_ctrl_new_std(&icd->ctrl_handler, &ak_camera_ctrl_ops,
-			V4L2_CID_GAMMA, ISP_GAMMA_0, 
-			ISP_GAMMA_6, 1, ISP_GAMMA_0);
+			V4L2_CID_CONTRAST, ISP_GAMMA_0, 
+			ISP_GAMMA_6, 1, ISP_GAMMA_3);
 		v4l2_ctrl_new_std(&icd->ctrl_handler, &ak_camera_ctrl_ops,
 			V4L2_CID_SATURATION, ISP_SATURATION_0, 
-			ISP_SATURATION_6, 1, ISP_SATURATION_1);
+			ISP_SATURATION_6, 1, ISP_SATURATION_3);
 		v4l2_ctrl_new_std(&icd->ctrl_handler, &ak_camera_ctrl_ops,
 			V4L2_CID_SHARPNESS, ISP_SHARPNESS_0, 
-			ISP_SHARPNESS_6, 1, ISP_SHARPNESS_1);
+			ISP_SHARPNESS_6, 1, ISP_SHARPNESS_3);
+		v4l2_ctrl_new_std(&icd->ctrl_handler, &ak_camera_ctrl_ops,
+			V4L2_CID_HUE, 0, 256, 1, 128);
+		v4l2_ctrl_new_std(&icd->ctrl_handler, &ak_camera_ctrl_ops,
+			V4L2_CID_HUE_AUTO, 0, 1, 1, 0);
 		v4l2_ctrl_new_std(&icd->ctrl_handler, &ak_camera_ctrl_ops,
 			V4L2_CID_DO_WHITE_BALANCE, ISP_MANU_WB_0, 
 			ISP_MANU_WB_6, 1, ISP_MANU_WB_0);
 		v4l2_ctrl_new_std(&icd->ctrl_handler, &ak_camera_ctrl_ops,
 			V4L2_CID_AUTO_WHITE_BALANCE, 0, 1, 1, 1);
+		v4l2_ctrl_new_std_menu(&icd->ctrl_handler, &ak_camera_ctrl_ops,
+			V4L2_CID_COLORFX, V4L2_COLORFX_VIVID, 0, V4L2_COLORFX_NONE);
 		
 		/* FIXME: subwindow is lost between close / open */
 		cam = kzalloc(sizeof(*cam), GFP_KERNEL);
@@ -740,9 +901,14 @@ static int ak_camera_add_device(struct soc_camera_device *icd)
 	return 0;
 }
 
-/*
-  * @Called when the /dev/videox is closed.
-  */
+/**
+ * @brief: Called when the /dev/videox is close. close ISP and sensor device.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *icd: soc_camera_device information structure, 
+ * akcamera depends on the soc driver.
+ */
 static void ak_camera_remove_device(struct soc_camera_device *icd)
 {
 	struct soc_camera_host *ici = to_soc_camera_host(icd->parent);
@@ -775,7 +941,14 @@ static void ak_camera_remove_device(struct soc_camera_device *icd)
 	CAMDBG("Leave %s\n", __func__);	
 }
 
-/* platform independent finished */
+/**
+ * @brief: set camera capability, used for query by user.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *ici: soc_camera_host information structure. 
+ * @param [in] *cap: v4l2_capability information structure.
+ */
 static int ak_camera_querycap(struct soc_camera_host *ici,
 			       struct v4l2_capability *cap)
 {
@@ -847,10 +1020,15 @@ static int ak_camera_set_crop(struct soc_camera_device *icd,
 	return ret;
 }
 
-
-/*
-  * @Called before ak_camera_set_fmt.
-  */
+/**
+ * @brief: setting image format information, Called before ak_camera_set_fmt.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *icd: soc_camera_device information structure, 
+ * akcamera depends on the soc driver.
+ * @param [in] *f: image format
+ */
 static int ak_camera_try_fmt(struct soc_camera_device *icd,
 			      struct v4l2_format *f)
 {
@@ -889,7 +1067,15 @@ static int ak_camera_try_fmt(struct soc_camera_device *icd,
 	return 0;
 }
 
-/* platform independent finished */
+/**
+ * @brief: setting image format information
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *icd: soc_camera_device information structure, 
+ * akcamera depends on the soc driver.
+ * @param [in] *f: image format
+ */
 static int ak_camera_set_fmt(struct soc_camera_device *icd,
 			      struct v4l2_format *f)
 {
@@ -929,15 +1115,27 @@ static int ak_camera_set_fmt(struct soc_camera_device *icd,
 	icd->current_fmt = xlate;
 
 	v4l2_subdev_call(sd, video, cropcap, &cropcap);
-	if (mf.width != cropcap.bounds.width 
-		|| mf.height != cropcap.bounds.height) {
-		mf.width	= cropcap.defrect.width;
-		mf.height	= cropcap.defrect.height;
-	}
-	
+	if ((mf.width > cropcap.bounds.width) 
+		|| (mf.height > cropcap.bounds.height)) {
+		/* D1 get from:
+		  if cropcap.bounds = 720P, output by scale down
+		  if cropcap.bounds = VGA, output by scale up 
+		*/
+		mf.width = cropcap.defrect.width;
+		mf.height = cropcap.defrect.height;
+	} else if ((mf.width < cropcap.defrect.width)
+		|| (mf.height < cropcap.defrect.height)) {
+		/*
+		  hypothesis, sensor output least size is VGA. the defrect size is VGA
+		  D2 and QVGA get from VGA scale down
+		*/
+		mf.width = cropcap.defrect.width;
+		mf.height = cropcap.defrect.height;
+	} 
+
 	isp_dbg("%s. mf.width = %d, mf.height = %d\n", 
 			__func__, mf.width, mf.height);
-	
+
 	ret = v4l2_subdev_call(sd, video, s_mbus_fmt, &mf);
 	if (ret < 0) 
 		return ret;
@@ -967,6 +1165,15 @@ static int ak_camera_set_fmt(struct soc_camera_device *icd,
 	return ret;
 }
 
+/**
+ * @brief: getting image format information
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *icd: soc_camera_device information structure, 
+ * akcamera depends on the soc driver.
+ * @param [in] *f: image format
+ */
 static int ak_camera_get_formats(struct soc_camera_device *icd, unsigned int idx,
 				     struct soc_camera_format_xlate *xlate)
 {
@@ -1035,16 +1242,43 @@ static void ak_camera_put_formats(struct soc_camera_device *icd)
 	CAMDBG("leave %s\n", __func__);
 }
 
+/**
+ * @brief: setting sensor register.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: isp_config_sensor_reg structure
+ */
 static int isp_set_sensor_param(struct isp_struct *isp, struct isp_config_sensor_reg *ctrl)
 {
-	if (ctrl->enable) 
-		aksensor_set_param(ctrl->cmd, ctrl->data);
+	aksensor_set_param(ctrl->cmd, ctrl->data);
 	return 0;
 }
 
-/*
-  * The private interface of ISP for application user.
-  */
+/**
+ * @brief: getting sensor register.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: isp_config_sensor_reg structure
+ */
+static unsigned int isp_get_sensor_param(struct isp_struct *isp, struct isp_config_sensor_reg *ctrl)
+{
+	return aksensor_get_param(ctrl->cmd);
+}
+
+/**
+ * @brief: The private interface of ISP for application user.
+ * setting ISP controller for image information
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *icd: soc_camera_device information structure, 
+ * akcamera depends on the soc driver.
+ * @param [in] *a: v4l2_streamparm structure, also used for user space.
+ */
  static int ak_camera_set_parm(struct soc_camera_device *icd,
 			      struct v4l2_streamparm *a)
 {
@@ -1131,6 +1365,16 @@ static int isp_set_sensor_param(struct isp_struct *isp, struct isp_config_sensor
 	case ISP_CID_SET_SENSOR_PARAM:
 		retval = isp_set_sensor_param(&pcdev->isp, (struct isp_config_sensor_reg *)parm_type);
 		break;
+	case ISP_CID_GET_SENSOR_PARAM:
+		retval = isp_get_sensor_param(&pcdev->isp, (struct isp_config_sensor_reg *)parm_type);
+		break;
+// ycx
+	case ISP_CID_AE_CTRL_PARAM:
+		retval = isp_set_ae_attr(&pcdev->isp, (struct isp_ae_attr*)parm_type);
+		break;
+	case ISP_CID_CC_AWB_PARAM:
+		retval = isp_set_cc_with_awb(&pcdev->isp, (struct isp_color_correct_awb*)parm_type);
+		break;
 	default:
 		retval = -EINVAL;
 		printk("%s: private control encounter unknown type\n", __func__);
@@ -1141,8 +1385,17 @@ static int isp_set_sensor_param(struct isp_struct *isp, struct isp_config_sensor
 	return retval;
 }
 
-
- static int ak_camera_get_parm(struct soc_camera_device *icd,
+ /**
+  * @brief: The private interface of ISP for application user.
+  * getting ISP controller for image information
+  * 
+  * @author: caolianming
+  * @date: 2014-01-06
+  * @param [in] *icd: soc_camera_device information structure, 
+  * akcamera depends on the soc driver.
+  * @param [in] *a: v4l2_streamparm structure, also used for user space.
+  */
+static int ak_camera_get_parm(struct soc_camera_device *icd,
 			      struct v4l2_streamparm *a)
 {
 	struct soc_camera_host *ici = to_soc_camera_host(icd->parent);
@@ -1253,7 +1506,15 @@ static int ak_camera_set_bus_param(struct soc_camera_device *icd)
 	return 0;
 }
 
-/* platform independent finished*/
+/**
+ * @brief: register video buffer by video sub-system
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *icd: soc_camera_device information structure, 
+ * akcamera depends on the soc driver.
+ * @param [in] *q: V4L2  buffer queue information structure
+ */
 static void ak_camera_init_videobuf(struct videobuf_queue *q,
 			struct soc_camera_device *icd)
 {
@@ -1270,7 +1531,15 @@ static void ak_camera_init_videobuf(struct videobuf_queue *q,
 	CAMDBG("leave %s\n", __func__);
 }
 
-/* platform independent finished*/
+/**
+ * @brief: request video buffer.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *icd: soc_camera_device information structure, 
+ * akcamera depends on the soc driver.
+ * @param [in] *q: V4L2  buffer queue information structure
+ */
 static int ak_camera_reqbufs(struct soc_camera_device *icd, 
 				struct v4l2_requestbuffers *p)
 {
@@ -1340,7 +1609,7 @@ static int ak_camera_probe(struct platform_device *pdev)
 	struct resource *res;
 	struct clk *clk, *cis_sclk;
 	void __iomem *base;
-	unsigned int irq;
+	unsigned int irq, rfled_irq;
 	int err = 0;
 
 	CAMDBG("entry %s\n", __func__);
@@ -1402,6 +1671,9 @@ static int ak_camera_probe(struct platform_device *pdev)
 		pcdev->mclk = 24;
 	}
 
+	if (pcdev->pdata->rf_led.pin > 0) 
+		pcdev->pdata->gpio_set(&pcdev->pdata->rf_led);
+		
 	INIT_LIST_HEAD(&pcdev->capture);
 	spin_lock_init(&pcdev->lock);
 
@@ -1430,6 +1702,17 @@ static int ak_camera_probe(struct platform_device *pdev)
 		goto exit_iounmap;
 	}
 
+	if (pcdev->pdata->rf_led.pin > 0) {
+		setup_timer(&pcdev->timer, rfled_timer, (unsigned long)pcdev);
+		rfled_irq = ak_gpio_to_irq(pcdev->pdata->rf_led.pin);
+		err = request_irq(rfled_irq, ak_rfled_isr, 
+				IRQF_DISABLED, "rfled", pcdev);
+		if (err) {
+			err = -ENODEV;
+			goto exit_iounmap;
+		}
+	}
+	
 	/*
 	  * request irq 
 	  */	
@@ -1438,8 +1721,10 @@ static int ak_camera_probe(struct platform_device *pdev)
 		err = -EBUSY;
 		goto exit_freeisp;
 	}
-
-	INIT_DELAYED_WORK(&pcdev->isp.work, isp_work);
+	/* init auto white balance*/
+	INIT_DELAYED_WORK(&pcdev->isp.awb_work, isp_awb_work);
+	/* init auto exposure*/
+	INIT_DELAYED_WORK(&pcdev->isp.ae_work, isp_ae_work);
 	
 	/*
 	** @register soc_camera_host

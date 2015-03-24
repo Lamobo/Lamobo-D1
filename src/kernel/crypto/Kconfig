@@ -977,6 +977,18 @@ config CRYPTO_USER_API_SKCIPHER
 	  This option enables the user-spaces interface for symmetric
 	  key cipher algorithms.
 
+
+config CRYPTO_DEV
+	tristate "User-space interface by dev"
+	depends on CRYPTO
+	select CRYPTO_BLKCIPHER
+	select CRYPTO_AEAD
+	select CRYPTO_HASH
+	help
+	  This option enables the user-spaces interface, can use it in 
+	  /dev/crypto 
+
+
 source "drivers/crypto/Kconfig"
 
 endif	# if CRYPTO

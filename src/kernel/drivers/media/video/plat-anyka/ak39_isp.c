@@ -1,11 +1,14 @@
 #include <linux/slab.h>
 #include <linux/hardirq.h>
+
 #include <linux/delay.h>
 #include <linux/dma-mapping.h>
 #include <asm/cacheflush.h>
 #include <plat-anyka/aksensor.h>
 
+
 #include "ak39_isp.h"
+#include "isp_param.h"
 
 //#define ISP_DEBUG
 #ifdef ISP_DEBUG
@@ -13,12 +16,37 @@
 #else
 #define isp_dbg(fmt, args...)	do{}while(0)
 #endif 
-
 #define isp_info(stuff...)		printk(KERN_INFO " ISP: " stuff)
+
 
 #define BRIGHTNESS_CHART_SIZE	64
 #define HISTOGRAM_SIZE			(1024*3)
 
+#define ABS_DIFF(a, b)   (((a) > (b)) ? ((a) - (b)) : ((b) - (a)))
+#define AWB_LOOP_FRAME_NUM  5
+#define G_TOTAL_THRESH 50000  
+#define CT_STABLE_CNT	2
+#define OUT_CYCLE_END  5
+#define AWB_CALC_PARA_NUM 5
+struct awb_rgb_param {
+	unsigned short r[3];
+	unsigned short b[3];
+	unsigned short g[3];
+};
+
+struct awb_para_screen
+{
+	unsigned long channel_g_total[4];//4              
+	unsigned short r_gain[4];
+	unsigned short b_gain[4];
+};
+
+
+unsigned int   updata_auto_exposure_num = 0;
+#define  UPDATA_AUTO_EXPOSURE_FREQUENCE 1
+
+static unsigned int brightness_average(struct isp_struct *isp);
+int isp_aec_time_calc(struct isp_struct  *isp);
 static unsigned long histo_arr[256] = {0};
 
 //the gamma_table by called build_gamma_table()
@@ -57,14 +85,14 @@ unsigned long gamma_table[7][BRIGHTNESS_CHART_SIZE] = {
 	0x87868583, 0x8c8b8988, 0x91908e8d, 0x95949492, 0x99989796, 0x9d9c9b9a, 0xa09f9f9e, 0xa4a3a2a1, 
 	0xa8a7a6a5, 0xadabaaa9, 0xb1b0afae, 0xb5b4b3b2, 0xb9b8b7b6, 0xbebdbbba, 0xc2c1c0bf, 0xc7c5c4c3, 
 	0xcbcac9c8, 0xd0cfcdcc, 0xd4d3d2d1, 0xd9d8d7d5, 0xdedcdbda, 0xe2e1e0df, 0xe7e6e5e3, 0xebebe9e8},
-	{ 0x11111010, 0x14131212, 0x16151514, 0x18181717, 0x1b1a1a19, 0x1e1d1c1c, 0x20201f1e, 0x24232221, 
-	0x27262524, 0x2a292928, 0x2e2d2c2b, 0x3231302f, 0x37363533, 0x3b3b3938, 0x403f3e3d, 0x44434241, 
-	0x49474645, 0x4d4c4b4a, 0x5251504e, 0x57565553, 0x5c5b5a58, 0x61605f5d, 0x66656462, 0x6b6a6968, 
-	0x716f6e6d, 0x76747372, 0x7b797877, 0x807e7d7c, 0x84838281, 0x89888786, 0x8e8d8b8a, 0x9291908f, 
-	0x96959493, 0x9b9a9897, 0x9e9d9c9c, 0xa2a1a09f, 0xa6a5a4a3, 0xa9a8a8a7, 0xadacabaa, 0xb0afaead, 
-	0xb3b2b1b1, 0xb6b5b4b4, 0xb9b8b7b7, 0xbbbbbab9, 0xbebebdbc, 0xc1c0c0bf, 0xc4c3c2c2, 0xc6c5c5c4, 
-	0xc8c8c7c7, 0xcbcacac9, 0xcdcdcccc, 0xd0cfcfce, 0xd2d2d1d0, 0xd4d4d3d3, 0xd7d6d6d5, 0xd9d8d8d7, 
-	0xdbdbdada, 0xdedddcdc, 0xe0dfdfde, 0xe2e2e1e0, 0xe4e4e3e3, 0xe7e6e5e5, 0xe9e8e8e7, 0xebebeae9},
+	{ 0x4020101, 0xc0a0806, 0x1412100e, 0x1c1a1816, 0x2422201e, 0x2d2b2926, 0x3533312f, 0x3d3b3937, 
+	0x4543413f, 0x4e4b4947, 0x5251504f, 0x57555453, 0x5b5a5958, 0x605e5d5c, 0x64636261, 0x69686665, 
+	0x6d6c6b6a, 0x7271706e, 0x76757473, 0x7b7a7978, 0x807e7d7c, 0x84838281, 0x89878685, 0x8d8c8b8a, 
+	0x91908f8e, 0x96959493, 0x9a999897, 0x9e9e9c9b, 0xa1a1a09f, 0xa4a4a3a2, 0xa7a7a6a5, 0xaaaaa9a8,
+	0xadadacab, 0xb0b0afae, 0xb3b2b2b1, 0xb6b5b5b4, 0xb9b8b7b7, 0xbbbbbab9, 0xbebdbdbc, 0xc1c0bfbf, 
+	0xc3c3c2c1, 0xc6c5c5c4, 0xc8c8c7c6, 0xcbcac9c9, 0xcdcccccb, 0xcfcfcecd, 0xd1d1d0d0, 0xd3d3d2d2, 
+	0xd5d5d4d4, 0xd7d7d6d6, 0xd9d9d8d8, 0xdbdadad9, 0xdddcdcdb, 0xe0e0dfde, 0xe3e2e2e1, 0xe5e5e4e4, 
+	0xe7e7e6e6, 0xe9e9e8e8, 0xeaeaeae9, 0xecebebeb, 0xededecec, 0xeeeeeded, 0xefefeeee, 0xf0f0efef},
 	{ 0x10101010, 0x12121111, 0x13131312, 0x15151414, 0x17161615, 0x19181817, 0x1b1b1a19, 0x1e1d1d1c, 
 	0x21201f1f, 0x25242322, 0x29282726, 0x2e2c2b2a, 0x3332302f, 0x37363534, 0x3c3b3a38, 0x41403f3d, 
 	0x47464443, 0x4d4b4a48, 0x5351504e, 0x59575654, 0x5f5d5c5a, 0x65636260, 0x6b6a6867, 0x71706e6d, 
@@ -292,6 +320,14 @@ void isp_restart_update_param(struct isp_struct *isp)
 			(1 << (12+ISP_FRAME_UPDATE))|(1 << ISP_FRAME_UPDATE);
 }
 
+/**
+ * @brief: update regtable before comming
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] force: force update if 1.
+ */
 void isp_update_regtable(struct isp_struct *isp, int force)
 {
 	if (force)
@@ -300,7 +336,13 @@ void isp_update_regtable(struct isp_struct *isp, int force)
 		REG32(isp->base + ISP_ORDER_CTRL) = ((1<<31) | (isp->addr & 0x3fffffff));
 }
 
-
+/**
+ * @brief: change ISP current mode if user change sensor
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
 int	update_cur_mode_class(struct isp_struct *isp)
 {
 	switch(isp->cur_mode) {
@@ -325,6 +367,17 @@ int	update_cur_mode_class(struct isp_struct *isp)
 	}
 	return 0;
 }
+
+/**
+ * @brief: setting cutter window size for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] co_g:  G component 
+ * @param [in] co_r, R component
+ * @param [in] co_b, B component
+ */
 static void __isp_set_white_pram(struct isp_struct *isp, 
 	unsigned int co_g, unsigned int co_r, unsigned int co_b)
 {
@@ -360,13 +413,29 @@ static int isp_set_auto_wb_support(struct isp_struct *isp,
 				|(ctrl->gb_low & 0x3ff);
 
 
-	isp->wb_param.co_g = 1024;
-	isp->wb_param.co_r = 1024;
-	isp->wb_param.co_b = 1024;
+	//isp->wb_param.co_g = 1024;
+	//isp->wb_param.co_r = 1024;
+	//isp->wb_param.co_b = 1024;
 
 	__isp_set_white_pram(isp, isp->wb_param.co_g, 
 				isp->wb_param.co_r, isp->wb_param.co_b);
 	return 0;
+}
+
+static int __enable_brightness_enhance(struct isp_struct *isp)
+{
+	isp->img_ctrltbl1[12] = 0x0;
+	if ((isp->chl2_enable)
+		&& ((isp->fmt_def_width == 640)||(isp->fmt_def_height == 480))
+		&& ((isp->chl2_width == isp->fmt_def_width)||(isp->chl2_height == isp->fmt_def_height))) {
+	
+		// disable edge(brightness) adjust
+		isp->img_ctrltbl1[11] &= ~(1 << 29);
+		isp->yedge_en = 0;
+		
+		return 0;
+	}
+	return 1;
 }
 
 static void __isp_set_color_crr(struct isp_struct *isp, struct isp_color_correct *ctrl,
@@ -385,7 +454,7 @@ static void __isp_set_color_crr(struct isp_struct *isp, struct isp_color_correct
 
 	for (i = 0; i < row; i++) {
 		for (j= 0; j<col; j++)
-			isp_dbg("	ctrl->ccMtrx[%d][%d] = %d\n", i, j, ctrl->ccMtrx[i][j]);
+			;//isp_dbg("	ctrl->ccMtrx[%d][%d] = %d\n", i, j, ctrl->ccMtrx[i][j]);
 	}
 
 	for (i = 0; i < row; i++) {
@@ -431,17 +500,25 @@ static void __isp_set_uv_saturation(struct isp_struct *isp, struct isp_saturatio
 	isp->img_ctrltbl1[14] |= (ctrl->Chigh << 24)|(ctrl->Clow << 16);
 }
 
-static void __isp_set_brigtness(struct isp_struct *isp,  
+static void __isp_set_sharpness(struct isp_struct *isp,  
 		struct isp_brightness_enhance *ctrl)
 {
 	ctrl->y_thrs = (ctrl->y_thrs > 2048) ? 2048 : ctrl->y_thrs;
 	ctrl->y_edgek = (ctrl->y_edgek > 2048) ? 2048 : ctrl->y_edgek;
+
+	isp->img_ctrltbl1[12] &= ~(0xffffff);
+	isp->img_ctrltbl1[12] |= (((ctrl->y_thrs * 9) & 0x7ff) << Y_EDGE_THRS_BIT)
+			|((ctrl->y_edgek & 0x7ff) << Y_EDGE_K_BIT);
+}
+
+static void __isp_set_brigtness(struct isp_struct *isp,  
+		struct isp_brightness_enhance *ctrl)
+{
 	ctrl->ygain = (ctrl->ygain > 64) ? 63 : 
 					((ctrl->ygain < -64) ? -63 : ctrl->ygain);
 
-	isp->img_ctrltbl1[12] = (ctrl->ygain << Y_GAIN_BIT)
-			|(((ctrl->y_thrs * 9) & 0x7ff) << Y_EDGE_THRS_BIT)
-			|((ctrl->y_edgek & 0x7ff) << Y_EDGE_K_BIT);
+	isp->img_ctrltbl1[12] &= ~(0xff << Y_GAIN_BIT);
+	isp->img_ctrltbl1[12] |= (ctrl->ygain << Y_GAIN_BIT);
 
 	// enable edge(brightness) adjust
 	isp->img_ctrltbl1[11] |= (1 << 29);
@@ -474,10 +551,7 @@ static void __isp_clear_lens_param(struct isp_struct *isp)
 
 static void __isp_set_lens_correct(struct isp_struct *isp, struct isp_lens_correct *ctrl)
 {
-	int width = isp->lens_use_width;
-	int height = isp->lens_use_height;
-	unsigned long cmd;
-	int value = 0, i;
+	int i;
 	
 	// lens coef setting
 	for (i = 0; i < 10; i++) {	
@@ -493,16 +567,8 @@ static void __isp_set_lens_correct(struct isp_struct *isp, struct isp_lens_corre
 				|(ctrl->lens_coefc[i] & 0x3ff);
 	}
 
-	if ((width <= 0) || (height <= 0)) {
-		width = isp->fmt_width;
-		height = isp->fmt_height;		
-	}
-		
-	// lens range setting
-	value = (width/2) * (width/2) + (height/2) * (height/2);
-	cmd = value / 22;
 	for (i = 0; i < 10; i++) {
-		isp->isp_ctrltbl[13+i] |= (cmd * (2*i+1)) & 0x3fffff;
+		isp->isp_ctrltbl[13+i] = (ctrl->lens_range[i] < 0) ? 0 : ctrl->lens_range[i];
 	}
 	
 	isp->isp_ctrltbl[23] = ((ctrl->lens_yref & 0x1fff) << LENS_YREF_BIT) 
@@ -511,7 +577,33 @@ static void __isp_set_lens_correct(struct isp_struct *isp, struct isp_lens_corre
 				+ (ctrl->lens_yref * ctrl->lens_yref)) & 0x7ffffff);
 }
 
+static void __set_special_effect(struct isp_struct *isp, struct isp_special_effect *ctrl)
+{
+	if (ctrl->solar_enable) 
+		isp->img_ctrltbl1[0] |= (ctrl->solar_thrs & 0xff) << YUV_SOLAR_THRD_BIT;
 
+	isp->img_ctrltbl1[14] |= ((ctrl->y_eff_coefa < 0) << (SPEC_YCOEFA_BIT+7))
+		|(((abs(ctrl->y_eff_coefa)) & 0x7f) << SPEC_YCOEFA_BIT) 
+		|((ctrl->y_eff_coefb & 0xff) << SPEC_YCOEFB_BIT);
+
+	isp->img_ctrltbl1[15] = ((ctrl->u_eff_coefa < 0) << (SPEC_UCOEFA_BIT+7)) 
+		|(((abs(ctrl->u_eff_coefa)) & 0x7f) << SPEC_UCOEFA_BIT) 
+		|(ctrl->u_eff_coefb << SPEC_UCOEFB_BIT) 
+		|((ctrl->v_eff_coefa < 0) << (SPEC_VCOEFA_BIT+7)) 
+		|(((abs(ctrl->v_eff_coefa)) & 0x7f) << SPEC_VCOEFA_BIT) 
+		|(ctrl->v_eff_coefb << SPEC_VCOEFB_BIT);
+
+	return;
+}
+
+/**
+ * @brief: checking irq status and handler.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
+unsigned int his_frame_cnt = 0;
 int isp_check_irq(struct isp_struct *isp)
 {
 	unsigned int irq_status;
@@ -527,11 +619,21 @@ int isp_check_irq(struct isp_struct *isp)
 	}
 
 	if (irq_status & (1 << ISP_FRAME_UPDATE)) {
-		if (isp->auto_wb_param_en)
-			isp_update_auto_wb_param(isp);
-		
-		//isp_set_histogram(isp, NULL);
-		//isp_get_histogram(isp);
+		if(isp->cur_mode_class == ISP_RGB_CLASS)
+		{	
+				if(1==his_frame_cnt)
+				{
+				    isp_get_histogram(isp);
+					isp_set_histogram(isp, NULL);				
+					his_frame_cnt = 0;
+				}
+			    else
+			    {
+			    	
+					  his_frame_cnt=1;
+					
+			    }
+		}
 	}
 
 #if 0
@@ -571,18 +673,41 @@ int isp_check_irq(struct isp_struct *isp)
 	return retval;
 }
 
+/**
+ * @brief: clear irq status
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
 int isp_clear_irq_status(struct isp_struct *isp)
 {
 	REG32(isp->base + ISP_IRQ_STATUS) |= 0x7ff;
 	return 0;
 }
 
+/**
+ * @brief: disable irq
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
 int isp_clear_irq(struct isp_struct *isp)
 {
 	REG32(isp->base + ISP_IRQ_STATUS) = 0;
 	return 0;
 }
 
+/**
+ * @brief: image frame(even frame mean first frame) for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] yaddr_chl1: main channel image size
+ * @param [in] yaddr_chl2: sub channel image size
+ */
 void isp_set_even_frame(struct isp_struct *isp, 
 				unsigned long yaddr_chl1, unsigned long yaddr_chl2)
 {
@@ -602,6 +727,15 @@ void isp_set_even_frame(struct isp_struct *isp,
 	}
 }
 
+/**
+ * @brief: image frame(odd frame mean next frame) for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] yaddr_chl1: main channel image size
+ * @param [in] yaddr_chl2: sub channel image size
+ */
 void isp_set_odd_frame(struct isp_struct *isp, 
 				unsigned long yaddr_chl1, 	unsigned long yaddr_chl2)
 {
@@ -620,6 +754,13 @@ void isp_set_odd_frame(struct isp_struct *isp,
 	}	
 }
 
+/**
+ * @brief: handler image boundary for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
 static int update_image_size(struct isp_struct *isp)
 {
 	int	iwidth = isp->cut_width;
@@ -641,7 +782,8 @@ static int update_image_size(struct isp_struct *isp)
 	
 	iwidth  = (isp->rgb_filter_en)?(iwidth-4):iwidth;
 	iheight = (isp->rgb_filter_en)?(iheight-4):iheight;
-	
+
+	// here is set isp OSD size, handler edge
 	isp->img_ctrltbl2[24] = ((iheight & 0x1fff) << OSD_SIZE_V_BIT)
 							|(iwidth & 0x1fff);
 
@@ -653,6 +795,14 @@ static int update_image_size(struct isp_struct *isp)
 	return 0;
 }
 
+/**
+ * @brief: Settting OSD for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *osd_info: struct isp_osd_info.
+ */
 int isp_set_osd(struct isp_struct *isp, struct isp_osd_info *osd_info)
 {
 	int base = 1;
@@ -676,6 +826,14 @@ int isp_set_osd(struct isp_struct *isp, struct isp_osd_info *osd_info)
 	return 0;
 }
 
+/**
+ * @brief: Enable main channel default for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] width, height: output image size
+ */
 int isp_set_channel1_scale(struct isp_struct *isp, int width, int height)
 {
 	int xrate, yrate;
@@ -703,21 +861,50 @@ int isp_set_channel1_scale(struct isp_struct *isp, int width, int height)
 	return 0;
 }
 
-
+/**
+ * @brief: setting cutter window size for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] xpos, xpos:  Image orignal position
+ * @param [in] width, height: needed image size
+ */
 int isp_set_cutter_window(struct isp_struct *isp, int xpos, int ypos, int width, int height)
 {
-	struct isp_demosaic demosac;
-	struct isp_rgb_filter rgb_filter;
-	int iwidth = width;
-	int iheight = height;
-	
+    struct isp_demosaic demosac;
+    struct isp_rgb_filter rgb_filter;
+    int iwidth, iheight;
+    
+    iwidth = width;
+    iheight = height;
+    isp->cut_width = width;
+    isp->cut_height = height;
+
+    if (!strcmp(get_sensor_name(), "ov9712")) {
+        if ((width == 1280)&&(height == 720)) {
+            iwidth = width;
+            iheight = height + 20;  // 740
+            isp->cut_width = width;
+            isp->cut_height = iheight;
+        }
+    } else {
+		if ((width == 640)&&(height == 480)) {
+            iwidth = width;
+            iheight = height-120; // 360
+            isp->cut_width = width;
+            isp->cut_height = iheight;
+        }
+	}
+
 	isp_dbg("%s. entry. iwidth=%d iheight=%d\n", __func__, 
 			iwidth, iheight);
-
+#if 0
 	if (width > isp->fmt_width || height > isp->fmt_height) {
 		printk(KERN_ERR"%s: invalid cutter window size\n", __func__);
 		return -EINVAL;
 	}
+#endif
 
 	if (xpos > isp->fmt_width || ypos > isp->fmt_height) {
 		printk(KERN_ERR"%s: invalid cutter window position\n", __func__);
@@ -734,12 +921,16 @@ int isp_set_cutter_window(struct isp_struct *isp, int xpos, int ypos, int width,
 
 	// the follow setup parameter only ov9712 
 	if (isp->cur_mode_class == ISP_RGB_CLASS) {
-		xpos = 3;
-		ypos = 3;
+		xpos += 3;
+		ypos += 3;
 		iwidth -= 4;
 		iheight -= 4;
 	}
+
+	isp_dbg("cutter_window: xpos=%d, ypos=%d, iwidth=%d, iheight=%d\n",
+			xpos, ypos, iwidth, iheight);
 	
+	// here is set isp output size
 	isp->isp_ctrltbl[0] = (isp->sub_sample << DSMP_RTO_BIT)
 				|(ypos << CUT_STRY_BIT)|xpos;
 	isp->isp_ctrltbl[1] = (iheight << CUT_WINH_BIT) | iwidth;
@@ -754,7 +945,7 @@ int isp_set_cutter_window(struct isp_struct *isp, int xpos, int ypos, int width,
 	
 	// should enable demo saic in RGB module
 	if (isp->demo_sac_thres <= 0) {
-		demosac.threshold = 1300;
+		demosac.threshold = 0;
 		isp->demo_sac_thres = demosac.threshold;
 	} else
 		demosac.threshold = isp->demo_sac_thres;
@@ -762,19 +953,24 @@ int isp_set_cutter_window(struct isp_struct *isp, int xpos, int ypos, int width,
 
 	// enable rgb filter (noise remove)
 	if (isp->rgb_filter_thres <= 0) {
-		rgb_filter.threshold = 142;
+		rgb_filter.threshold = 31;
 		isp->rgb_filter_thres = rgb_filter.threshold;
 	} else
 		rgb_filter.threshold = isp->rgb_filter_thres;
 	isp_set_rgb_filter(isp, &rgb_filter);
 	
-	isp->cut_width = width;
-	isp->cut_height = height;
-	
 	update_image_size(isp);
 	return 0;
 }
 
+/**
+ * @brief: Enable channel 2 for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *isp:  struct isp_channel2_info.
+ */
 int isp_set_channel2(struct isp_struct *isp, struct isp_channel2_info *chl2_info)
 {
 	int width = chl2_info->width;
@@ -818,6 +1014,14 @@ int isp_set_channel2(struct isp_struct *isp, struct isp_channel2_info *chl2_info
 	return 0;
 }
 
+/**
+ * @brief: Setting occlustion area for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *isp:  struct isp_occlusion_info.
+ */
 int isp_set_occlusion_area(struct isp_struct *isp, struct isp_occlusion_info *oclu_info)
 {
 	int target_area;
@@ -843,6 +1047,14 @@ int isp_set_occlusion_area(struct isp_struct *isp, struct isp_occlusion_info *oc
 	return 0;
 }
 
+/**
+ * @brief: Setting occlustion color for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *isp:  struct isp_occlusion_color.
+ */
 int isp_set_occlusion_color(struct isp_struct *isp, struct isp_occlusion_color *color_info)
 {
 	isp->img_ctrltbl2[0] = 0x0;
@@ -857,6 +1069,14 @@ int isp_set_occlusion_color(struct isp_struct *isp, struct isp_occlusion_color *
 	return 0;
 }
 
+/**
+ * @brief: Setting Zoom for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *isp:  struct isp_zoom_info.
+ */
 int isp_set_zoom(struct isp_struct *isp, struct isp_zoom_info *info)
 {
 	struct isp_channel2_info chl2;
@@ -879,8 +1099,8 @@ int isp_set_zoom(struct isp_struct *isp, struct isp_zoom_info *info)
 	}
 
 	if (isp->cur_mode_class == ISP_RGB_CLASS) {
-		offset_w = 18;
-		offset_h = 16;
+		offset_w = 22;
+		offset_h = 20;
 	} else if (isp->cur_mode_class == ISP_YUV_CLASS) {
 		offset_w = 6;
 		offset_h = 6;
@@ -960,6 +1180,15 @@ int isp_set_crop(struct isp_struct *isp, struct v4l2_rect rect)
 }
 
 /* *******this interface response to set image param ****** */
+
+/**
+ * @brief: black balance for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_black_balance
+ */
 int isp_set_black_balance(struct isp_struct *isp, struct isp_black_balance *ctrl)
 {
 	int i;
@@ -988,6 +1217,14 @@ int isp_set_black_balance(struct isp_struct *isp, struct isp_black_balance *ctrl
 	return 0;
 }
 
+/**
+ * @brief: lens correct for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_lens_correct
+ */
 int isp_set_lens_correct(struct isp_struct *isp, struct isp_lens_correct *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
@@ -1011,6 +1248,14 @@ int isp_set_lens_correct(struct isp_struct *isp, struct isp_lens_correct *ctrl)
 	return 0;
 }
 
+/**
+ * @brief: set demosaic for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_demosaic
+ */
 int isp_set_demosaic(struct isp_struct *isp, struct isp_demosaic *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
@@ -1044,7 +1289,14 @@ out:
 	return 0;
 }
 
-// noise remove
+/**
+ * @brief: noise remove for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_rgb_filter
+ */
 int isp_set_rgb_filter(struct isp_struct *isp, struct isp_rgb_filter *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
@@ -1084,10 +1336,21 @@ out:
 	return 0;
 }
 
+/**
+ * @brief: uv iso filter for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_uv_filter
+ */
 int isp_set_uv_iso_filter(struct isp_struct *isp, struct isp_uv_filter *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
 
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 0;
+	
 	BUG_ON(ctrl == NULL);
 
 	if (ctrl->enable == 0) {
@@ -1106,7 +1369,14 @@ int isp_set_uv_iso_filter(struct isp_struct *isp, struct isp_uv_filter *ctrl)
 	return 0;
 }
 
-// bad pixel defect and fixed
+/**
+ * @brief: bad pixel defect and fixed for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_defect_pixel
+ */
 int isp_set_defect_pixel(struct isp_struct *isp, struct isp_defect_pixel *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
@@ -1140,6 +1410,14 @@ int isp_set_defect_pixel(struct isp_struct *isp, struct isp_defect_pixel *ctrl)
 	return 0;
 }
 
+/**
+ * @brief: set manu wb for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_white_balance
+ */
 int isp_set_manu_wb(struct isp_struct *isp, struct isp_white_balance *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
@@ -1173,7 +1451,14 @@ int isp_set_manu_wb(struct isp_struct *isp, struct isp_white_balance *ctrl)
 
 	return 0;
 }
-
+/**
+ * @brief: set auto wb for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_auto_white_balance
+ */
 int isp_set_auto_wb(struct isp_struct *isp, struct isp_auto_white_balance *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
@@ -1197,8 +1482,36 @@ int isp_set_auto_wb(struct isp_struct *isp, struct isp_auto_white_balance *ctrl)
 		isp->auto_wb_param_en = 0;		
 	} else {
 		// enable white balance calculate
-		isp_set_auto_wb_support(isp, ctrl);
-		
+		//isp_set_auto_wb_support(isp, ctrl);
+		struct awb_colortemp_set *colortemp;
+
+		isp->awb_param.auto_wb_step = ctrl->awb_step;
+
+	
+
+		if(ctrl->index < 0 || ctrl->index >ISP_COLORTEMP_MODE_COUNT) {
+			return -EINVAL;
+		}
+		colortemp = &isp->awb_param.colortemp_set[ctrl->index];
+
+		colortemp->gr_low = ctrl->gr_low;
+		colortemp->gr_high = ctrl->gr_high;
+		colortemp->gb_high = ctrl->gb_high;
+		colortemp->gb_low = ctrl->gb_low;
+		colortemp->grb_high = ctrl->grb_high;
+		colortemp->grb_low = ctrl->grb_low;
+
+		colortemp->r_low =  ctrl->r_low;	
+		colortemp->r_high = ctrl->r_high;
+		colortemp->g_low =  ctrl->g_low;	
+		colortemp->g_high = ctrl->g_high;
+		colortemp->b_low =  ctrl->b_low;	
+		colortemp->b_high = ctrl->b_high;
+
+		colortemp->channel_r_total = ctrl->co_r;
+		colortemp->channel_b_total = ctrl->co_g;
+		colortemp->channel_g_total = ctrl->co_b;
+
 		isp->wb_param_en = 0;
 		isp->auto_wb_param_en = 1;
 	}
@@ -1207,6 +1520,14 @@ int isp_set_auto_wb(struct isp_struct *isp, struct isp_auto_white_balance *ctrl)
 	return 0;
 }
 
+/**
+ * @brief: color correct for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_color_correct
+ */
 int isp_set_color_correct(struct isp_struct *isp, struct isp_color_correct *ctrl)
 {
 	int i;
@@ -1220,7 +1541,8 @@ int isp_set_color_correct(struct isp_struct *isp, struct isp_color_correct *ctrl
 
 	isp->img_ctrltbl1[11] &= ~(0x3fffff);
 	for (i = 0; i < 9; i++)
-		isp->img_ctrltbl1[2+i] = 0x0;
+		;
+		//isp->img_ctrltbl1[2+i] = 0x0;
 	
 	if (ctrl->enable == 0) {
 		// disable color correction
@@ -1235,11 +1557,22 @@ int isp_set_color_correct(struct isp_struct *isp, struct isp_color_correct *ctrl
 	return 0;
 }
 
+/**
+ * @brief: set gamma for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_gamma_calculate
+ */
 int isp_set_gamma_calc(struct isp_struct *isp, struct isp_gamma_calculate *ctrl)
 {
 	int i;
 	
 	isp_dbg("%s enter.\n", __func__);
+	
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 0;
 	
 	BUG_ON(ctrl == NULL);
 	
@@ -1252,12 +1585,12 @@ int isp_set_gamma_calc(struct isp_struct *isp, struct isp_gamma_calculate *ctrl)
 		//isp_update_regtable(isp, 0);
 	} else {
 		if (ctrl->is_sync == 0) {
-			for(i = 0; i < 32/*BRIGHTNESS_CHART_SIZE >> 1*/; i++)				
+			for(i = 0; i < 32; i++)				
 				isp->img_lumitbl[i] = ctrl->gamma[i];
 		}
 
 		if (ctrl->is_sync == 1) {
-			for(i = 0; i < 32/*BRIGHTNESS_CHART_SIZE >> 1*/; i++)
+			for(i = 0; i < 32; i++)
 				isp->img_lumitbl[32+i] = ctrl->gamma[i];
 			
 			// enable brightness adjust
@@ -1271,13 +1604,25 @@ int isp_set_gamma_calc(struct isp_struct *isp, struct isp_gamma_calculate *ctrl)
 	return 0;
 }
 
+/**
+ * @brief: brightness enhance for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_brightness_enhance
+ */
 int isp_set_brightness_enhance(struct isp_struct *isp, struct isp_brightness_enhance *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
 
-	BUG_ON(ctrl == NULL);
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 0;
 	
-	isp->img_ctrltbl1[12] = 0x0;
+	BUG_ON(ctrl == NULL);
+
+	if (!__enable_brightness_enhance(isp)) 
+		goto out;
 	
 	if (ctrl->enable == 0) {
 		// disable edge(brightness) adjust
@@ -1292,20 +1637,32 @@ int isp_set_brightness_enhance(struct isp_struct *isp, struct isp_brightness_enh
 	#endif
 	} else {
 		__isp_set_brigtness(isp, ctrl);
+		__isp_set_sharpness(isp, ctrl);
 
 		isp->yedge_en = 1;
 		//isp->uv_isoflt_en = 1;
 	}
-	
+out:	
 	update_image_size(isp);
 	isp_update_regtable(isp, 0);
 	return 0;
 }
 
+/**
+ * @brief: uv saturation for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_saturation
+ */
 int isp_set_uv_saturation(struct isp_struct *isp, struct isp_saturation *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
 
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 0;
+	
 	BUG_ON(ctrl == NULL);
 
 	isp->img_ctrltbl1[13] &= ~0x3fffffff;
@@ -1325,6 +1682,14 @@ int isp_set_uv_saturation(struct isp_struct *isp, struct isp_saturation *ctrl)
 	return 0;
 }
 
+/**
+ * @brief: set histogram for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_histogram
+ */
 int isp_set_histogram(struct isp_struct *isp, struct isp_histogram *ctrl)
 {
 	unsigned long regval;
@@ -1334,13 +1699,22 @@ int isp_set_histogram(struct isp_struct *isp, struct isp_histogram *ctrl)
 	if (isp->cur_mode_class != ISP_RGB_CLASS)
 		return 0;
 	
-	//BUG_ON(ctrl == NULL);
-#if 0
-	if (ctrl->enable == 0) {
+#if 1
 
+	do {
+		regval = REG32(isp->base + ISP_HISTO_CFG);
+	} while(regval >> 31);
+	
+	REG32(isp->base + ISP_HISTO_CFG) = (1 << 31)
+					|(isp->histo_phyaddr & 0x3fffffff);
+	isp->histo_en = 1;
+#else
+
+	if (ctrl->enable == 0) {
+		REG32(isp->base + ISP_HISTO_CFG) = 0;
 		isp->histo_en = 0;
 	} else {
-#endif
+
 		do {
 			regval = REG32(isp->base + ISP_HISTO_CFG);
 		} while(regval >> 31);
@@ -1348,18 +1722,30 @@ int isp_set_histogram(struct isp_struct *isp, struct isp_histogram *ctrl)
 		REG32(isp->base + ISP_HISTO_CFG) = (1 << 31)
 						|(isp->histo_phyaddr & 0x3fffffff);
 		isp->histo_en = 1;
-//	}
+	}
+#endif
 
 	return 0;
 }
 
+/**
+ * @brief: color effect for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_special_effect
+ */
 int isp_set_special_effect(struct isp_struct *isp, struct isp_special_effect *ctrl)
 {
 	isp_dbg("%s enter.\n", __func__);
 
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 0;
+	
 	BUG_ON(ctrl == NULL);
 	
-	isp->img_ctrltbl1[0] &= ~(0xff) << 24;
+	isp->img_ctrltbl1[0] &= ~(0xff << 24);
 	isp->img_ctrltbl1[14] &= ~(0xffff);
 	isp->img_ctrltbl1[15] = 0x0;
 
@@ -1370,38 +1756,72 @@ int isp_set_special_effect(struct isp_struct *isp, struct isp_special_effect *ct
 		isp->yuv_effect_en = 0;
 		isp->yuv_solar_en = 0;
 	} else {
-		isp->img_ctrltbl1[0] |= (ctrl->solar_thrs & 0xff) << YUV_SOLAR_THRD_BIT;
-		isp->img_ctrltbl1[14] |= ((ctrl->y_eff_coefa < 0) << (SPEC_YCOEFA_BIT+7))
-			|(((abs(ctrl->y_eff_coefa)) & 0x7f) << SPEC_YCOEFA_BIT) 
-			|((ctrl->y_eff_coefb & 0xff) << SPEC_YCOEFB_BIT);
+		__set_special_effect(isp, ctrl);	
 
-		isp->img_ctrltbl1[15] = ((ctrl->u_eff_coefa < 0) << (SPEC_UCOEFA_BIT+7)) 
-			|(((abs(ctrl->u_eff_coefa)) & 0x7f) << SPEC_UCOEFA_BIT) 
-			|(ctrl->u_eff_coefb << SPEC_UCOEFB_BIT) 
-			|((ctrl->v_eff_coefa < 0) << (SPEC_VCOEFA_BIT+7)) 
-			|(((abs(ctrl->v_eff_coefa)) & 0x7f) << SPEC_VCOEFA_BIT) 
-			|(ctrl->v_eff_coefb << SPEC_VCOEFB_BIT);
-		
 		//enable yuv and yuv_solar
-		isp->img_ctrltbl1[11] |= (0x3 << 27);
+		isp->img_ctrltbl1[11] |= (0x1 << 28);
 		isp->yuv_effect_en = 1;
-		isp->yuv_solar_en = 1;
+		
+		if (ctrl->solar_enable) {
+			isp->img_ctrltbl1[11] |= (0x1 << 27);
+			isp->yuv_solar_en = 1;
+		} else {
+			isp->img_ctrltbl1[11] &= ~(0x1 << 27);
+			isp->yuv_solar_en = 0;
+		}
+		
 	}
 
-	//isp_update_regtable(isp, 0);
+	return 0;
+}
+
+/**
+ * @brief:  remove fog for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_image_fog
+ */
+int isp_remove_fog(struct isp_struct *isp, struct isp_image_fog *ctrl)
+{
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 0;
+	
+	BUG_ON(ctrl == NULL);
+	
+	if (ctrl->enable == 0) 
+		isp->fog_en = 0;
+	else 
+		isp->fog_en = 1;
+
 	return 0;
 }
 
 
-/* ~~~~~~~~~~ ISP control ~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~ ISP control ~~~~~~~~~~~~~~~ */
+
+/**
+ * @brief: set brightness for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct v4l2_ctrl - The control structure.
+ */
 int isp_set_brightness(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 {
 	struct isp_brightness_enhance bl_edge;
 
 	isp_dbg("%s. enter. ctrl->val=%d\n", __func__, ctrl->val);
 
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 1;
+	
+	if (!__enable_brightness_enhance(isp)) 
+		goto out;
+	
 	memset(&bl_edge, 0, sizeof(struct isp_brightness_yedge));
-	isp->img_ctrltbl1[12] = 0x0;
 	
 #if 0
 	// ctrl->val is 0 indicate edge enhance closed
@@ -1418,30 +1838,30 @@ int isp_set_brightness(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 	} else {
 
 #endif
-		bl_edge.y_edgek = 1000;
+		bl_edge.y_edgek = 300;
 		bl_edge.y_thrs = 2;
 
 		switch(ctrl->val) {
 		case ISP_BRIGHTNESS_0:
-			bl_edge.ygain = -30;
+			bl_edge.ygain = -20;
 			break;
 		case ISP_BRIGHTNESS_1:
 			bl_edge.ygain = -15;
 			break;
 		case ISP_BRIGHTNESS_2:
-			bl_edge.ygain = 0;
+			bl_edge.ygain = -10;
 			break;
 		case ISP_BRIGHTNESS_3:
-			bl_edge.ygain = 10;
+			bl_edge.ygain = 0;
 			break;
 		case ISP_BRIGHTNESS_4:
-			bl_edge.ygain = 20;
+			bl_edge.ygain = 10;
 			break;
 		case ISP_BRIGHTNESS_5:
-			bl_edge.ygain = 30;
+			bl_edge.ygain = 20;
 			break;
 		case ISP_BRIGHTNESS_6:
-			bl_edge.ygain = 40;
+			bl_edge.ygain = 35;
 			break;
 		}
 
@@ -1450,15 +1870,27 @@ int isp_set_brightness(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 		isp->yedge_en = 1;
 		//isp->uv_isoflt_en = 1;
 	//}
-	
+out:	
 	update_image_size(isp);
 	isp_update_regtable(isp, 0);
 	return 0;
 }
 
+/**
+ * @brief: set gamma for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct v4l2_ctrl - The control structure.
+ */
 int isp_set_gamma(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 {
 	isp_dbg("%s. enter. ctrl->val=%d\n", __func__, ctrl->val);
+
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 1;
+	
 	#if 0
 	if (ctrl->val == ISP_GAMMA_0) {
 		memset(isp->img_lumitbl, 0, sizeof(unsigned long)*BRIGHTNESS_CHART_SIZE);
@@ -1489,6 +1921,7 @@ int isp_set_gamma(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 		case ISP_GAMMA_6:
 			__isp_set_gamma(isp, gamma_table[6]);
 			break;
+		
 		}
 	
 		// enable brightness adjust
@@ -1500,11 +1933,22 @@ int isp_set_gamma(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 	return 0;
 }
 
+/**
+ * @brief: set saturation for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct v4l2_ctrl - The control structure.
+ */
 int isp_set_saturation(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 {
 	struct isp_saturation satu;
 
 	isp_dbg("%s. enter. ctrl->val=%d\n", __func__, ctrl->val);
+
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+			return 1;
 	
 	memset(&satu, 0, sizeof(struct isp_saturation));
 	isp->img_ctrltbl1[13] &= ~0x3fffffff;
@@ -1532,8 +1976,8 @@ int isp_set_saturation(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 		case ISP_SATURATION_3:
 			satu.Chigh = 5;
 			satu.Clow = 0;
-			satu.Khigh = 400;
-			satu.Klow = 249;
+			satu.Khigh = 354;
+			satu.Klow = 254;
 			break;
 		case ISP_SATURATION_4:
 			satu.Chigh = 5;
@@ -1564,68 +2008,485 @@ int isp_set_saturation(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 	return 0;
 }
 
-//颜色校正每个sensor都不一样
-// brief: return -1 is indicate the function is not support YUV data
+/**
+ * @brief: set sharpness for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct v4l2_ctrl - The control structure.
+ */
 int isp_set_sharpness(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 {
+	struct isp_brightness_enhance bl_edge;
 
-	struct isp_color_correct colcon;
-	int i;
+	isp_dbg("%s. enter. ctrl->val=%d\n", __func__, ctrl->val);
 
-	isp_dbg("%s enter. ctrl->val=%d\n", __func__, ctrl->val);
-
-	if (isp->cur_mode_class != ISP_RGB_CLASS) {
-		return 0;
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 1;
+	
+	memset(&bl_edge, 0, sizeof(struct isp_brightness_yedge));
+	
+	switch(ctrl->val) {
+	case ISP_SHARPNESS_0:
+		bl_edge.y_edgek = 200;
+		bl_edge.y_thrs = 2;
+		break;
+	case ISP_SHARPNESS_1:
+		bl_edge.y_edgek = 300;
+		bl_edge.y_thrs = 2;
+		break;
+	case ISP_SHARPNESS_2:
+		bl_edge.y_edgek = 400;
+		bl_edge.y_thrs = 2;
+		break;
+	case ISP_SHARPNESS_3:
+		bl_edge.y_edgek = 500;
+		bl_edge.y_thrs = 2;
+		break;
+	case ISP_SHARPNESS_4:
+		bl_edge.y_edgek = 600;
+		bl_edge.y_thrs = 2;
+		break;
+	case ISP_SHARPNESS_5:
+		bl_edge.y_edgek = 700;
+		bl_edge.y_thrs = 2;
+		break;
+	case ISP_SHARPNESS_6:
+		bl_edge.y_edgek = 800;
+		bl_edge.y_thrs = 2;
+		break;
 	}
 	
-	memset(&colcon, 0, sizeof(struct isp_color_correct));
-	isp->img_ctrltbl1[11] &= ~(0x3fffff);
-	for (i = 0; i < 9; i++)
-		isp->img_ctrltbl1[2+i] = 0x0;
-	
-	if (ctrl->val == ISP_SHARPNESS_0) {
-		// disable color correction
-		isp->img_ctrltbl1[11] &= ~(1 << 31);
-		isp->color_crr_en = 0;
-	} else {
-		switch(ctrl->val) {
-		case ISP_SHARPNESS_1:
-			colcon.cc_thrs_low = 40;
-			colcon.cc_thrs_high = 41;
-			colcon.ccMtrx[0][0] = 1024;
-			colcon.ccMtrx[0][1] = 150;
-			colcon.ccMtrx[0][2] = -150;
-			colcon.ccMtrx[1][0] = 150;
-			colcon.ccMtrx[1][1] = 1024;
-			colcon.ccMtrx[1][2] = -150;
-			colcon.ccMtrx[2][0] = 301;
-			colcon.ccMtrx[2][1] = -301;
-			colcon.ccMtrx[2][2] = 1024;
-			break;
-		case ISP_SHARPNESS_2:
-		case ISP_SHARPNESS_3:
-		case ISP_SHARPNESS_4:
-		case ISP_SHARPNESS_5:
-		case ISP_SHARPNESS_6:
-			break;
-		}
-
-		__isp_set_color_crr(isp, &colcon, 3, 3);
-
-		isp->color_crr_en = 1;
-	}
-	
-	//isp_update_regtable(isp, 0);
+	__isp_set_sharpness(isp, &bl_edge);
 	return 0;
 }
 
-#define ABS_DIFF(a, b)   (((a) > (b)) ? ((a) - (b)) : ((b) - (a)))
+/**
+ * @brief: set color effects for ISP controller.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct v4l2_ctrl - The control structure.
+ */
+int isp_set_uspecial_effect(struct isp_struct *isp, struct v4l2_ctrl *ctrl, int isp_wb)
+{
+	struct isp_special_effect effect;
+	
+//	printk("%s enter. ctrl->val=%d\n", __func__, ctrl->val);
+	if(0 == isp_wb)
+		{
+		
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 1;
+		}
+	
+	BUG_ON(ctrl == NULL);
 
-struct awb_rgb_param {
-	unsigned short r[3];
-	unsigned short b[3];
-};
+	memset(&effect, 0, sizeof(struct isp_special_effect));
+	isp->img_ctrltbl1[0] &= ~(0xff << 24);
+	isp->img_ctrltbl1[14] &= ~(0xffff);
+	isp->img_ctrltbl1[15] = 0x0;
 
+	switch(ctrl->val) {
+	case V4L2_COLORFX_NONE:
+		effect.solar_thrs = 0;
+		effect.y_eff_coefa = 64;
+		effect.y_eff_coefb = 0;
+		effect.u_eff_coefa = 64;
+		effect.u_eff_coefb = 0;
+		effect.v_eff_coefa = 64;
+		effect.v_eff_coefb = 0;
+		break;
+	case V4L2_COLORFX_BW:
+		effect.solar_thrs = 0;
+		effect.y_eff_coefa = 64;
+		effect.y_eff_coefb = 0;
+		effect.u_eff_coefa = 0;
+		effect.u_eff_coefb = 128;
+		effect.v_eff_coefa = 0;
+		effect.v_eff_coefb = 128;
+		break;
+	case V4L2_COLORFX_SEPIA:
+		effect.solar_thrs = 0;
+		effect.y_eff_coefa = 64;
+		effect.y_eff_coefb = 0;
+		effect.u_eff_coefa = 0;
+		effect.u_eff_coefb = 64;
+		effect.v_eff_coefa = 0;
+		effect.v_eff_coefb = 160;
+		break;
+	case V4L2_COLORFX_NEGATIVE:
+		effect.solar_thrs = 0;
+		effect.y_eff_coefa = -64;
+		effect.y_eff_coefb = 255;
+		effect.u_eff_coefa = -64;
+		effect.u_eff_coefb = 255;
+		effect.v_eff_coefa = -64;
+		effect.v_eff_coefb = 255;
+		break;
+	case V4L2_COLORFX_EMBOSS:
+		break;
+	case V4L2_COLORFX_SKETCH:
+		break;
+	case V4L2_COLORFX_SKY_BLUE:
+		break;
+	case V4L2_COLORFX_GRASS_GREEN:
+		break;
+	case V4L2_COLORFX_SKIN_WHITEN:
+		break;
+	case V4L2_COLORFX_VIVID:
+		break;
+	}
+
+	__set_special_effect(isp, &effect);
+	//enable yuv and yuv_solar
+	isp->img_ctrltbl1[11] |= (0x1 << 28);
+	isp->yuv_effect_en = 1;
+
+	if (isp->yuv_solar_en) {
+		isp->img_ctrltbl1[11] |= (0x1 << 27);
+	} else {
+		isp->img_ctrltbl1[11] &= ~(0x1 << 27);
+	}
+	
+	return 0;
+}
+static int awb_para_update(struct isp_struct *isp,
+								struct isp_auto_white_balance *auto_screen_wb_param)
+{
+	 	auto_screen_wb_param->r_high = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].r_high;
+		auto_screen_wb_param->r_low =  isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].r_low;	
+		auto_screen_wb_param->g_high = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].g_high;
+		auto_screen_wb_param->g_low =  isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].g_low;	
+		auto_screen_wb_param->b_high = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].b_high;
+		auto_screen_wb_param->b_low =  isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].b_low;	
+		
+		auto_screen_wb_param->grb_high = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].grb_high;
+		auto_screen_wb_param->grb_low = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].grb_low;
+		
+		auto_screen_wb_param->gr_high = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].gr_high;
+		auto_screen_wb_param->gr_low = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].gr_low;
+		
+		auto_screen_wb_param->gb_high = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].gb_high;
+		auto_screen_wb_param->gb_low = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].gb_low;
+	 
+	 return 0;
+    
+}
+
+static int estimate_color_temperture( struct isp_struct *isp,
+									  unsigned long  r_total,
+									  unsigned long b_total,
+									  unsigned long  g_total)
+{
+	//
+	unsigned int i;
+	unsigned long max_g_total;
+	unsigned int max_index=-1;
+	
+	if (0<isp->awb_param.frame_cnt && isp->awb_param.frame_cnt<AWB_LOOP_FRAME_NUM)
+	{
+	   if(r_total!=0 && b_total!= 0 && g_total!=0)
+	   	{
+	   		isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].channel_r_total += (r_total>>2);
+	   		isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].channel_b_total += (b_total>>2);
+			isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_seq].channel_g_total += (g_total>>2);
+	   	}
+	}
+
+	isp->awb_param.frame_cnt++;
+	//isp_dbg("the isp->awb_param.frame_cnt = %d\n",isp->awb_param.frame_cnt);
+	if(isp->awb_param.frame_cnt>=AWB_LOOP_FRAME_NUM)	//statics one color tempor
+	{
+		isp->awb_param.frame_cnt = 0;
+		isp->awb_param.colortemp_set_seq++;
+		if(isp->awb_param.colortemp_set_seq>=isp->awb_param.colortemp_set_num+1)	//last color tempor
+		{
+			isp->awb_param.colortemp_set_seq = 0;
+			
+			max_index = -1;
+			max_g_total = 0;
+		   for(i=0;i<isp->awb_param.colortemp_set_num;i++)
+		   {
+		   		isp_dbg("g_total[%d]=%ld\n", i, isp->awb_param.colortemp_set[i].channel_g_total);
+		   	  if(isp->awb_param.colortemp_set[i].channel_g_total>=max_g_total)
+		   	  {
+		   	  	max_index = i;
+				max_g_total = isp->awb_param.colortemp_set[i].channel_g_total;
+		   	  }
+		   }
+
+		   if(max_g_total<=G_TOTAL_THRESH)	//use default AWB statics if no color tempor avaliable
+		   	{
+		   		max_index = isp->awb_param.colortemp_set_num;
+				max_g_total = isp->awb_param.colortemp_set[isp->awb_param.colortemp_set_num].channel_g_total;
+		   	}
+
+		   if(max_g_total >G_TOTAL_THRESH && 
+	   	 		(isp->awb_param.colortemp_set[max_index].channel_r_total!=0) && 
+	   	 		(isp->awb_param.colortemp_set[max_index].channel_b_total!=0))
+		   	{
+		   		long r_gain,g_gain, b_gain, max_rgb;
+				if(isp->awb_param.colortemp_set[max_index].channel_r_total>
+				   isp->awb_param.colortemp_set[max_index].channel_b_total)
+				   max_rgb = isp->awb_param.colortemp_set[max_index].channel_r_total;
+				else
+					max_rgb = isp->awb_param.colortemp_set[max_index].channel_b_total;
+				
+				if(max_rgb<
+				   isp->awb_param.colortemp_set[max_index].channel_g_total)
+				{
+				   max_rgb = isp->awb_param.colortemp_set[max_index].channel_g_total;
+				}								  				
+				
+				r_gain = max_rgb/(isp->awb_param.colortemp_set[max_index].channel_r_total>>10);
+				b_gain = max_rgb/(isp->awb_param.colortemp_set[max_index].channel_b_total>>10);
+				g_gain = max_rgb/(isp->awb_param.colortemp_set[max_index].channel_g_total>>10);
+
+				if(max_index!=isp->awb_param.current_colortemp_index)
+				{
+					isp->awb_param.colortemp_set[max_index].time_cnt++;
+					for(i=0;i<isp->awb_param.colortemp_set_num+1;i++)
+					{
+					   	if(i!= max_index)
+							isp->awb_param.colortemp_set[i].time_cnt = 0;
+					}
+					if(isp->awb_param.colortemp_set[max_index].time_cnt>CT_STABLE_CNT)
+					{
+						//change color temp scene
+						isp->awb_param.target_r_gain = r_gain;
+				   		isp->awb_param.target_b_gain = b_gain;
+						isp->awb_param.target_g_gain = g_gain;
+						isp->awb_param.current_colortemp_index = max_index;
+
+						for(i=0;i<isp->awb_param.colortemp_set_num+1;i++)
+					    {
+					   	  isp->awb_param.colortemp_set[i].time_cnt = 0;
+					    }
+					}
+				}
+				else
+				{
+					isp->awb_param.target_r_gain = r_gain;
+			   		isp->awb_param.target_b_gain = b_gain;
+					isp->awb_param.target_g_gain = g_gain;
+					isp->awb_param.current_colortemp_index = max_index;
+
+					for(i=0;i<isp->awb_param.colortemp_set_num+1;i++)
+				    {
+				   	  isp->awb_param.colortemp_set[i].time_cnt = 0;
+				    }
+				}
+		   	}
+		    else
+				max_index = -1;
+
+			for(i=0;i<isp->awb_param.colortemp_set_num+1;i++)
+		   {  
+		   	  isp->awb_param.colortemp_set[i].channel_r_total= 0;
+	   		  isp->awb_param.colortemp_set[i].channel_b_total = 0;
+			  isp->awb_param.colortemp_set[i].channel_g_total = 0;
+		   }
+		   
+		}
+	}
+	
+	return max_index;	
+}
+
+
+static int isp_update_wb_param_slowness(struct isp_struct *isp)
+{
+        int  deltar,deltab,deltag;
+		int  step = 0;
+
+		step = isp->awb_param.auto_wb_step;
+
+		if(step == 0)
+		{
+			step = 1;
+		}
+		
+		deltar = isp->awb_param.target_r_gain - isp->awb_param.current_r_gain;
+		if(deltar>0)
+		{
+			deltar= (deltar+step-1)/step;
+		}
+		if(deltar<0)
+		{
+		   deltar= (deltar-step+1)/step;
+		}
+		isp->awb_param.current_r_gain += deltar;
+
+		deltab =isp->awb_param.target_b_gain - isp->awb_param.current_b_gain;
+
+		if(deltab>0)
+		{
+		   deltab = (deltab+step-1)/step;
+		}
+		if(deltab<0)
+		{
+			deltab = (deltab-step+1)/step;
+		}
+		
+		isp->awb_param.current_b_gain += deltab;
+
+		deltag =isp->awb_param.target_g_gain - isp->awb_param.current_g_gain;
+
+		if(deltag>0)
+		{
+		   deltag= (deltag+step-1)/step;
+		}
+		if(deltag<0)
+		{
+			deltag= (deltag-step+1)/step;
+		}
+		
+		isp->awb_param.current_g_gain += deltag;
+		
+	    return 0;
+
+}
+static int _isp_awb_cc_para_update(struct isp_struct *isp,struct isp_color_correct *color_correct)
+{
+	short color_temperture = isp->awb_param.current_colortemp_index;
+   	color_correct->enable = 1;
+   	//isp_dbg("isp->awb_param.current_colortemp_index = %d\n",isp->awb_param.current_colortemp_index);
+   	color_correct->cc_thrs_low = isp->awb_param.color_correct_set[color_temperture].cc_thrs_low;
+   	color_correct->cc_thrs_high = isp->awb_param.color_correct_set[color_temperture].cc_thrs_high;
+   	color_correct->ccMtrx[0][0] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[0][0];
+	color_correct->ccMtrx[0][1] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[0][1];
+   	color_correct->ccMtrx[0][2] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[0][2];
+   
+   	color_correct->ccMtrx[1][0] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[1][0];
+   	color_correct->ccMtrx[1][1] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[1][1];
+   	color_correct->ccMtrx[1][2] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[1][2];
+   
+   	color_correct->ccMtrx[2][0] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[2][0];
+   	color_correct->ccMtrx[2][1] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[2][1];
+   	color_correct->ccMtrx[2][2] = isp->awb_param.color_correct_set[color_temperture].ccMtrx[2][2];
+
+	return 0;
+}
+
+
+
+
+
+int isp_set_cc_with_awb(struct isp_struct *isp, struct isp_color_correct_awb *ctrl)
+{
+
+	struct color_correct_set *cctemp;
+
+	isp_dbg("%s enter.\n", __func__);
+
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 0;
+		
+	BUG_ON(ctrl == NULL);
+		
+
+	if(ctrl->color_temperture_index > 2)
+		ctrl->color_temperture_index = 2;
+
+	isp->awb_param.current_colortemp_index = ctrl->color_temperture_index;
+
+		
+
+	if(ctrl->color_temperture_index < 0 || ctrl->color_temperture_index >ISP_COLORTEMP_MODE_COUNT) {
+		return -EINVAL;
+	}
+
+	
+	cctemp = &isp->awb_param.color_correct_set[ctrl->color_temperture_index];
+	cctemp->cc_thrs_high = ctrl->cc_thrs_high;
+	cctemp->cc_thrs_low = ctrl->cc_thrs_low;
+
+	
+
+	cctemp->ccMtrx[0][0] = ctrl->ccMtrx[0][0];
+	cctemp->ccMtrx[0][1] = ctrl->ccMtrx[0][1];
+	cctemp->ccMtrx[0][2] = ctrl->ccMtrx[0][2];
+		
+	cctemp->ccMtrx[1][0] = ctrl->ccMtrx[1][0];
+	cctemp->ccMtrx[1][1] = ctrl->ccMtrx[1][1];
+	cctemp->ccMtrx[1][2] = ctrl->ccMtrx[1][2];
+
+	cctemp->ccMtrx[2][0] = ctrl->ccMtrx[2][0];
+	cctemp->ccMtrx[2][1] = ctrl->ccMtrx[2][1];
+	cctemp->ccMtrx[2][2] = ctrl->ccMtrx[2][2];
+	
+	
+	return  0;
+}
+
+
+//xph
+#if 1
+	int isp_update_auto_wb_param(struct isp_struct *isp)
+	{
+
+    unsigned long co_g = 0, co_r = 0, co_b = 0;	
+	int   awb_index;
+	struct isp_auto_white_balance auto_wb_param;
+	struct isp_color_correct      color_correct;
+	//first update register
+	REG32(isp->base + ISP_RGB_DATA) = 1;
+	
+	//then read value from register
+	co_r = REG32(isp->base + ISP_RGB_DATA);
+	co_g = REG32(isp->base + ISP_RGB_DATA);
+	co_b = REG32(isp->base + ISP_RGB_DATA);
+	//isp_dbg("[%ld %ld %ld]\n", co_r, co_g, co_b);
+	//ak_gpio_setpin(0, 1);//by xc
+
+	//if (!co_r || !co_g || !co_b)
+		//printk("|");
+	//return 0;
+
+    awb_index = estimate_color_temperture( isp,
+									  co_r,
+									  co_b,
+									  co_g);          //find the max_value g_tatol as the awb para
+	if(awb_index>=0)
+  	{
+		isp_dbg("ct set=%d, r_gain=%d,  b_gain =%d\n", 
+			awb_index, isp->awb_param.target_r_gain, isp->awb_param.target_b_gain);
+  	}
+   isp_update_wb_param_slowness(isp);
+   #if 0
+	isp->wb_param.co_r = isp->awb_param.target_r_gain;
+	isp->wb_param.co_b =  isp->awb_param.target_b_gain;
+	isp->wb_param.co_g = isp->awb_param.target_g_gain;
+   #endif
+    isp->wb_param.co_r = isp->awb_param.current_r_gain;
+	isp->wb_param.co_b =  isp->awb_param.current_b_gain;
+	isp->wb_param.co_g = isp->awb_param.current_g_gain;
+	
+    __isp_set_white_pram(isp, isp->wb_param.co_g, 
+				isp->wb_param.co_r, isp->wb_param.co_b);
+     
+     //isp_dbg("isp->wb_param.co_r %d, isp->wb_param.co_b %d\n", 
+		  //   isp->wb_param.co_r,  isp->wb_param.co_b);
+	 awb_para_update(isp,&auto_wb_param);
+     isp_set_auto_wb_support(isp, &auto_wb_param);
+
+	// color correct
+	 _isp_awb_cc_para_update(isp,&color_correct);
+	 isp_set_color_correct(isp, &color_correct);
+	
+	
+	isp_update_regtable(isp, 0);
+	return 0;
+}
+
+#endif
+
+
+//caolianming
+#if  0
 int isp_update_auto_wb_param(struct isp_struct *isp)
 {
 	unsigned long co_g = 0, co_r = 0, co_b = 0;
@@ -1666,11 +2527,11 @@ int isp_update_auto_wb_param(struct isp_struct *isp)
 				nb2 = ABS_DIFF(rb_arr.b[0], rb_arr.b[2]);
 				nb3 = ABS_DIFF(rb_arr.b[1], rb_arr.b[2]);
 								
-				if (((co_r_tmp > 700) && (co_r_tmp < 1700)) &&
+				if (((co_r_tmp > 0) && (co_r_tmp < 2560)) &&
 					((nr1+nr2)<30 || (nr1+nr3)<30 || (nr2+nr3)<30))
 					isp->wb_param.co_r = co_r_tmp;
 				
-				if (((co_b_tmp > 700) && (co_b_tmp < 1700)) &&
+				if (((co_b_tmp > 0) && (co_b_tmp < 2560)) &&
 					((nb1+nb2)<30 || (nb1+nb3)<30 || (nb2+nb3)<30))
 					isp->wb_param.co_b = co_b_tmp;
 
@@ -1698,6 +2559,7 @@ int isp_update_auto_wb_param(struct isp_struct *isp)
 	isp_update_regtable(isp, 0);
 	return 0;
 }
+#endif
 
 // brief: return -1 is indicate the function is not support YUV data
 int isp_auto_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
@@ -1706,9 +2568,8 @@ int isp_auto_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 	
 	isp_dbg("%s enter.\n", __func__);
 
-	if (isp->cur_mode_class != ISP_RGB_CLASS) {
-		return 0;
-	}
+	if (isp->cur_mode_class != ISP_RGB_CLASS) 
+		return 1;
 	
 	memset(&auto_wb_param, 0, sizeof(struct isp_auto_white_balance));
 	memset(&isp->wb_param, 0, sizeof(struct isp_wb_param));
@@ -1726,20 +2587,6 @@ int isp_auto_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 		isp->isp_ctrltbl[25] &= ~(1 << 31);
 		isp->auto_wb_param_en = 0;
 	} else {
-		auto_wb_param.r_high = 984;
-		auto_wb_param.r_low = 555;	
-		auto_wb_param.g_high = 988;
-		auto_wb_param.g_low = 718;	
-		auto_wb_param.b_high = 979;
-		auto_wb_param.b_low = 542;	
-		
-		auto_wb_param.grb_high = 826;
-		auto_wb_param.grb_low = 437; 
-		auto_wb_param.gr_high = 822;
-		auto_wb_param.gr_low = 433;
-		auto_wb_param.gb_high = 818;
-		auto_wb_param.gb_low = 420;
-		
 		isp_set_auto_wb_support(isp, &auto_wb_param);
 		
 		//disable manu while balance, enable auto while balance
@@ -1752,14 +2599,14 @@ int isp_auto_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 }
 
 // brief: return -1 is indicate the function is not support YUV data
-int isp_manu_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
+int isp_manu_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl, int isp_wb)
 {
 	isp_dbg("%s enter.\n", __func__);
-
-	if (isp->cur_mode_class != ISP_RGB_CLASS) {
+if(0 == isp_wb)
+{
+	if (isp->cur_mode_class != ISP_RGB_CLASS) 
 		return 0;
-	}
-	
+}
 	memset(&isp->wb_param, 0, sizeof(struct isp_wb_param));
 
 	if (ctrl->val == ISP_MANU_WB_0) {
@@ -1804,12 +2651,841 @@ int isp_manu_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl)
 	return 0;
 }
 
+#if 0 
+void update_exposure_value(struct isp_struct *isp)
+{
+	unsigned int value;
+	static int flags_max = 0, flags_min = 0;
+	
+	value = brightness_average(isp);
+
+	if (!strcmp(get_sensor_name(), "ov9712")) {
+		if ((value > 0xB4) && (flags_max < 2)) {
+			//isp_dbg(" >0xB4 -> 0x48\n");
+			flags_max++;
+			flags_min = 0;
+			aksensor_set_param(0x14, 0x48);
+		} else if ((value < 0x60) && (flags_min < 2)) {
+			//isp_dbg(" <0x60 -> 0x40\n");
+			flags_max = 0;
+			flags_min++;
+			aksensor_set_param(0x14, 0x40);
+		} 
+	}
+}
+#endif
+#if 1
+int isp_recalc_gamma_from_histogram(struct isp_struct *isp)
+{
+	unsigned char gamma_tmp[256] = {0};
+	unsigned char y_lut[256] = {0};
+	unsigned char Lum_Tab[256] = {0};
+	unsigned int slope;
+	unsigned int sum = 0;
+	unsigned int lutTmp = 0;
+	int i;
+	
+	isp->fog_thrs = 7372;  // = 1280 * 720 * 0.008
+	
+	for (i = 0; i < 256; i++) {
+		sum += (histo_arr[i]);
+		if (sum > isp->fog_thrs) {
+			break;
+		}
+	}
+	isp->fog_thrs = i;
+
+	for (i = 0; i <= isp->fog_thrs; i++) {
+		gamma_tmp[i] = 0x0;
+	}
+
+	// float --> int
+	slope = (255 << 16) / (255 - isp->fog_thrs);
+	for (i = isp->fog_thrs+1; i < 256; i++) 		
+		gamma_tmp[i] = (slope*(i-isp->fog_thrs)) >> 16;
+
+	for(i = 0; i < 256; i++) {
+		lutTmp = (219 * (i - 128) + (128 << 8)) >> 8;
+		Lum_Tab[i] = (unsigned char)lutTmp;
+	}
+
+	for(i = 0; i < 256; i++) {
+		y_lut[i] = Lum_Tab[gamma_tmp[i]];	
+	}
+	
+	//copy to isp->img_lumitbl, write gamma table
+	for(i = 0; i < 256; i+=4) {
+		isp->img_lumitbl[i>>2] = y_lut[i]|(y_lut[i+1] << 8)
+					|(y_lut[i+2] << 16)|(y_lut[i+3] << 24);
+	}
+	
+	isp_update_regtable(isp, 0);
+	return 0;
+}
+#endif
+
+
+
+/**
+ * @brief: set auto AE for ISP controller.
+ * 
+ * @author: yanchunxiang
+ * @date: 2014-03-13
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ * @param [in] *ctrl: struct isp_ae_attr
+ */
+
+int isp_set_ae_attr (struct isp_struct *isp, struct isp_ae_attr *ctrl) 
+{
+
+	isp_dbg("%s enter.\n", __func__);
+
+	if (isp->cur_mode_class != ISP_RGB_CLASS)
+		return 0;
+		
+	BUG_ON(ctrl == NULL);
+	
+	// no use auto explore control
+	if (ctrl->enable == 0)
+	{
+		
+		isp->aec_param.bByPassAE = 1;
+	} 
+	else
+	{
+		
+		isp->aec_param.exposure_time_max = ctrl->ae_timemax;
+		isp->aec_param.exposure_time_min = ctrl->ae_timemin;
+		isp->aec_param.stable_range = ctrl->ae_tolerance;
+		isp->aec_param.target_lumiance = ctrl->ae_target;
+		
+		isp->aec_param.exposure_step = ctrl->ae_step;
+		isp->aec_param.bLinkage = ctrl->enableExpLinkage;
+		isp->aec_param.bCompensation = ctrl->enableExpCompensation;
+		isp->aec_param.bGama = ctrl->enableExpGama;
+
+		isp->aec_param.bByPassAE = 0;	
+		
+	}	
+
+	return 0;
+
+}
+
+
+
+
+unsigned int aec_time_flag = 0;
+unsigned int tmp_exposure_time;
+ int tmp_a_gain;
+unsigned int  laec_flag = 0;
+unsigned int laec_time  =0xffff;
+
+int calc_aec_updata_step(struct isp_struct *isp,int target_lumiance, int calc_lumi_average)
+{
+	int  lumi_deta =  0 ;
+	int  target_lumi = isp->aec_param.target_lumiance;
+	int high_lock = 0, low_lock = 0;
+	int stepCoef = 0;
+	
+
+	high_lock = isp->aec_param.target_lumiance +
+					isp->aec_param.stable_range;
+	low_lock  =  isp->aec_param.target_lumiance -
+					isp->aec_param.stable_range;
+
+	stepCoef = isp->aec_param.exposure_step;
+
+
+	if( low_lock>calc_lumi_average)
+	{
+		lumi_deta = low_lock - calc_lumi_average;
+		
+	}
+	else if(high_lock< calc_lumi_average)
+	{
+	    	
+	    	lumi_deta = calc_lumi_average-high_lock;
+		
+	}
+	else
+	{ 
+	    lumi_deta= 0;
+	}
+	
+	 
+	
+	
+
+	 if (lumi_deta == 0)// lumi_deta = 0
+	{
+	       isp->aec_param.aec_step.exposure_time_updata_step = 0;	 	           
+		   isp->aec_param.aec_step.a_gain_updata_step = 0;
+		   isp->aec_param.aec_step.laec_time_step=
+		  	isp->aec_param.current_laec_time>>1;
+
+		   // printk("calc_aec_updata_step 0000000:lumi_deta!\n");
+		   
+			       // isp->aec_param.current_a_gain>>1;
+	}
+	else  if(lumi_deta<=(target_lumi>>4))
+    {
+     	isp->aec_param.aec_step.exposure_time_updata_step = 
+	 	            (isp->aec_param.current_exposure_time>>5) * stepCoef;
+		isp->aec_param.aec_step.a_gain_updata_step =  1;
+		isp->aec_param.aec_step.laec_time_step=isp->aec_param.current_laec_time>>5;
+			        //isp->aec_param.current_a_gain>>5;
+	 
+    
+    }
+				   
+	else if(lumi_deta<=(target_lumi>>3))
+	{
+	    isp->aec_param.aec_step.exposure_time_updata_step = 
+	 	            (isp->aec_param.current_exposure_time>>4) * stepCoef;
+		isp->aec_param.aec_step.a_gain_updata_step = 1;
+		isp->aec_param.aec_step.laec_time_step=isp->aec_param.current_laec_time>>4;
+			        //isp->aec_param.current_a_gain>>4;
+	}
+	else if(lumi_deta<=(target_lumi>>2))
+	{
+	    isp->aec_param.aec_step.exposure_time_updata_step = 
+	 	            (isp->aec_param.current_exposure_time>>3) * stepCoef;
+		isp->aec_param.aec_step.a_gain_updata_step = 1;
+		isp->aec_param.aec_step.laec_time_step=isp->aec_param.current_laec_time>>3;
+			       // isp->aec_param.current_a_gain>>3;
+	}
+	else if (lumi_deta<=target_lumi>>1)
+	{
+		  isp->aec_param.aec_step.exposure_time_updata_step = 
+	 	            (isp->aec_param.current_exposure_time>>2) * stepCoef;
+		   isp->aec_param.aec_step.a_gain_updata_step = 1;
+		   isp->aec_param.aec_step.laec_time_step=isp->aec_param.current_laec_time>>2;
+			       // isp->aec_param.current_a_gain>>2;
+	}
+	else if (lumi_deta<=target_lumi)
+	{
+		  isp->aec_param.aec_step.exposure_time_updata_step = 
+	 	            (isp->aec_param.current_exposure_time>>1) * stepCoef;
+		   isp->aec_param.aec_step.a_gain_updata_step =  2;
+		   isp->aec_param.aec_step.laec_time_step=isp->aec_param.current_laec_time>>2;
+			       // isp->aec_param.current_a_gain>>2;
+	}
+	else if (lumi_deta>target_lumi && lumi_deta <= 255)
+	{
+	      isp->aec_param.aec_step.exposure_time_updata_step = 
+	 	            (isp->aec_param.current_exposure_time>>1) * stepCoef; 
+		  isp->aec_param.aec_step.a_gain_updata_step = 2;
+		  isp->aec_param.aec_step.laec_time_step=
+		  	isp->aec_param.current_laec_time>>1;
+			        //isp->aec_param.current_a_gain>>1;
+	}
+	else 
+	{
+	      printk("lumi_deta:%d, targed:%d\n",lumi_deta,target_lumi);
+	}
+	
+	if(isp->aec_param.current_exposure_time<=32)
+	{
+		isp->aec_param.aec_step.exposure_time_updata_step = 1;
+		isp->aec_param.aec_step.a_gain_updata_step  =1;
+		isp->aec_param.aec_step.laec_time_step = 2;
+
+#if 0
+		if((isp->aec_param.current_exposure_time<=6)&&
+			(aec_time_flag==1))
+	    {
+	       isp->aec_param.stable_range = 4*isp->aec_param.stable_range;
+		   aec_time_flag = 1;
+		   printk("stable range increase\n");
+	    }
+
+		if((isp->aec_param.current_exposure_time>6) 
+		&&(aec_time_flag==1))
+	    {
+		  aec_time_flag = 0;
+		  isp->aec_param.stable_range = isp->aec_param.stable_range>2;
+		  printk("stable range decrease\n");
+	    }
+#endif
+	
+		
+	}
+
+
+	
+	
+	
+	return  0;
+	
+}
+
+unsigned int agc_smooth_num = 0;
+unsigned int agc_aec_update_flag = 0;
+unsigned int agc_smooth_max = 0;
+int isp_luminance_aec_time_calc(struct isp_struct *isp)
+{
+	
+
+  	unsigned int calc_lumi_average = isp->aec_param.hist_feature.mean_brightness;
+	int target_lumiance = isp->aec_param.target_lumiance;
+	unsigned int high_lock = 0;
+ 	unsigned int low_lock =  0; 
+	unsigned int high_hold = 0;	  
+	unsigned int low_hold  = 0; 
+	int current_exposure_time = 0;
+	int tempvalue = 0;
+	
+	tempvalue = isp->aec_param.target_lumiance + isp->aec_param.stable_range;
+	high_lock = (tempvalue > 256) ? 256 : tempvalue;
+
+	tempvalue = isp->aec_param.target_lumiance - isp->aec_param.stable_range;
+	low_lock = (tempvalue < 0) ? 0 : tempvalue;
+
+	tempvalue = isp->aec_param.target_lumiance + isp->aec_param.stable_range + 6;        
+	high_hold = (tempvalue > 256) ? 256 : tempvalue;
+
+	tempvalue = isp->aec_param.target_lumiance - isp->aec_param.stable_range - 6;
+	low_hold = (tempvalue < 0) ? 0 : tempvalue;
+
+	calc_aec_updata_step(isp,target_lumiance,calc_lumi_average);
+   
+	if((calc_lumi_average<=high_lock)&&(calc_lumi_average>=low_lock))
+	{
+
+	 isp->aec_param.aec_locked  = 1;                              //no work to do
+	 isp->aec_param.aec_status  = 0;  // 稳定
+
+	  return 0;
+
+	}
+   
+
+	if((isp->aec_param.aec_locked == 1) &&
+		  (((calc_lumi_average<high_hold)&&(calc_lumi_average>high_lock)) ||
+
+		  ((calc_lumi_average < low_lock)&&(calc_lumi_average>low_hold) ))	)
+
+   
+   {
+	 //isp->aec_param.aec_locked  = 0;
+	 isp->aec_param.aec_locked  = 1; 
+	 isp->aec_param.aec_status  = 0;                              //no work to do
+
+	  return 0;
+    
+   }
+   else
+   {
+	 isp->aec_param.aec_locked  = 0; 
+     isp->aec_param.aec_status  = 1;                              //不稳定 
+   }
+   
+
+ if(isp->aec_param.aec_status == 1)
+
+ {
+
+	// 过曝
+ 	 if(calc_lumi_average > high_lock) 
+  
+    {
+
+
+		if(isp->aec_param.current_exposure_time<=8)
+		{
+           
+               if(isp->aec_param.current_a_gain > isp->aec_param.a_gain_min)
+			    {
+			        isp->aec_param.current_exposure_time = isp->aec_param.current_exposure_time;
+						isp->aec_param.current_a_gain--;
+
+						if(isp->aec_param.current_a_gain<isp->aec_param.a_gain_min)
+						{
+							printk("current_a_gain<0: %d\n",isp->aec_param.current_a_gain);
+				
+							isp->aec_param.current_a_gain = isp->aec_param.a_gain_min;
+						}
+				}
+                else
+				{
+					
+
+					if(isp->aec_param.current_exposure_time > 1)
+					{
+
+						agc_smooth_max = (isp->aec_param.current_exposure_time<<4)/(isp->aec_param.current_exposure_time-1);
+						agc_smooth_max -= 16;
+
+						if(agc_smooth_max > 7)
+						{
+							agc_smooth_max = 7;
+						}
+
+						agc_smooth_max += isp->aec_param.a_gain_min;
+
+
+						isp->aec_param.current_a_gain = agc_smooth_max;				   
+					    
+
+						isp->aec_param.current_exposure_time = isp->aec_param.current_exposure_time - 1;
+						
+					}
+					else if(isp->aec_param.current_exposure_time == 1)
+					{
+						isp->aec_param.current_exposure_time = 0;
+						isp->aec_param.current_a_gain = isp->aec_param.a_gain_min+7; // 是否匹配
+						
+					}
+					else if(isp->aec_param.current_exposure_time == 0 && isp->aec_param.current_a_gain == isp->aec_param.a_gain_min)
+					{
+						printk("time =0 && a_gain = 0; \n");
+				
+						return 0;
+					}
+					else
+					{
+						printk(" < 8 ERROR \n");
+					}
+	
+
+					
+					
+				}
+				return 0;
+
+                
+				
+           }
+		 
+		
+
+
+
+ 
+		/*
+		if((isp->aec_param.current_d_gain <= isp->aec_param.d_gain_max)&&
+			(isp->aec_param.current_d_gain >= isp->aec_param.d_gain_min))
+	   	 {
+	   	 	isp->aec_param.current_d_gain -=isp->aec_param.aec_step.d_gain_updata_step;
+			if(isp->aec_param.current_d_gain<=0)
+			{
+				isp->aec_param.current_d_gain = 0;
+				
+			}
+			return 0;
+	   	}*/
+
+		if((isp->aec_param.current_a_gain <= isp->aec_param.a_gain_max)&&
+			(isp->aec_param.current_a_gain > isp->aec_param.a_gain_min))
+		{
+			isp->aec_param.current_a_gain -= isp->aec_param.aec_step.a_gain_updata_step;
+
+			
+			if(isp->aec_param.current_a_gain <= isp->aec_param.a_gain_min)
+			{
+				isp->aec_param.current_a_gain = isp->aec_param.a_gain_min;
+				
+			}
+			return 0;
+		}
+
+		// 下面是a_gain=0时，减少曝光时间
+		current_exposure_time = isp->aec_param.current_exposure_time-
+			                    isp->aec_param.aec_step.exposure_time_updata_step;	 		
+		if(current_exposure_time < isp->aec_param.exposure_time_min)
+		{
+			isp->aec_param.current_exposure_time = isp->aec_param.exposure_time_min;
+		}
+		else
+		{
+		  isp->aec_param.current_exposure_time = current_exposure_time;
+		}
+
+		
+	        
+	//	 printk("in the light envi,the exposure_time is %d\n",isp->aec_param.current_exposure_time);
+	//	 printk("in the light envi,the a_gain is %d\n",isp->aec_param.current_a_gain);
+		
+ 	}
+  else if(calc_lumi_average<low_lock)
+  {  
+
+	if(isp->aec_param.current_exposure_time<=8)
+	{
+		if(isp->aec_param.current_exposure_time == 0)// 0 -> 1
+		{
+			agc_smooth_max = isp->aec_param.a_gain_min + 7;
+		}
+		else
+		{
+			// 计算agc_smooth_max		
+			
+			agc_smooth_max = ((isp->aec_param.current_exposure_time+1)<<4)/isp->aec_param.current_exposure_time;
+			agc_smooth_max = agc_smooth_max - 16;
+			
+			if(agc_smooth_max > 7)
+			{
+				agc_smooth_max = 7;
+			}
+			
+			agc_smooth_max += isp->aec_param.a_gain_min;
+		}
+				
+		if(isp->aec_param.current_a_gain < agc_smooth_max)
+		{
+			isp->aec_param.current_a_gain++;
+
+		}
+		else //if(isp->aec_param.current_a_gain >= agc_smooth_max)
+		{
+			isp->aec_param.current_exposure_time++;
+			isp->aec_param.current_a_gain = isp->aec_param.a_gain_min;
+			
+		}
+		
+        return 0;   
+           
+	}	   
+				
+
+
+     isp->aec_param.current_exposure_time += isp->aec_param.aec_step.exposure_time_updata_step; 
+
+	if(isp->aec_param.current_exposure_time >=	isp->aec_param.exposure_time_max)
+	 {
+		isp->aec_param.current_exposure_time = isp->aec_param.exposure_time_max;
+		isp->aec_param.current_a_gain = isp->aec_param.current_a_gain+
+			                          isp->aec_param.aec_step.a_gain_updata_step;
+		if(isp->aec_param.current_a_gain > isp->aec_param.a_gain_max)
+		{
+		    isp->aec_param.current_a_gain = isp->aec_param.a_gain_max;
+			isp->aec_param.current_d_gain = isp->aec_param.current_d_gain +
+				        isp->aec_param.current_d_gain;
+			if (isp->aec_param.current_d_gain > isp->aec_param.d_gain_max)
+			{
+				isp->aec_param.current_d_gain  = isp->aec_param.d_gain_max;
+			}
+		}
+		
+	 }
+	 
+	// printk("int the dark envi, the exposure_time%d\n",isp->aec_param.current_exposure_time);
+	// printk("in  the dark envi,the a_gain =%d\n",isp->aec_param.current_a_gain);
+  }
+  else
+  {
+       isp->aec_param.aec_status = 0;
+  }
+ 
+  
+ }
+ 
+  return 0;
+	
+}
+
+
+
+
+static unsigned int _isp_set_para_with_aec(struct isp_struct *isp)
+{
+
+#if 0
+
+		isp->aec_param.para_with_aec.y_edgek[0] = 750;
+		isp->aec_param.para_with_aec.y_edgek[1] = 740;
+		isp->aec_param.para_with_aec.y_edgek[2] = 730;
+		isp->aec_param.para_with_aec.y_edgek[3] = 720;
+		isp->aec_param.para_with_aec.y_edgek[4] = 710;
+		isp->aec_param.para_with_aec.y_edgek[5] = 600;
+		isp->aec_param.para_with_aec.y_edgek[6] = 690;
+		isp->aec_param.para_with_aec.y_edgek[7] = 680;
+#endif	
+
+
+        // 东舜客户
+        isp->aec_param.para_with_aec.y_edgek[0] = 550;
+		isp->aec_param.para_with_aec.y_edgek[1] = 540;
+		isp->aec_param.para_with_aec.y_edgek[2] = 530;
+		isp->aec_param.para_with_aec.y_edgek[3] = 520;
+		isp->aec_param.para_with_aec.y_edgek[4] = 510;
+		isp->aec_param.para_with_aec.y_edgek[5] = 500;
+		isp->aec_param.para_with_aec.y_edgek[6] = 490;
+		isp->aec_param.para_with_aec.y_edgek[7] = 480;
+
+		isp->aec_param.para_with_aec.y_thrs[0]  = 2 ; 
+		isp->aec_param.para_with_aec.y_thrs[1]  = 2 ; 
+		isp->aec_param.para_with_aec.y_thrs[2]  = 2 ; 
+		isp->aec_param.para_with_aec.y_thrs[3]  = 2 ; 
+		isp->aec_param.para_with_aec.y_thrs[4]  = 2 ; 
+		isp->aec_param.para_with_aec.y_thrs[5]  = 2 ;
+		isp->aec_param.para_with_aec.y_thrs[6]  = 2 ; 
+		isp->aec_param.para_with_aec.y_thrs[7]  = 2 ;
+
+		isp->aec_param.para_with_aec.rgb_filter_thres[0]  = 20 ; 
+		isp->aec_param.para_with_aec.rgb_filter_thres[1]  = 30 ; 
+		isp->aec_param.para_with_aec.rgb_filter_thres[2]  = 40 ; 
+		isp->aec_param.para_with_aec.rgb_filter_thres[3]  = 50 ; 
+		isp->aec_param.para_with_aec.rgb_filter_thres[4]  = 60 ; 
+		isp->aec_param.para_with_aec.rgb_filter_thres[5]  = 70 ;
+		isp->aec_param.para_with_aec.rgb_filter_thres[6]  = 80 ; 
+		isp->aec_param.para_with_aec.rgb_filter_thres[7]  = 100;
+
+		isp->aec_param.para_with_aec.demo_sac_thres[0] = 4;
+		isp->aec_param.para_with_aec.demo_sac_thres[1] = 4;
+		isp->aec_param.para_with_aec.demo_sac_thres[2] = 4;
+		isp->aec_param.para_with_aec.demo_sac_thres[3] = 4;
+		isp->aec_param.para_with_aec.demo_sac_thres[4] =4 ;
+		isp->aec_param.para_with_aec.demo_sac_thres[5] = 4;
+		isp->aec_param.para_with_aec.demo_sac_thres[6] = 20;
+		isp->aec_param.para_with_aec.demo_sac_thres[7] = 52;
+		return 0;
+		
+}
+
+
+static unsigned int isp_param_updata_with_ae(struct isp_struct *isp)
+{
+  //  unsigned int exposure_time = isp->aec_param.current_exposure_time+1;
+	unsigned int gain = isp->aec_param.current_a_gain-
+		                isp->aec_param.a_gain_min + 1;
+	unsigned int intensity_light = gain;//exposure_time*gain;
+	unsigned int intensity_light_max = //isp->aec_param.exposure_time_max*
+		                              isp->aec_param.a_gain_max;
+	unsigned int intensity_level_step = intensity_light_max/8;
+	unsigned int intensity_level = intensity_light/intensity_level_step;
+	struct isp_brightness_enhance bl_edge;
+
+	printk("intensity is %d\n",intensity_level);
+
+
+	_isp_set_para_with_aec(isp);
+
+	bl_edge.y_edgek = isp->aec_param.para_with_aec.y_edgek[intensity_level];      //edge
+    bl_edge.y_thrs  = isp->aec_param.para_with_aec.y_thrs[intensity_level];
+
+    __isp_set_sharpness(isp, &bl_edge);
+
+
+	if (isp->cur_mode_class != ISP_RGB_CLASS) {
+		isp->img_ctrltbl1[1] &= ~(1 << 31);
+		isp->rgb_filter_en = 0;
+		isp->rgb_filter_en_flag = 0;
+		goto out;
+	}
+
+	isp->rgb_filter_thres = 
+		isp->aec_param.para_with_aec.rgb_filter_thres[intensity_level];
+	isp->rgb_filter_en = 1;
+	
+    isp->demo_sac_thres = isp->aec_param.para_with_aec.demo_sac_thres[intensity_level];
+   __isp_set_sharpness(isp, &bl_edge);	
+   
+out:
+   // printk("y_edgek = %d demo_sac_thres=%d rgb_filter_thres=%d\n",bl_edge.y_edgek,
+	//	 isp->demo_sac_thres,isp->rgb_filter_thres);
+	update_image_size(isp);
+	isp_update_regtable(isp, 0);
+	return 0;
+   		
+}
+
+
+
+
+
+#define LOW_VALUE 16
+#define HIGH_VALUE 240
+
+
+int isp_compensation_with_ae(struct isp_struct *isp)
+{
+	int i=0;
+ 	int histo_sum[16], pixel_sum[16];
+	int new_avg = 0,sum_num=0,value = 0;
+	int weight_ceff[8] = {1,2,3,4,5,6,7,8};
+	int weight = 0;
+	 
+	memset(histo_sum,0,sizeof(histo_sum));
+	memset(pixel_sum,0,sizeof(pixel_sum));
+	 
+	for(i=0; i<LOW_VALUE;i++)
+	{
+		histo_sum[0] += i *(histo_arr[i]);
+		pixel_sum[0] += (histo_arr[i]);
+	}
+	 
+	
+	 
+	// 数据较少时，亮度增加
+	if(pixel_sum[0] < LOW_VALUE*3600/4 )// 14400
+	{
+		// histo_sum[0] = histo_sum[0] *3/4;
+		// pixel_sum[0] = pixel_sum[0] * 4/3;//3/4;
+	}
+	 
+	 
+	for(i=LOW_VALUE; i<HIGH_VALUE;i++)
+	{
+		histo_sum[1] += i *(histo_arr[i]);
+		pixel_sum[1] += (histo_arr[i]);
+	}
+	 
+	//printk(">16&&<240:%d\n",pixel_sum[1]);	 
+	
+	
+	for(i=HIGH_VALUE; i<256;i++)
+	{
+		histo_sum[2] += i *(histo_arr[i]);
+		pixel_sum[2] += (histo_arr[i]);
+	}
+	//printk(">240:%d\n",pixel_sum[2]);
+	
+	 weight=pixel_sum[2]/((256-HIGH_VALUE)*3600)-1;
+	 if(weight>7)
+	 	weight = 7;
+	 else if(weight<0)
+	 	weight = 0;
+	 else
+	 	weight = weight_ceff[weight];
+
+	 histo_sum[2] = (histo_sum[2]/16)*(weight+16);
+	 
+		 
+	value = histo_sum[0] + histo_sum[1] + histo_sum[2];
+	sum_num = pixel_sum[0] + pixel_sum[1] + pixel_sum[2];
+
+	if (sum_num == 0)
+		sum_num = 1;
+	
+	new_avg = value/sum_num;
+ 
+	//printk("new value:%d, sum_num:%d, average:%d\n",value, sum_num, new_avg);
+	return new_avg;
+}
+
+
+
+T_U32 g_uLum_Tab[4][BRIGHTNESS_CHART_SIZE] = {
+	// default
+		{
+	0x4020101, 0xc0a0806, 0x1412100e, 0x1c1a1816, 0x2422201e, 0x2d2b2926, 0x3533312f, 0x3d3b3937, 
+	0x4543413f, 0x4e4b4947, 0x5251504f, 0x57555453, 0x5b5a5958, 0x605e5d5c, 0x64636261, 0x69686665, 
+	0x6d6c6b6a, 0x7271706e, 0x76757473, 0x7b7a7978, 0x807e7d7c, 0x84838281, 0x89878685, 0x8d8c8b8a, 
+	0x91908f8e, 0x96959493, 0x9a999897, 0x9e9e9c9b, 0xa1a1a09f, 0xa4a4a3a2, 0xa7a7a6a5, 0xaaaaa9a8,		
+	0xadadacab, 0xb0b0afae, 0xb3b2b2b1, 0xb6b5b5b4, 0xb9b8b7b7, 0xbbbbbab9, 0xbebdbdbc, 0xc1c0bfbf, 
+	0xc3c3c2c1, 0xc6c5c5c4, 0xc8c8c7c6, 0xcbcac9c9, 0xcdcccccb, 0xcfcfcecd, 0xd1d1d0d0, 0xd3d3d2d2, 
+	0xd5d5d4d4, 0xd7d7d6d6, 0xd9d9d8d8, 0xdbdadad9, 0xdddcdcdb, 0xe0e0dfde, 0xe3e2e2e1, 0xe5e5e4e4, 
+	0xe7e7e6e6, 0xe9e9e8e8, 0xeaeaeae9, 0xecebebeb, 0xededecec, 0xeeeeeded, 0xefefeeee, 0xf0f0efef,
+
+		},
+	//直线
+		{
+	0x3020100, 0x7060504, 0xb0a0908, 0xf0e0d0c, 0x13121110, 0x17161514, 0x1b1a1918, 0x1f1e1d1c, 
+	0x23222120, 0x27262524, 0x2b2a2928, 0x2f2e2d2c, 0x33323130, 0x37363534, 0x3b3a3938, 0x3f3e3d3c, 
+	0x43424140, 0x47464544, 0x4b4a4948, 0x4f4e4d4c, 0x53525150, 0x57565554, 0x5b5a5958, 0x5f5e5d5c, 
+	0x63626160, 0x67666564, 0x6b6a6968, 0x6f6e6d6c, 0x73727170, 0x77767574, 0x7b7a7978, 0x7f7e7d7c,
+	0x83828180, 0x87868584, 0x8b8a8988, 0x8f8e8d8c, 0x93929190, 0x97969594, 0x9b9a9998, 0x9f9e9d9c, 
+	0xa3a2a1a0, 0xa7a6a5a4, 0xabaaa9a8, 0xafaeadac, 0xb3b2b1b0, 0xb7b6b5b4, 0xbbbab9b8, 0xbfbebdbc, 
+	0xc3c2c1c0, 0xc7c6c5c4, 0xcbcac9c8, 0xcfcecdcc, 0xd3d2d1d0, 0xd7d6d5d4, 0xdbdad9d8, 0xdfdedddc, 
+	0xe3e2e1e0, 0xe7e6e5e4, 0xebeae9e8, 0xefeeedec, 0xf3f2f1f0, 0xf7f6f5f4, 0xfbfaf9f8, 0xfffefdfc,
+		},
+	//凸
+		{
+	0x6040200, 0xf0d0b08, 0x18161412, 0x211f1d1b, 0x2b282624, 0x34322f2d, 0x3e3b3936, 0x47454240, 
+	0x514f4c4a, 0x5b595654, 0x6663605e, 0x6e6e6b68, 0x7171706f, 0x74747372, 0x77777675, 0x7b7a7978, 
+	0x7e7d7c7b, 0x81807f7e, 0x84838282, 0x87868585, 0x8a898988, 0x8d8c8c8b, 0x90908f8e, 0x94939291, 
+	0x97969594, 0x9a999897, 0x9d9c9b9b, 0xa09f9e9e, 0xa3a2a1a1, 0xa6a5a5a4, 0xa9a8a8a7, 0xacababaa,
+	0xafaeaead, 0xb2b1b0b0, 0xb5b4b3b3, 0xb8b7b6b6, 0xbbbab9b8, 0xbdbdbcbb, 0xc0bfbfbe, 0xc3c2c1c1, 
+	0xc5c5c4c3, 0xc8c7c7c6, 0xcbcac9c9, 0xcdcccccb, 0xcfcfcece, 0xd2d1d1d0, 0xd4d4d3d2, 0xd6d6d5d5, 
+	0xd9d8d7d7, 0xdbdadad9, 0xdddcdcdb, 0xdfdededd, 0xe3e1e0df, 0xe8e7e6e4, 0xedecebea, 0xf1f0efee, 
+	0xf4f3f3f2, 0xf7f6f6f5, 0xf9f8f8f7, 0xfbfafaf9, 0xfcfcfbfb, 0xfdfdfcfc, 0xfefefdfd, 0xfffefefe,
+
+		},
+		
+	// bright
+		{
+	0x5030100, 0xd0b0907, 0x1412100e, 0x1c1a1816, 0x23211f1e, 0x2b292725, 0x34312f2d, 0x3c3a3836, 
+	0x4543403e, 0x4e4c4947, 0x57555350, 0x615f5c5a, 0x68676764, 0x6a6a6968, 0x6d6c6c6b, 0x6f6f6e6d, 
+	0x72717170, 0x75747373, 0x77767675, 0x7a797878, 0x7c7c7b7a, 0x7f7f7e7d, 0x82818180, 0x85848383, 
+	0x87878685, 0x8a8a8988, 0x8d8c8c8b, 0x908f8e8e, 0x93929191, 0x96959493, 0x98989796, 0x9b9b9a99,
+	0x9e9e9d9c, 0xa1a1a09f, 0xa4a3a3a2, 0xa7a6a6a5, 0xaaa9a9a8, 0xadacacab, 0xb0afafae, 0xb3b2b2b1, 
+	0xb6b5b5b4, 0xb9b9b8b7, 0xbcbcbbba, 0xbfbfbebd, 0xc3c2c1c0, 0xc6c5c4c3, 0xc9c8c7c6, 0xcccbcaca, 
+	0xcfcecdcd, 0xd2d1d1d0, 0xd5d4d4d3, 0xd8d8d7d6, 0xdcdbdad9, 0xdfdedddc, 0xe2e1e0df, 0xe5e4e3e3, 
+	0xe8e7e7e6, 0xebebeae9, 0xefeeedec, 0xf2f1f0ef, 0xf5f4f3f3, 0xf8f7f7f6, 0xfbfbfaf9, 0xfffefdfc,
+		},
+
+};
+
+	
+int isp_gamma_with_ae(struct isp_struct * isp)
+{
+	int i = 0;
+	T_U32 step = 0;	
+	T_U32 gamma_temp[BRIGHTNESS_CHART_SIZE];
+	T_U8 *gammaT = AK_NULL, *gamma = AK_NULL;
+
+	int pixel_sum = 0;
+	int value_avg = 0;
+		 
+	for(i=0; i<LOW_VALUE;i++)
+	{
+		
+		pixel_sum += (histo_arr[i]);
+	} 
+
+	value_avg = LOW_VALUE*3600/2;
+	
+	gammaT = (T_U8 *)g_uLum_Tab[0];
+	gamma = (T_U8*)gamma_temp;	
+
+	if(value_avg == 0)
+	{
+		printk("isp_gamma_with_ae() ERROR!\n");
+		return 0;
+	}
+
+
+	for(i=0; i<64; i++)
+	{
+				
+		step = pixel_sum / value_avg; 
+
+		if(step > 10) step = 10;
+		
+		gamma[i] = gammaT[i] + step ;		
+		
+	}
+
+	// printk("gama[10]:old:%d, new:%d\n", gammaT[10],gamma[10]);
+
+	for(i=64; i<256; i++)
+	{
+		gamma[i] = gammaT[i];
+	}		
+	
+	__isp_set_gamma(isp, gamma_temp);
+	
+	isp->img_ctrltbl1[11] |= (1 << 30);
+	isp->gamma_calc_en = 1;	
+	return 0;
+}
+
+
+
+
+
+
+unsigned int pre_brightness_average = 0;
+
 static unsigned int brightness_average(struct isp_struct *isp)
 {
 	unsigned int sum = 0, tmp = 0;
 	unsigned int average;
 	int i;
 
+    
 	for (i = 0; i < 256; i++) {
 		sum += i *(histo_arr[i]);
 		tmp += (histo_arr[i]);
@@ -1817,31 +3493,208 @@ static unsigned int brightness_average(struct isp_struct *isp)
 	
 	if (tmp == 0)
 		tmp = 1;
+	if(tmp>1000)
+	{
+	    average = sum/tmp;
+		
 	
-	average = sum/tmp;
-	//isp_dbg("[%d] %d %d\n", average, sum, tmp);
-	return average;
+	}
+	else
+	{
+	    average = pre_brightness_average;
+	}
+
+	if(isp->aec_param.bCompensation)
+	{
+		 average = isp_compensation_with_ae(isp);
+	}
+
+	if(isp->aec_param.bGama)
+	{
+		isp_gamma_with_ae(isp);	
+	
+	}
+	
+	
+	
+	pre_brightness_average = average;
+	//printk("the sum =%d\n tmp = %d\n",sum,tmp);
+
+    if(average<255)
+    {
+	    isp->aec_param.hist_feature.mean_brightness = average;
+    }
+	else
+	{
+		isp->aec_param.hist_feature.mean_brightness = 255;
+	}
+    //printk("average is %d\n",isp->aec_param.hist_feature.mean_brightness);
+	return 0;
 }
 
-void update_exposure_value(struct isp_struct *isp)
+
+
+#define OV_MAX(a, b)            (((a) < (b) ) ?  (b) : (a))
+#define OV_MIN(a, b)            (((a) > (b) ) ?  (b) : (a))
+#define OV_CLIP3(low, high, x)  (OV_MAX(OV_MIN((x), high), low))
+/*
+ * This function applies the new gains to the ISP registers.
+ */
+static __inline unsigned int cmos_gains_update(struct isp_struct *isp,unsigned int p_gains)
 {
-	unsigned int value;
-	static int flags_max = 0, flags_min = 0;
+
+    unsigned int ag_interget_table[17] = {0,  1, 2, 2, 4, 4, 4, 4, 8, 8, 8, 8,
+        8, 8, 8, 8, 16};
+    unsigned int ag_integer, ag_fraction, tmp;
+	unsigned int ag_return;
+ 
+    tmp =  p_gains / 16;
+	if(tmp == 0)
+	{
+		tmp = 1;
+		printk("Div ERROR 000!\n");
+	}
 	
-	value = brightness_average(isp);
-	
-	if ((value > 0xB4) && (flags_max < 2)) {
-		//isp_dbg(" >0xB4 -> 0x48\n");
-		flags_max++;
-		flags_min = 0;
-		aksensor_set_param(0x14, 0x48);
-	} else if ((value < 0x60) && (flags_min < 2)) {
-		//isp_dbg(" <0x60 -> 0x40\n");
-		flags_max = 0;
-		flags_min++;
-		aksensor_set_param(0x14, 0x40);
-	} 
+    tmp =  OV_CLIP3(0, 16, tmp);
+    ag_integer =  ag_interget_table[tmp];
+ 
+    ag_fraction = (p_gains / ag_integer) - 16;
+    ag_fraction =  OV_CLIP3(0, 15, ag_fraction);
+ 
+    if (((ag_fraction + 16) * ag_integer) < p_gains)
+    {
+        if (ag_fraction < 15)
+        {
+            ag_fraction++;
+        }
+        else if (ag_integer < 16)
+        {
+            tmp++;
+            ag_integer  =  ag_interget_table[tmp];
+            ag_fraction = 0;
+        }
+        else
+        {
+        }
+    }
+ 
+    switch (ag_integer)
+    {
+        case 1 :
+            ag_integer = 0x00;
+            break;
+        case 2 :
+            ag_integer = 0x10;
+            break;
+        case 4 :
+            ag_integer = 0x30;
+            break;
+        case 8 :
+            ag_integer = 0x70;
+            break;
+        case 16 :
+            ag_integer = 0xf0;
+            break;
+        default:
+            ag_integer = 0x00;
+            break;
+    }
+
+    ag_return = ag_integer|ag_fraction;
+ 
+	return ag_return;
 }
+ 
+
+
+
+int isp_update_auto_exposure_param(struct isp_struct *isp)
+{
+    unsigned char exposure_time_msb = 0;
+	unsigned char exposure_time_lsb = 0;
+	unsigned int ag_value = 0;
+	
+
+
+		if (!isp->aec_param.bByPassAE) // start AE
+		{
+			//get isp_exposure_hist_feature 
+		   	tmp_exposure_time = isp->aec_param.current_exposure_time;
+		   	tmp_a_gain = isp->aec_param.current_a_gain;
+
+		   	brightness_average(isp);
+	      	isp_luminance_aec_time_calc(isp);		
+
+				    
+      		if((isp->aec_param.aec_status!=0))    	//need to update
+       		{
+       			if(isp->aec_param.bLinkage)
+       			{
+					isp_param_updata_with_ae(isp);		// sharpen
+				}			
+
+
+				// 每两帧写一次
+				if(updata_auto_exposure_num == UPDATA_AUTO_EXPOSURE_FREQUENCE)
+		       	{	
+		       		if ((isp->aec_param.current_exposure_time>=0)&&
+				   		(isp->aec_param.current_a_gain>=0))
+				   
+	       	   	    {	
+	       	   	    
+			           	exposure_time_msb =(isp->aec_param.current_exposure_time>>8)&0xff;
+		    			exposure_time_lsb = isp->aec_param.current_exposure_time&0xff;
+		  
+						aksensor_set_param(0x16,exposure_time_msb);
+						aksensor_set_param(0x10,exposure_time_lsb);
+
+						//ag_value = cmos_gains_update(isp,isp->aec_param.current_a_gain);
+						// aksensor_set_param(0x00,((isp->aec_param.current_a_gain)&0x7f) | (1<<0x7) );
+						//aksensor_set_param(0x00, ag_value );
+
+						isp->aec_param.current_a_gain = tmp_a_gain;
+						
+
+						updata_auto_exposure_num = 0;
+						agc_aec_update_flag = 0;
+						//printk("exp_time %d,  aver_L %d, a_gain %d,target:%d \n",isp->aec_param.current_exposure_time,
+						//	isp->aec_param.hist_feature.mean_brightness,isp->aec_param.current_a_gain,isp->aec_param.target_lumiance);
+			            
+	       	   	    }
+					else
+					{
+					    
+						printk("ERROR time:%d,again:%d\n",isp->aec_param.current_exposure_time,isp->aec_param.current_a_gain);
+					}
+
+			   
+
+       	   		}
+			    else
+			    {
+			    
+			         ag_value = cmos_gains_update(isp,isp->aec_param.current_a_gain);
+					 aksensor_set_param(0x00, ag_value );
+			         updata_auto_exposure_num++;
+					 isp->aec_param.current_exposure_time = tmp_exposure_time;
+		             //isp->aec_param.current_a_gain = tmp_a_gain;
+			    }			
+       	}
+	   
+	}
+
+
+
+	return 0;
+
+	
+}
+
+
+
+
+
+
 
 /* compress histogram */
 int isp_get_histogram(struct isp_struct *isp)
@@ -1856,12 +3709,58 @@ int isp_get_histogram(struct isp_struct *isp)
 					+((isp->histo_base[i+8]<<16)|(isp->histo_base[i+7]<<8)|(isp->histo_base[i+6]))
 					+((isp->histo_base[i+5]<<16)|(isp->histo_base[i+4]<<8)|(isp->histo_base[i+3]))
 					+((isp->histo_base[i+2]<<16)|(isp->histo_base[i+1]<<8)|(isp->histo_base[i]));
-	}
+	}	
 	
-	schedule_delayed_work(&isp->work, msecs_to_jiffies(20));
 	return 0;
 }
 
+/**
+ * @brief: initial ISP parameter about image effects.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
+static void isp_initial_effects(struct isp_struct *isp)
+{
+	// following called support RGB only
+	isp_set_demosaic(isp, &stDemosaic);
+	
+	isp_set_rgb_filter(isp, &stRGBFilter);
+	
+	isp_set_defect_pixel(isp, &stDefectPixel);
+	
+	isp_set_lens_correct(isp, &stLensCorrect);
+	
+	isp_set_color_correct(isp, &stColorCorrect);
+	
+	isp_set_special_effect(isp, &stSpecialEffect);
+	
+	isp_set_black_balance(isp, &stBlackBlance);
+	
+	if (isp->wb_param_en)
+		isp_set_manu_wb(isp, &stWhiteBlance);
+
+	isp_set_ae_attr(isp, &stAeAttr);	
+
+	// following called support RGB and YUV
+	isp_set_gamma_calc(isp, &stGammaCalc[0]);
+	isp_set_gamma_calc(isp, &stGammaCalc[1]);
+	
+	isp_set_brightness_enhance(isp, &stBrigtnessEnhance);
+	
+	isp_set_uv_iso_filter(isp, &stUVFilter);
+	
+	isp_set_uv_saturation(isp, &stSaturation);
+}
+
+/**
+ * @brief: set ISP controller for startting data collection.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
 int isp_apply_mode(struct isp_struct *isp)
 {
 	int width = isp->fmt_width;
@@ -1918,7 +3817,6 @@ int isp_apply_mode(struct isp_struct *isp)
 			break;
 		}
 		
-		isp_update_regtable(isp, 1);
 		break;
 		
 	case ISP_RGB_CLASS:
@@ -1945,7 +3843,6 @@ int isp_apply_mode(struct isp_struct *isp)
 			break;
 		}
 		
-		isp_update_regtable(isp, 1);
 		break;
 		
 	case ISP_JPEG_CLASS:
@@ -1963,13 +3860,21 @@ int isp_apply_mode(struct isp_struct *isp)
 		printk("Unrecognized mode %d\n", isp->cur_mode);
 	}
 
+	isp_initial_effects(isp);
+	isp_update_regtable(isp, 1);
 	return ret;
 }
 
-/*
-  * Note: To enable raw upload, the 14th bit of peripheral parameter register must be 
-  * set, otherwise the data cannot be captured
-  */
+/**
+ * @brief: start data collection.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ *
+ * Note: To enable raw upload, the 14th bit of peripheral parameter register must be 
+ * set, otherwise the data cannot be captured
+ */
 void isp_start_capturing(struct isp_struct *isp)
 {
 	unsigned long peri_status;
@@ -1992,6 +3897,13 @@ void isp_start_capturing(struct isp_struct *isp)
 	}
 }
 
+/**
+ * @brief: stop data collection.
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
 void isp_stop_capturing(struct isp_struct *isp)
 {
 	unsigned long peri_status;
@@ -2000,6 +3912,89 @@ void isp_stop_capturing(struct isp_struct *isp)
 	peri_status |= (1 << 30);
 	peri_status &= ~(1 << 31);
 	REG32(isp->base + ISP_PERI_PARA) = peri_status;
+}
+
+static void isp_init_awb_parms(struct isp_struct *isp)
+{
+	int i;
+	struct awb_colortemp_set *colortemp;
+	struct isp_auto_white_balance *awb;
+	struct isp_color_correct_awb *cc_awb;
+	struct color_correct_set *color_correct_temp;
+
+	//init AWB
+	isp->awb_param.frame_cnt = 0;
+	isp->awb_param.current_b_gain = 1024;
+	isp->awb_param.current_g_gain = 1024;
+	isp->awb_param.current_r_gain = 1024;
+	
+	isp->awb_param.target_b_gain = 1024;
+	isp->awb_param.target_g_gain = 1024;
+	isp->awb_param.target_r_gain = 1024;
+	
+	isp->awb_param.auto_wb_step = 5;
+	isp->awb_param.colortemp_set_num = ISP_COLORTEMP_MODE_COUNT;
+	isp->awb_param.colortemp_set_seq = 0;
+
+	BUG_ON(ISP_COLORTEMP_MODE_COUNT != ARRAY_SIZE(stAwb));
+
+	/*one by one*/
+	for(i=ISP_COLORTEMP_MODE_A; i<ISP_COLORTEMP_MODE_COUNT; i++) {
+		colortemp = &isp->awb_param.colortemp_set[i];
+		awb = &stAwb[i];
+
+		colortemp->gr_low = awb->gr_low;
+		colortemp->gr_high = awb->gr_high;
+		colortemp->gb_high = awb->gb_high;
+		colortemp->gb_low = awb->gb_low;
+		colortemp->grb_high = awb->grb_high;
+		colortemp->grb_low = awb->grb_low;
+
+		colortemp->r_low =  awb->r_low;	
+		colortemp->r_high = awb->r_high;
+		colortemp->g_low =  awb->g_low;	
+		colortemp->g_high = awb->g_high;
+		colortemp->b_low =  awb->b_low;	
+		colortemp->b_high = awb->b_high;
+
+		colortemp->channel_r_total = awb->co_r;
+		colortemp->channel_b_total = awb->co_g;
+		colortemp->channel_g_total = awb->co_b;
+	}
+
+	// init color_correct_set
+	isp->awb_param.current_colortemp_index = 2;
+
+
+	// ISP_A_LIGHT---ISP_D75_LIGHT
+	for(i=0; i<3; i++ )
+	{
+		color_correct_temp = &isp->awb_param.color_correct_set[i];
+		cc_awb = &stCCwithAwb[i];
+
+		color_correct_temp->cc_thrs_low = cc_awb->cc_thrs_low;
+		color_correct_temp->cc_thrs_high = cc_awb->cc_thrs_high;
+
+		color_correct_temp->ccMtrx[0][0] = cc_awb->ccMtrx[0][0];
+		color_correct_temp->ccMtrx[0][1] = cc_awb->ccMtrx[0][1];
+		color_correct_temp->ccMtrx[0][2] = cc_awb->ccMtrx[0][2];
+		
+		color_correct_temp->ccMtrx[1][0] = cc_awb->ccMtrx[1][0];
+		color_correct_temp->ccMtrx[1][1] = cc_awb->ccMtrx[1][1];
+		color_correct_temp->ccMtrx[1][2] = cc_awb->ccMtrx[1][2];
+
+		color_correct_temp->ccMtrx[2][0] = cc_awb->ccMtrx[2][0];
+		color_correct_temp->ccMtrx[2][1] = cc_awb->ccMtrx[2][1];
+		color_correct_temp->ccMtrx[2][2] = cc_awb->ccMtrx[2][2];
+	
+	}
+	// default
+	isp->awb_param.color_correct_set[3].ccMtrx[0][0] = stCCwithAwb[2].ccMtrx[0][0];
+	isp->awb_param.color_correct_set[3].ccMtrx[0][1] = stCCwithAwb[2].ccMtrx[0][1];
+	isp->awb_param.color_correct_set[3].ccMtrx[0][2] = stCCwithAwb[2].ccMtrx[0][2];
+		
+
+	
 }
 
 
@@ -2059,6 +4054,14 @@ void isp_dump_register(struct isp_struct *isp)
 	printk("\n");	
 }
 
+
+/**
+ * @brief: prepare resource for initial ISP controller
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
 int isp_module_init(struct isp_struct *isp)
 {
 	//register table total size is (32 * 4 * 6) = 768byte. here is more than real size.
@@ -2085,82 +4088,44 @@ int isp_module_init(struct isp_struct *isp)
 	}
 	memset(isp->histo_base, 0, HISTOGRAM_SIZE);
 
+	isp_init_awb_parms(isp);
+	
 	isp_dbg("Allocate %d bytes for register table\n", isp->bytes);
 
+    isp->aec_param.current_exposure_time = 0xf0;	
+	isp->aec_param.current_d_gain = 0;
+	isp->aec_param.a_gain_max = 127;
+	isp->aec_param.a_gain_min = 16;
+	isp->aec_param.current_a_gain = isp->aec_param.a_gain_min;
+	isp->aec_param.d_gain_max = 4;
+	isp->aec_param.d_gain_min = 0;
+	isp->aec_param.exposure_time_max = 0xffff;
+	isp->aec_param.exposure_time_min = 0x00;
+	isp->aec_param.stable_range = 10;
+	isp->aec_param.target_lumiance =0x50;
+	isp->aec_param.exposure_step = 1;
+	isp->aec_param.current_laec_time=0xffff;
+
+	
+	isp->aec_param.bLinkage = 1;
+	isp->aec_param.bCompensation = 1;
+	isp->aec_param.bGama = 1;
+	isp->aec_param.bByPassAE = 0;	
+	
 	return 0;
 }
 
-
+/**
+ * @brief: release resource for ISP controller
+ * 
+ * @author: caolianming
+ * @date: 2014-01-06
+ * @param [in] *isp: isp_struct structure, indicate ISP hard device information
+ */
 void isp_module_fini(struct isp_struct *isp)
 {
 	dma_free_coherent(NULL, HISTOGRAM_SIZE, isp->histo_base, isp->histo_phyaddr);
 	dma_free_coherent(NULL, isp->bytes, isp->area, isp->addr);
 }
 
-
-#if 0
-void build_gamma_table(struct isp_struct *isp)
-{
-    int i;
-	unsigned char lum_table[256] = {0};
-
-	// generate lum correction parameter
-	for (i=0; i<256; i++) {   
-	    if(i<=13)
-			lum_table[i]=(unsigned char)(0.46154*i +0);
-		if (13<i && i<=21)
-			lum_table[i]=(unsigned char)(2*i -20);
-		if (21<i&&i<=26)
-			lum_table[i]=(unsigned char)(4*i -62);
-		if (26<i && i<=36)
-			lum_table[i]=(unsigned char)(2.4*i -20.4);
-		if (36<i && i<=48)
-			lum_table[i]=(unsigned char)(2.1667*i -12);
-		if (48<i && i<=61)
-			lum_table[i]=(unsigned char)(1.5385*i +18.154);
-		if (61<i && i<=73)
-			lum_table[i]=(unsigned char)(1.5*i +20.5);
-	    if (73<i && i<=93)
-			lum_table[i]=(unsigned char)(0.95*i +60.65);
-	    if (93<i && i<=114)
-			lum_table[i]=(unsigned char)(0.80952*i +73.714);
-	    if (114<i && i<=135)
-			lum_table[i]=(unsigned char)(0.7619*i +79.091);
-	    if (135<i && i<=157)
-			lum_table[i]=(unsigned char)(0.63636*i +96.091);
-		if (157<i && i<=190)
-			lum_table[i]=(unsigned char)(0.36364*i +138.91);
-		if (190<i && i<=221)
-			lum_table[i]=(unsigned char)(0.25806*i +158.97);
-		if (221<i && i<=241)
-			lum_table[i]=(unsigned char)(0.95*i +6.05);
-		if (241<i && i<=255) {
-			lum_table[i]=(unsigned char)((1.4286*i -109.29)>255?254:(1.4286*i -109.29));
-		}		
-	}
-	
-	for (i=5; i<247; i++) {
-		lum_table[i]=(unsigned char)((lum_table[i-5]+lum_table[i-4]
-			+lum_table[i-3]+lum_table[i-2]
-			+lum_table[i-1]+lum_table[i]
-			+lum_table[i+1]+lum_table[i+2]
-			+lum_table[i+3]+lum_table[i+4]
-			+lum_table[i+5]+lum_table[i+6]
-			+lum_table[i+7])/13);
-	}
-
-	//copy to isp->img_lumitbl
-	for(i = 0; i < 256; i+=4) {
-		isp->img_lumitbl[i>>2] = lum_table[i]|(lum_table[i+1] << 8)
-					|(lum_table[i+2] << 16)|(lum_table[i+3] << 24);
-	}
-	
-	printk("\n");
-	for(i = 0; i < 64; i++) {
-		printk("%08x  ", isp->img_lumitbl[i]);
-		if ((i != 0) && (i % 5 == 0))
-			printk("\n");
-	}
-} 
-#endif
 

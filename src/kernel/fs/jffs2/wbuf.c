@@ -1263,7 +1263,7 @@ void jffs2_dataflash_cleanup(struct jffs2_sb_info *c) {
 int jffs2_nor_wbuf_flash_setup(struct jffs2_sb_info *c) {
 	/* Cleanmarker currently occupies whole programming regions,
 	 * either one or 2 for 8Byte STMicro flashes. */
-	//c->cleanmarker_size = max(16u, c->mtd->writesize);
+	c->cleanmarker_size = max(16u, c->mtd->writesize);
 
 	/* Initialize write buffer */
 	init_rwsem(&c->wbuf_sem);

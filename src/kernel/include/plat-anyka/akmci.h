@@ -169,7 +169,7 @@ struct clk;
 
 /* the 0x800000 value is reference RTOS platform, 
  *	timeout is 419ms */
-#define TRANS_DATA_TIMEOUT	0x800000	
+#define TRANS_DATA_TIMEOUT	0xffffffff /*0x800000*/
 
 #define MAX_MCI_REQ_SIZE	(65536)
 /* as l2 fifo limit to 512 bytes */

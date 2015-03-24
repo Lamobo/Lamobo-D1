@@ -49,6 +49,13 @@ struct aksensor_priv {
 
 static struct sensor_info *sensor_info_array[SENSOR_MAX_SUPPORT];
 
+/**
+ * @brief: register sensor device
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *si: sensor_info structure, indicate sensor info
+ */
 int register_sensor(struct sensor_info *si)
 {
 	int i, ret;
@@ -76,6 +83,19 @@ int register_sensor(struct sensor_info *si)
 	return ret;
 }
 EXPORT_SYMBOL(register_sensor);
+
+/**
+ * @brief: get sensor device name
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] void: none
+ */
+const char *get_sensor_name(void)
+{
+	return cur_sensor_info->sensor_name;
+}
+EXPORT_SYMBOL(get_sensor_name);
 
 /**
  * @brief camera probe pointer
@@ -115,7 +135,16 @@ static struct sensor_info *probe_sensors(struct i2c_client *client)
 	return NULL;
 }
 
-
+/**
+ * @brief: write sensor register by i2c bus
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] daddr: sensor device address
+ * @param [in] raddr: sensor device register(cmd)
+ * @param [in] *data: pointer to data, the data writed to sensor register
+ * @param [in] size: data number
+ */
 s32 aksensor_i2c_write_byte_short(u8 daddr, u16 raddr, u8 *data, u32 size)
 {
 	unsigned char msg[3];
@@ -127,6 +156,14 @@ s32 aksensor_i2c_write_byte_short(u8 daddr, u16 raddr, u8 *data, u32 size)
 	return i2c_master_send(g_client, msg, 3);
 }
 
+/**
+ * @brief: read sensor register value by i2c bus
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] daddr: sensor device address
+ * @param [in] raddr: sensor device register(cmd)
+ */
 s32 aksensor_i2c_read_byte_short(u8 daddr, u16 raddr)
 {
 	unsigned char msg[2];
@@ -145,6 +182,16 @@ s32 aksensor_i2c_read_byte_short(u8 daddr, u16 raddr)
 	return data;
 }
 
+/**
+ * @brief: write sensor register by i2c bus
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] daddr: sensor device address
+ * @param [in] raddr: sensor device register(cmd)
+ * @param [in] *data: pointer to data, the data writed to sensor register
+ * @param [in] size: data number
+ */
 s32 aksensor_i2c_write_word_data(u8 daddr, u16 raddr, u16 *data, u32 size)
 {
 	unsigned char msg[4];
@@ -160,6 +207,14 @@ s32 aksensor_i2c_write_word_data(u8 daddr, u16 raddr, u16 *data, u32 size)
 	return i2c_master_send(g_client, msg, 4);
 }
 
+/**
+ * @brief: read sensor register value by i2c bus
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] daddr: sensor device address
+ * @param [in] raddr: sensor device register(cmd)
+ */
 s32 aksensor_i2c_read_word_data(u8 daddr, u16 raddr)
 {
 	unsigned char msg[4];
@@ -177,11 +232,29 @@ s32 aksensor_i2c_read_word_data(u8 daddr, u16 raddr)
 	return (buf[1] << 8)|buf[0];
 }
 
+/**
+ * @brief: write sensor register by i2c bus
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] daddr: sensor device address
+ * @param [in] raddr: sensor device register(cmd)
+ * @param [in] *data: pointer to data, the data writed to sensor register
+ * @param [in] size: data number
+ */
 s32 aksensor_i2c_write_byte_data(u8 daddr, u8 raddr, u8 *data, u32 size)
 {
 	return i2c_smbus_write_byte_data(g_client, raddr, *data);
 }
 
+/**
+ * @brief: read sensor register value by i2c bus
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] daddr: sensor device address
+ * @param [in] raddr: sensor device register(cmd)
+ */
 s32 aksensor_i2c_read_byte_data(u8 daddr, u8 raddr)
 {
 	g_client->addr = daddr/2;
@@ -194,6 +267,14 @@ static struct aksensor_priv *to_aksensor(const struct i2c_client *client)
 	return container_of(i2c_get_clientdata(client), struct aksensor_priv, subdev);
 }
 
+/**
+ * @brief: initial sensor device, open clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *sd: v4l2_subdev struct, v4l2 sub-device info
+ * @param [in] val: none
+ */
 static int aksensor_init(struct v4l2_subdev *sd, u32 val)
 {
 	int ret;
@@ -208,6 +289,13 @@ static int aksensor_init(struct v4l2_subdev *sd, u32 val)
 	return 0;
 }
 
+/**
+ * @brief: read sensor register value by i2c bus
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *sd: v4l2_subdev struct, v4l2 sub-device info
+ */
 static int aksensor_loadfw(struct v4l2_subdev *sd)
 {
 	SENDBG("entry %s\n", __func__);
@@ -220,6 +308,14 @@ static int aksensor_loadfw(struct v4l2_subdev *sd)
 	return AK_FALSE;
 }
 
+/**
+ * @brief: close sensor device, close clock
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *sd: v4l2_subdev struct, v4l2 sub-device info
+ * @param [in] val: none
+ */
 static int aksensor_reset( struct v4l2_subdev *sd, u32 val )
 {
 //	struct i2c_client *client = v4l2_get_subdevdata(sd);
@@ -249,6 +345,14 @@ static int aksensor_g_chip_ident(struct v4l2_subdev *sd,
 	return 0;
 }
 
+/**
+ * @brief: query v4l2 sub-device ctroller function
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *sd: v4l2_subdev struct, v4l2 sub-device info
+ * @param [in] *qc: v4l2_queryctrl struct
+ */
 static int aksensor_queryctrl(struct v4l2_subdev *sd, struct v4l2_queryctrl *qc)
 {
 	int ret = 0;
@@ -271,12 +375,22 @@ static int aksensor_g_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
 #endif
 	return 0;
 }
+
+/**
+ * @brief: query v4l2 sub-device ctroller function
+ * 
+ * @author: caolianming
+ * @date: 2014-01-09
+ * @param [in] *sd: v4l2_subdev struct, v4l2 sub-device info
+ * @param [in] *ctrl: v4l2_control struct
+ */
 static int aksensor_s_ctrl(struct v4l2_subdev *sd, struct v4l2_control *ctrl)
 {
 	int ret = 0;
 	struct v4l2_ctrl v4l2ctrl;
 	
-	sensor_dbg("entry %s\n", __func__);
+	sensor_dbg("entry %s  ctrl->id=%d, ctrl->value=%d\n", 
+			__func__, ctrl->id, ctrl->value);
 
 	if (cur_sensor_info->ctrls) {
 		v4l2ctrl.id = ctrl->id;
@@ -594,6 +708,12 @@ void aksensor_set_param(unsigned int cmd, unsigned int data)
 	cur_sensor_info->handler->cam_set_sensor_param_func(cmd, data);
 }
 EXPORT_SYMBOL(aksensor_set_param);
+
+unsigned short aksensor_get_param(unsigned int cmd)
+{
+	return cur_sensor_info->handler->cam_get_sensor_param_func(cmd);
+}
+EXPORT_SYMBOL(aksensor_get_param);
 
 /*
  * i2c_driver function

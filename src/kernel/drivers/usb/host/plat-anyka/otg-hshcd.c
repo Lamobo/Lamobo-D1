@@ -42,6 +42,7 @@ module_param(host_sw, charp, S_IRUGO);
 
 static const char hcd_name[] = "usb-host";
 extern struct akotghc_epfifo_mapping akotg_epfifo_mapping;;
+extern struct workqueue_struct *g_otghc_wq;;
 
 
 static struct hc_driver akhs_otg_driver = {
@@ -330,6 +331,9 @@ module_init(akotg_hc_init);
 static void __exit akotg_hc_cleanup(void)
 {
 	platform_driver_unregister(&akotg_hc_driver);
+	flush_workqueue(g_otghc_wq);
+	destroy_workqueue(g_otghc_wq);
+	g_otghc_wq = NULL;
 }
 module_exit(akotg_hc_cleanup);
 MODULE_DESCRIPTION("Anyka Host Controller Driver");

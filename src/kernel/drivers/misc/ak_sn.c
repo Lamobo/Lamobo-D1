@@ -83,7 +83,7 @@ static int __init serial_number_init(void)
 
 	ret = sysfs_create_file(sn_kobj, *attrsbarcode);
 	if (ret) {
-		printk("Create serial number sysfs file failed\n"); 
+		printk("Create barcode sysfs file failed\n"); 
 		kobject_put(sn_kobj);
 	}
 

@@ -43,7 +43,6 @@ static DEFINE_MUTEX(mtd_mutex);
 /* Add ioctl data structure for spi flash burn tool.
 */
 #define FLASH_PAGESIZE		256
-#define FLASH_ERASESIZE     4096
 
 #define AK_SPIFLASH_PHY_ERASE               0x80
 #define AK_SPIFLASH_PHY_READ                0x81
@@ -70,6 +69,7 @@ struct erase_para
 {
     T_U32 chip_num; //which chip the block is in
     T_U32 startpage; // the block's first page number
+	T_U32 erasesize;
 };
 
 struct get_id_para
@@ -686,7 +686,7 @@ static int erase_SPIFlash_page(struct mtd_info *mtd, unsigned long arg)
 	
 	memset(&instr_info, 0, sizeof(struct erase_info));
 	instr_info.addr = e_para.startpage * FLASH_PAGESIZE;
-	instr_info.len = len = FLASH_ERASESIZE; 
+	instr_info.len = len = e_para.erasesize; 
 	instr_info.mtd = mtd;
 
 	//printk("Addr: %lld, len: %lld, start to erase...\n", instr_info.addr, instr_info.len);

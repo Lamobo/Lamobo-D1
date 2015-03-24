@@ -103,6 +103,12 @@ struct isp_zoom_info {
 #define  ISP_CID_HISTOGRAM			0x73		//histogram
 #define  ISP_CID_SPECIAL_EFFECT		0x74		//special effect
 #define  ISP_CID_SET_SENSOR_PARAM	0x75		//set sensor parameter
+#define  ISP_CID_GET_SENSOR_PARAM	0x76		//get sensor parameter
+
+//ycx
+#define ISP_CID_AE_CTRL_PARAM		0x77		//get AE parameter
+#define ISP_CID_CC_AWB_PARAM		0x78		//get AE parameter
+
 
 /* response pc tool control command structure define */
 struct isp_black_balance {
@@ -162,6 +168,8 @@ struct isp_white_balance {
 struct isp_auto_white_balance {
 	int type;
 	int	enable;				//register table 0x20: offset register 25 [31]
+	int awb_step;
+	int index;
 	unsigned int gr_low;              // 0.8125
     unsigned int gr_high;             // 1.555
     unsigned int gb_low;              // 0.863
@@ -235,12 +243,44 @@ struct isp_special_effect {
     unsigned int v_eff_coefb;	//register table 0x24: offset register 15 [7:0]
 };
 
+//uv iso filter
+struct isp_image_fog {
+	int type;
+	int	enable;					//register table 0x24: offset register 13 [30]
+};
+
 struct isp_config_sensor_reg {
 	int type;
 	int	enable;
 	unsigned int cmd;
 	unsigned int data;
 };
+
+
+struct isp_ae_attr {
+	int type;
+	int enable; 			// enable AE
+
+	unsigned int ae_target;
+	unsigned int ae_tolerance;
+	unsigned int ae_step;
+	unsigned int ae_timemax;
+	unsigned int ae_timemin;
+	
+	int enableExpLinkage;
+	int enableExpCompensation;
+	int enableExpGama;
+};
+
+
+struct isp_color_correct_awb {
+	int type;				
+	int color_temperture_index;
+	unsigned int cc_thrs_low;
+	unsigned int cc_thrs_high;
+	int ccMtrx[3][3];
+};
+
 
 #endif
 

@@ -41,7 +41,9 @@
 #define DEBUG(n, args...) 
 #endif
 
-#define FLASH_BUF_SIZE			(32*1024*1024)
+#define SPI_FLASH_BIN_PAGE_START 	558
+
+#define FLASH_BUF_SIZE			(32*1024)
 #define FLASH_PAGESIZE		256
 
 #define SPI_FLASH_READ		1
@@ -56,7 +58,11 @@
 #define OPCODE_WRDI     		0x04    /* Write Disable */ 
 #define OPCODE_RDSR1    		0x05    /* Read Status Register1 */
 #define OPCODE_RDSR2     		0x35    /* Read Status Register2 */ 
-#define OPCODE_WRSR          	0x01    /* Write Status Register */ 
+#define OPCODE_RDSR3     		0x15    /* Read Status Register3 */ 
+
+#define OPCODE_WRSR1          	0x01    /* Write Status Register */ 
+#define OPCODE_WRSR2          	0x31    /* Write Status2 Register eg:gd25q128c*/ 
+#define OPCODE_WRSR3          	0x11    /* Write Status3 Register eg:gd25q128c*/ 
 
 #define OPCODE_NORM_READ     	0x03    /* Read Data Bytes */ 
 #define OPCODE_FAST_READ      	0x0b    /* Read Data Bytes at Higher Speed */ 
@@ -83,6 +89,7 @@
 
 #define SPI_STATUS_REG1	1
 #define SPI_STATUS_REG2	2
+#define SPI_STATUS_REG3	3
 
 
 /* Used for SST flashes only. */
@@ -178,8 +185,10 @@ struct flash_info {
 #define SFLAG_QUAD_WRITE          	(1<<11)
 
 #define SFLAG_SECT_4K       		(1<<12)
-
+#define SFLAG_COM_STATUS3         	(1<<13)
 };
+
+struct ak_spiflash;
 
 /**
   *because of some spi flash is difference of status register difinition.
@@ -208,6 +217,9 @@ struct flash_status_reg
 */
 	unsigned b_cmp:4;		/*conjunction bp0-bp4 bit*/
 	unsigned b_sus:4;		/*exec an erase/program suspend command*/
+
+	u32 (*read_sr)(struct ak_spiflash *);
+	int (*write_sr)(struct ak_spiflash *, u32);
 };
 
 struct ak_spiflash {
@@ -235,6 +247,8 @@ struct ak_spiflash {
 
 static struct mtd_info *ak_mtd_info;
 
+static inline int write_enable(struct ak_spiflash *flash);
+static int wait_till_ready(struct ak_spiflash *flash);
 
 static inline struct ak_spiflash *mtd_to_spiflash(struct mtd_info *mtd)
 {
@@ -308,6 +322,77 @@ static inline void flash_buf_bounce_post(struct ak_spiflash *flash,
 
 #endif
 
+static int gd25q128c_write_sr(struct ak_spiflash *flash, u32 val)
+{
+	int ret;
+
+	wait_till_ready(flash);
+	write_enable(flash);
+	flash->command[0] = OPCODE_WRSR1;
+	flash->command[1] = val & 0xff;
+	ret = spi_write(flash->spi, flash->command, 2);
+
+	wait_till_ready(flash);
+	write_enable(flash);
+	flash->command[0] = OPCODE_WRSR2;
+	flash->command[1] = (val>>8) &0xff;
+	ret |= spi_write(flash->spi, flash->command, 2);
+	wait_till_ready(flash);
+
+	return ret;
+}
+
+
+static u32 normal_read_sr(struct ak_spiflash *flash)
+{
+	ssize_t retval;
+	u8 code;
+	u32 status;
+	u8 st_tmp= 0;
+
+	code = OPCODE_RDSR1;
+
+	if((retval = spi_write_then_read(flash->spi, &code, 1, &st_tmp, 1))<0)
+		return retval;
+
+	status = st_tmp;
+	if(flash->info.flags & SFLAG_COM_STATUS2){
+		code = OPCODE_RDSR2;
+		if((retval = spi_write_then_read(flash->spi, &code, 1, &st_tmp, 1))<0)
+			return retval;
+		
+		 status = (status | (st_tmp << 8));		
+	}
+
+   	if(flash->info.flags & SFLAG_COM_STATUS3){
+		code = OPCODE_RDSR3;
+		if((retval = spi_write_then_read(flash->spi, &code, 1, &st_tmp, 1))<0)
+			return retval;
+		
+		 status = (status | (st_tmp << 16));		
+	}
+
+	return status;
+}
+
+static int normal_write_sr(struct ak_spiflash *flash, u32 val)
+{
+	int wr_cnt;
+	
+	flash->command[0] = OPCODE_WRSR1;
+	flash->command[1] = val & 0xff;
+	flash->command[2] = (val>>8) &0xff;
+	
+    if (flash->info.flags & SFLAG_COM_STATUS2) {
+        wr_cnt = 3;
+    } else {
+        wr_cnt = 2;
+    }
+
+	return spi_write(flash->spi, flash->command, wr_cnt);
+}
+
+
 /*
  * Internal helper functions
  */
@@ -321,28 +406,14 @@ static inline void flash_buf_bounce_post(struct ak_spiflash *flash,
 * @param[in] spiflash handle.
 * @return int Return the status register value.
 */
-static int read_sr(struct ak_spiflash *flash)
+static u32 read_sr(struct ak_spiflash *flash)
 {
-	ssize_t retval;
-	u8 code;
-	u16 status;
-	u8 status1, status2;
+	struct flash_status_reg *fsr = &flash->stat_reg;
 
-	code = OPCODE_RDSR1;
+	if(fsr && fsr->read_sr)
+		return fsr->read_sr(flash);
 
-	if((retval = spi_write_then_read(flash->spi, &code, 1, &status1, 1))<0)
-		return retval;
-
-	if(flash->info.flags & SFLAG_COM_STATUS2){
-		code = OPCODE_RDSR2;
-		if((retval = spi_write_then_read(flash->spi, &code, 1, &status2, 1))<0)
-			return retval;
-		
-		 status = (status1 | (status2 << 8));		
-	} else
-		status = status1 & 0xff;
-
-	return status;
+	return -EINVAL;
 }
 
 
@@ -358,21 +429,14 @@ static int read_sr(struct ak_spiflash *flash)
 * @retval returns zero on success
 * @retval return a negative error code if failed
 */
-static int write_sr(struct ak_spiflash *flash, u16 val)
+static int write_sr(struct ak_spiflash *flash, u32 val)
 {
-	int wr_cnt;
-	
-	flash->command[0] = OPCODE_WRSR;
-	flash->command[1] = val & 0xff;
-	flash->command[2] = (val>>8) &0xff;
-	
-    if (flash->info.flags & SFLAG_COM_STATUS2) {
-        wr_cnt = 3;
-    } else {
-        wr_cnt = 2;
-    }
+	struct flash_status_reg *fsr = &flash->stat_reg;
 
-	return spi_write(flash->spi, flash->command, wr_cnt);
+	if(fsr && fsr->write_sr)
+		return fsr->write_sr(flash, val);
+
+	return -EINVAL;
 }
 
 
@@ -427,7 +491,7 @@ static inline int write_disable(struct ak_spiflash *flash)
 static int wait_till_ready(struct ak_spiflash *flash)
 {
 	unsigned long deadline;
-	int sr;
+	u32 sr;
 	struct flash_status_reg *fsr = &flash->stat_reg;
 
 	deadline = jiffies + MAX_READY_WAIT_JIFFIES;
@@ -448,7 +512,7 @@ static int wait_till_ready(struct ak_spiflash *flash)
 static int quad_mode_enable(struct ak_spiflash *flash)
 {
 	int ret;
-	u16 regval;	
+	u32 regval;	
 	struct flash_status_reg *fsr = &flash->stat_reg;
 	
 	ret = wait_till_ready(flash);
@@ -468,7 +532,7 @@ static int quad_mode_enable(struct ak_spiflash *flash)
 static int quad_mode_disable(struct ak_spiflash *flash)
 {
 	int ret;
-	u16 regval;
+	u32 regval;
 	struct flash_status_reg *fsr = &flash->stat_reg;
 		
 	ret = wait_till_ready(flash);
@@ -712,8 +776,10 @@ static int ak_spiflash_cfg_quad_mode(struct ak_spiflash *flash)
 		(flash->info.flags & (SFLAG_QUAD_WRITE|SFLAG_QUAD_IO_WRITE|
 			SFLAG_DUAL_READ|SFLAG_DUAL_IO_READ))) {		
 		ret = quad_mode_enable(flash);
-		if(ret)
+		if(ret) {
 			flash->bus_width &= ~FLASH_BUS_WIDTH_4WIRE;
+			printk("config the spiflash quad enable fail. transfer use 1 wire.\n");
+		}
 	}
 	else
 		quad_mode_disable(flash);
@@ -1119,6 +1185,19 @@ static 	struct flash_status_reg __devinitdata  status_reg_list[] = {
 			.jedec_id = 0xc22018,	.ext_id = 0,
 			.b_wip = 0,	.b_wel = 1,	.b_bp0 = 2,	.b_bp1 = 3,
 			.b_bp2 = 4,	.b_bp3 = 5,	.b_qe = 6,	.b_srp0 = 7,
+			.read_sr = normal_read_sr,
+			.write_sr = normal_write_sr,
+		},
+		/*spiflash gd25q128c*/
+		{
+			.jedec_id = 0xc84018,	.ext_id = 0,
+			.b_wip = 0,	.b_wel = 1,	.b_bp0 = 2,	.b_bp1 = 3,
+			.b_bp2 = 4,	.b_bp3 = 5,	.b_bp4 = 6,	.b_srp0 = 7,
+			
+			.b_srp1 = 8,.b_qe = 9,	.b_lb = 10,	.b_cmp = 14,
+			.b_sus = 15,
+			.read_sr = normal_read_sr,
+			.write_sr = gd25q128c_write_sr,
 		},
 		/*normal status reg define*/
 		{
@@ -1128,6 +1207,8 @@ static 	struct flash_status_reg __devinitdata  status_reg_list[] = {
 			
 			.b_srp1 = 8,.b_qe = 9,	.b_lb = 10,	.b_cmp = 14,
 			.b_sus = 15,
+			.read_sr = normal_read_sr,
+			.write_sr = normal_write_sr,
 		},
 };
 
@@ -1308,7 +1389,7 @@ int ak_fha_init(void)
 	pInit_info->eAKChip = FHA_CHIP_SET_TYPE;
 	pInit_info->ePlatform = PLAT_LINUX;
 	pInit_info->eMedium = MEDIUM_SPIFLASH;
-	pInit_info->eMode = MODE_UPDATE;
+	pInit_info->eMode = MODE_NEWBURN;
 
 	pCallback = kmalloc(sizeof(T_FHA_LIB_CALLBACK), GFP_KERNEL);
 	if (!pCallback) {
@@ -1330,7 +1411,7 @@ int ak_fha_init(void)
 	/* Yea, PagePerBlock=16 in producer_all, 
 	 * when SPI flash didn`t suport 4k sector erase,
 	 * all will dead, Why can be forbear of this big BUG ? */
-	spi_info.BinPageStart = 64;
+	spi_info.BinPageStart = SPI_FLASH_BIN_PAGE_START;
 	spi_info.PageSize = 256;
 	spi_info.PagesPerBlock = ak_mtd_info->erasesize / 256;
 
@@ -1388,7 +1469,7 @@ int ak_fha_init_for_update(int n)
 	/* Yea, PagePerBlock=16 in producer_all, 
 	 * when SPI flash didn`t suport 4k sector erase,
 	 * all will dead, Why can be forbear of this big BUG ? */
-	spi_info.BinPageStart = 64;
+	spi_info.BinPageStart = SPI_FLASH_BIN_PAGE_START;
 	spi_info.PageSize = 256;
 	spi_info.PagesPerBlock = ak_mtd_info->erasesize / 256;
 

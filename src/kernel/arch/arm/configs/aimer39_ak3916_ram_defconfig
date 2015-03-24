@@ -667,6 +667,7 @@ CONFIG_BLK_DEV_RAM_SIZE=4096
 # CONFIG_WL127X_RFKILL is not set
 CONFIG_AK_SERIAL_NUMBER=y
 # CONFIG_AK_MOTOR is not set
+CONFIG_AK_DAC_CLOCK=y
 
 #
 # user space generic gpio controller

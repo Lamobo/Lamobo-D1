@@ -349,12 +349,30 @@ config IMX2_WDT
 	  To compile this driver as a module, choose M here: the
 	  module will be called imx2_wdt.
 
+choice
+	prompt "ANYKA ak39 watchdog"
+	default AK39_WATCHDOG
+	depends on ARCH_AK39
+
 config AK39_WATCHDOG
-	tristate "ANYKA ak39 watchdog"
+	bool "RTC"
 	depends on ARCH_AK39
 	help
-	  Say Y here if you want support for the watchdog timer on ANYKA ak39 boards.
+	  Say Y here if you are using the rtc watchdog
 
+config AK39_WATCHDOG_TOP
+	bool "TOP"
+	depends on ARCH_AK39
+	help
+	  Say Y here if you are using the top watchdog
+
+config AK39_WATCHDOG_NONE
+	bool "NONE"
+	depends on ARCH_AK39
+	help
+	  Say Y here if you are not useing any watchdog
+
+endchoice
 # AVR32 Architecture
 
 config AT32AP700X_WDT

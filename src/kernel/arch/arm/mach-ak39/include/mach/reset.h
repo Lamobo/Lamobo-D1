@@ -9,6 +9,8 @@
 extern void (*ak39_arch_reset) (void);
 
 #define MODULE_RESET_CON1       (AK_VA_SYSCTRL + 0x20)
+#define MODULE_WDT_CFG1	(AK_VA_SYSCTRL + 0xe4)
+#define MODULE_WDT_CFG2	(AK_VA_SYSCTRL + 0Xe8)
 
 #define AK39_SRESET_MMCSD		(1)
 #define AK39_SRESET_SDIO		(2)

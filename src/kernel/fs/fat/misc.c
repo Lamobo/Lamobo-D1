@@ -97,6 +97,46 @@ int fat_clusters_flush(struct super_block *sb)
 	return 0;
 }
 
+
+/* Flushes the number of free clusters on FAT32 */
+/* XXX: Need to write one per FSINFO block.  Currently only writes 1 */
+int fat_write_fsck_flags(struct super_block *sb, unsigned int flags)
+{
+	int err = 0;
+	struct msdos_sb_info *sbi = MSDOS_SB(sb);
+	struct buffer_head *bh;
+	struct fat_boot_fsinfo *fsinfo;
+
+	if (sbi->fat_bits != 32)
+		return 0;
+
+	bh = sb_bread(sb, sbi->fsinfo_sector);
+	if (bh == NULL) {
+		fat_msg(sb, KERN_ERR, "bread failed in fat_write_fsck_flags");
+		return -EIO;
+	}
+
+	fsinfo = (struct fat_boot_fsinfo *)bh->b_data;
+	/* Sanity check */
+	if (!IS_FSINFO(fsinfo)) {
+		fat_msg(sb, KERN_ERR, "Invalid FSINFO signature: "
+		       "0x%08x, 0x%08x (sector = %lu)",
+		       le32_to_cpu(fsinfo->signature1),
+		       le32_to_cpu(fsinfo->signature2),
+		       sbi->fsinfo_sector);
+	} else {
+		fsinfo->reserved1[0] = cpu_to_le32(flags);
+		mark_buffer_dirty(bh);
+
+		err = sync_dirty_buffer(bh);
+		if(err)
+			fat_msg(sb, KERN_ERR, "flush disk fail, dirty of fat filesystem.\n");
+	}
+	brelse(bh);
+
+	return 0;
+}
+
 /*
  * fat_chain_add() adds a new cluster to the chain of clusters represented
  * by inode.

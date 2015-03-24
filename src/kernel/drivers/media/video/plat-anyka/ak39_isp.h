@@ -167,6 +167,17 @@ typedef enum
     SUBSMP_8X   /*sub sample 1/8 * 1/8 */ 
 } T_SUBSMP_RTO;
 
+
+
+typedef enum 
+{
+	ISP_A_LIGHT= 0,
+	ISP_TL84_LIGHT,
+	ISP_D75_LIGHT,
+	ISP_DEFAULT_LIGHT
+} T_AWB_MODE;
+
+
 //define the image sensor controller register address
 #undef REG32
 #define REG32(_reg_)  (*(volatile unsigned long *)(_reg_))
@@ -177,11 +188,125 @@ struct isp_brightness_yedge {
     signed char		ygain;
 };
 
+struct color_correct_set
+{
+   unsigned int cc_thrs_low;
+   unsigned int cc_thrs_high;
+   int ccMtrx[3][3];
+	
+};
 struct isp_wb_param {
 	unsigned short	co_r;
 	unsigned short	co_g;
 	unsigned short	co_b;
 };
+
+#define CT_SET_NUM	3
+
+struct awb_colortemp_set
+{
+	long channel_r_total;
+	long channel_b_total;
+	long channel_g_total;//4              
+
+	int  time_cnt;
+
+	unsigned int gr_low;              
+    unsigned int gr_high;             
+    unsigned int gb_low;              
+    unsigned int gb_high;             
+    unsigned int grb_low;             
+    unsigned int grb_high;            
+    //range of pixel 
+    unsigned int r_low;
+    unsigned int r_high;
+    unsigned int g_low;
+    unsigned int g_high;
+    unsigned int b_low;
+    unsigned int b_high;
+};
+
+enum isp_colortemp_mode {
+	ISP_COLORTEMP_MODE_A = 0,
+	ISP_COLORTEMP_MODE_TL84,
+	ISP_COLORTEMP_MODE_D75,
+	ISP_COLORTEMP_MODE_D50,
+	ISP_COLORTEMP_MODE_DEFAULT,
+	ISP_COLORTEMP_MODE_COUNT,
+};
+
+struct isp_awb_param {
+	unsigned int frame_cnt;
+	short current_r_gain;
+	short current_b_gain;
+	short current_g_gain;
+	
+	short target_r_gain;
+	short target_b_gain;
+	short target_g_gain;
+
+	short auto_wb_step;
+	short colortemp_set_num;
+	short colortemp_set_seq;
+	short current_colortemp_index;	
+	struct awb_colortemp_set colortemp_set[ISP_COLORTEMP_MODE_COUNT+1];	
+	struct color_correct_set color_correct_set[ISP_COLORTEMP_MODE_COUNT];
+};
+
+struct isp_aec_hist_feature
+{
+	unsigned int   mean_brightness;
+	unsigned char   puppet_mid_brightness;
+	unsigned char   average_feature_distance;
+};
+
+struct isp_aec_step
+{
+	unsigned int a_gain_updata_step;
+	unsigned int exposure_time_updata_step;
+	unsigned int laec_time_step;
+};
+
+struct isp_para_with_aec
+{
+   unsigned int  rgb_filter_thres[8];    //filter threshold
+   unsigned int  demo_sac_thres[8];      //demosaic threshold
+   unsigned int  y_edgek[8];
+   unsigned int  y_thrs[8];         
+};
+
+
+struct isp_aec_param
+{
+    int current_exposure_time;
+	 int current_laec_time;
+	int current_a_gain;
+	int current_d_gain;
+	 int exposure_time_max;
+	 int exposure_time_min;
+	//unsigned int target_time;
+	unsigned int  target_lumiance;
+	unsigned int  exposure_step;
+	unsigned int  stable_range;
+	int  a_gain_min;
+	int  a_gain_max;
+	int  d_gain_min;
+	int  d_gain_max;
+	unsigned int  aec_status;
+	unsigned int  aec_locked;	
+
+	int bByPassAE;
+	int bLinkage;
+	int bCompensation;
+	int bGama;
+	
+	struct isp_aec_step aec_step;
+	struct isp_aec_hist_feature hist_feature;
+	struct isp_para_with_aec para_with_aec;
+	
+};
+
+
 
 struct isp_struct {
 	void __iomem	*base;
@@ -219,6 +344,7 @@ struct isp_struct {
 	unsigned int rgb_filter_thres;
 	
 	int yedge_en;
+	int sharpness_en;
 	int uv_isoflt_en;
 	int uv_isoflt_en_flag;
 	int gamma_calc_en;
@@ -232,9 +358,13 @@ struct isp_struct {
 	int blkb_en;				// black balance enable flag
 	int lens_crr_en;
 	int histo_en;
-
+	int fog_en;
+	int fog_thrs;
+	
 	T_SUBSMP_RTO sub_sample;             //0:1x,1:2x,2:4x,3:8x
 	struct isp_wb_param wb_param;
+	struct isp_awb_param awb_param;
+	struct isp_aec_param aec_param;
 	unsigned char	*area;			/* virtual pointer */
 	dma_addr_t		addr;			/* physical address */
 	size_t 			bytes;			/* buffer size in bytes */
@@ -246,7 +376,9 @@ struct isp_struct {
 	dma_addr_t		histo_phyaddr;
 	unsigned char 	*histo_base;
 
-	struct delayed_work work;	
+	int rfled_ison;
+	struct delayed_work awb_work;	
+	struct delayed_work ae_work;	
 };
 
 void isp_start_capturing(struct isp_struct *isp);
@@ -298,9 +430,12 @@ int isp_set_brightness(struct isp_struct *isp, struct v4l2_ctrl *ctrl);
 int isp_set_gamma(struct isp_struct *isp, struct v4l2_ctrl *ctrl);
 int isp_set_saturation(struct isp_struct *isp, struct v4l2_ctrl *ctrl);
 int isp_set_sharpness(struct isp_struct *isp, struct v4l2_ctrl *ctrl);
+int isp_set_uspecial_effect(struct isp_struct *isp, struct v4l2_ctrl *ctrl, int isp_wb);
+int isp_set_ucolor_correct(struct isp_struct *isp, struct v4l2_ctrl *ctrl);
 int isp_update_auto_wb_param(struct isp_struct *isp);
 int isp_auto_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl);
-int isp_manu_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl);
+int isp_manu_set_wb_param(struct isp_struct *isp, struct v4l2_ctrl *ctrl, int isp_wb);
+int isp_update_auto_exposure_param(struct isp_struct *isp);
 
 
 /* *******this interface response to set image param ****** */
@@ -319,6 +454,7 @@ int isp_set_uv_saturation(struct isp_struct *isp, struct isp_saturation *ctrl);
 int isp_set_histogram(struct isp_struct *isp, struct isp_histogram *ctrl);
 int isp_get_histogram(struct isp_struct *isp);
 int isp_set_special_effect(struct isp_struct *isp, struct isp_special_effect *ctrl);
+int isp_remove_fog(struct isp_struct *isp, struct isp_image_fog *ctrl);
 
 int isp_apply_mode(struct isp_struct *isp);
 void isp_start_capturing(struct isp_struct *isp);
@@ -328,6 +464,7 @@ int isp_module_init(struct isp_struct *isp);
 void isp_module_fini(struct isp_struct *isp);
 
 int isp_set_histogram(struct isp_struct *isp, struct isp_histogram *ctrl);
-void update_exposure_value(struct isp_struct *isp);
+int isp_set_ae_attr (struct isp_struct *isp, struct isp_ae_attr *ctrl) ;
+int isp_set_cc_with_awb(struct isp_struct *isp, struct isp_color_correct_awb *ctrl);
 
 #endif
