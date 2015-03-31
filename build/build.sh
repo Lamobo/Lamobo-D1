@@ -6,7 +6,7 @@ prepare_tools()
     sudo apt-get install -yq lzop
 
     if [ `uname -m` == 'x86_64' ]; then
-        sudo apt-get install -yq ia32-libs ia32-libs-multiarch:i386 liblzo2-2:i386 liblzma5:i386
+        sudo apt-get install -yq ia32-libs ia32-libs-multiarch liblzo2-2:i386 liblzma5:i386
     fi
 
     if [ ! -d $DEV_ROOT/compiler/arm-2009q3 ]; then
