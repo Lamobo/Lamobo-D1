@@ -1,10 +1,8 @@
 # Lamobo-D1 Development Environment
----
 
 [![Build Status](https://travis-ci.org/Lamobo/Lamobo-D1.svg?branch=master)](https://travis-ci.org/Lamobo/Lamobo-D1)
 
 ## Firmware Build Steps
----
 
 0. Tested OS
 
@@ -38,7 +36,6 @@
     ```
 
 ## Firmware Flash Steps
----
 
 0. Tested OS
 
