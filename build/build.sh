@@ -75,7 +75,7 @@ build_busybox()
 
     find rootfs/ -exec touch -h {} \;
     tar zcpf rootfs.tar.gz rootfs
-    #cp -v rootfs.tar.gz ../librootfs/rootfs.tar.gz
+    cp -v rootfs.tar.gz ../librootfs/rootfs.tar.gz
 }
 
 clean_busybox()
