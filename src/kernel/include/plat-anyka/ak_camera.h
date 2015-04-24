@@ -17,6 +17,7 @@
 #define __ASM_ARCH_CAMERA_H_
 
 #include <mach/map.h>
+#include <mach/gpio.h>
 
 #define AK_CAM_DRV_NAME 		"ak_camera"
 #define MAX_VIDEO_MEM			16
@@ -113,6 +114,10 @@ struct captureSync{
 struct ak_camera_pdata {
 	unsigned long mclk;
 	unsigned long flags;
+	
+	struct gpio_info rf_led;
+	int (* gpio_get)(unsigned int pin);
+	void (* gpio_set)(const struct gpio_info *info);
 };
 
 #endif /* __ASM_ARCH_CAMERA_H_ */

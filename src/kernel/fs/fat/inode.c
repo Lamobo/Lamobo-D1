@@ -28,6 +28,7 @@
 #include <linux/hash.h>
 #include <asm/unaligned.h>
 #include "fat.h"
+#include "chkdsk.h"
 
 #ifndef CONFIG_FAT_DEFAULT_IOCHARSET
 /* if user don't select VFAT, this is undefined. */
@@ -487,6 +488,7 @@ static void fat_put_super(struct super_block *sb)
 {
 	struct msdos_sb_info *sbi = MSDOS_SB(sb);
 
+	fat_release_disk(sb);
 	if (sb->s_dirt)
 		fat_write_super(sb);
 
@@ -1405,6 +1407,9 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 				sbi->free_clus_valid = 1;
 			sbi->free_clusters = le32_to_cpu(fsinfo->free_clusters);
 			sbi->prev_free = le32_to_cpu(fsinfo->next_cluster);
+
+			/*FIXME:add fsck flag use for check disk flag. lixinhai*/
+			chkdsk_set_chk_flags(sbi, le32_to_cpu(fsinfo->reserved1[0]));
 		}
 
 		brelse(fsinfo_bh);
@@ -1516,6 +1521,8 @@ int fat_fill_super(struct super_block *sb, void *data, int silent, int isvfat,
 		fat_msg(sb, KERN_ERR, "get root inode failed");
 		goto out_fail;
 	}
+
+	fat_scan_disk(sb);
 
 	return 0;
 

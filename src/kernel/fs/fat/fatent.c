@@ -7,6 +7,7 @@
 #include <linux/fs.h>
 #include <linux/msdos_fs.h>
 #include <linux/blkdev.h>
+#include <linux/vmalloc.h>
 #include "fat.h"
 
 struct fatent_operations {
@@ -452,6 +453,8 @@ static void fat_collect_bhs(struct buffer_head **bhs, int *nr_bhs,
 	}
 }
 
+#define TIRGGER_FIND_FCBMP_THRESHOLD  3
+
 int fat_alloc_clusters(struct inode *inode, int *cluster, int nr_cluster)
 {
 	struct super_block *sb = inode->i_sb;
@@ -460,6 +463,7 @@ int fat_alloc_clusters(struct inode *inode, int *cluster, int nr_cluster)
 	struct fat_entry fatent, prev_ent;
 	struct buffer_head *bhs[MAX_BUF_PER_PAGE];
 	int i, count, err, nr_bhs, idx_clus;
+	int hit_flags = 0;
 
 	BUG_ON(nr_cluster > (MAX_BUF_PER_PAGE / 2));	/* fixed limit */
 
@@ -476,6 +480,17 @@ int fat_alloc_clusters(struct inode *inode, int *cluster, int nr_cluster)
 	fatent_init(&fatent);
 	fatent_set_entry(&fatent, sbi->prev_free + 1);
 	while (count < sbi->max_cluster) {
+
+		if(hit_flags >= TIRGGER_FIND_FCBMP_THRESHOLD) {
+			int entry;
+			entry = fcbmp_find_next_free_cluster(&sbi->fcbmp,
+				   	sbi->max_cluster - 1, fatent.entry);
+			if((entry >= FAT_START_ENT) && (entry < sbi->max_cluster))
+				fatent.entry = entry;
+
+			hit_flags = 0;
+		}
+
 		if (fatent.entry >= sbi->max_cluster)
 			fatent.entry = FAT_START_ENT;
 		fatent_set_entry(&fatent, fatent.entry);
@@ -488,10 +503,13 @@ int fat_alloc_clusters(struct inode *inode, int *cluster, int nr_cluster)
 			if (ops->ent_get(&fatent) == FAT_ENT_FREE) {
 				int entry = fatent.entry;
 
+				hit_flags = 0;
 				/* make the cluster chain */
 				ops->ent_put(&fatent, FAT_ENT_EOF);
 				if (prev_ent.nr_bhs)
 					ops->ent_put(&prev_ent, entry);
+
+				fcbmp_set_cluster(&sbi->fcbmp, fatent.entry);
 
 				fat_collect_bhs(bhs, &nr_bhs, &fatent);
 
@@ -510,6 +528,9 @@ int fat_alloc_clusters(struct inode *inode, int *cluster, int nr_cluster)
 				 * so we can still use the prev_ent.
 				 */
 				prev_ent = fatent;
+			} else {
+				if(++hit_flags >= TIRGGER_FIND_FCBMP_THRESHOLD)
+					break; 
 			}
 			count++;
 			if (count == sbi->max_cluster)
@@ -585,6 +606,9 @@ int fat_free_clusters(struct inode *inode, int cluster)
 		}
 
 		ops->ent_put(&fatent, FAT_ENT_FREE);
+
+		fcbmp_clear_cluster(&sbi->fcbmp, fatent.entry);
+
 		if (sbi->free_clusters != -1) {
 			sbi->free_clusters++;
 			sb->s_dirt = 1;
@@ -683,3 +707,103 @@ out:
 	unlock_fat(sbi);
 	return err;
 }
+
+
+int fat_scan_disk(struct super_block *sb)
+{
+	struct msdos_sb_info *sbi = MSDOS_SB(sb);
+	struct fatent_operations *ops = sbi->fatent_ops;
+	struct fat_entry fatent;
+	unsigned long reada_blocks, reada_mask, cur_block;
+	int err = 0;
+	int diff_time; /*used for test.*/
+	int fcbmp_flag, fsck_flag;
+	unsigned long entry = 0;
+
+	lock_fat(sbi);
+
+	/*first, set the check disk flags to dirty when mount file system.*/
+	fat_write_fsck_flags(sb, FSCK_FAT_DIRTY);
+	fcbmp_flag = support_fcbmp();
+	fsck_flag = (chkdsk_disk_status(sbi) == FSCK_FAT_DIRTY) &&
+		(support_fat_fsck() != FAT_FSCK_UNSUPPORT);
+
+//fsck_flag = 1; /*FIXME:used for test.*/	
+
+	if(fcbmp_flag && (fcbmp_init(sb, &sbi->fcbmp) != 0))
+		fcbmp_flag = 0;
+
+	if(fsck_flag && (fat_fsck_init(sb, &sbi->chkdsk) != 0))
+		fsck_flag = 0;
+
+	if(!fcbmp_flag  && !fsck_flag)
+		goto out;
+
+	printk("Fat file system start scan disk, total %lu cluster.\n",
+	   	sbi->max_cluster);
+
+	diff_time = jiffies; /*record start time.*/
+
+	reada_blocks = FAT_READA_SIZE >> sb->s_blocksize_bits;
+	reada_mask = reada_blocks - 1;
+	cur_block = 0;
+
+	fatent_init(&fatent);
+	fatent_set_entry(&fatent, FAT_START_ENT);
+	while (fatent.entry < sbi->max_cluster) {
+		/* readahead of fat blocks */
+		if ((cur_block & reada_mask) == 0) {
+			unsigned long rest = sbi->fat_length - cur_block;
+			fat_ent_reada(sb, &fatent, min(reada_blocks, rest));
+		}
+		cur_block++;
+
+		show_fat_fsck_process(sbi->fat_length, cur_block);
+		err = fat_ent_read_block(sb, &fatent);
+		if (err)
+			goto out;
+
+		do {
+			if (ops->ent_get(&fatent) != FAT_ENT_FREE) {
+				if(fcbmp_flag)
+					fcbmp_set_cluster(&sbi->fcbmp, fatent.entry);
+				entry = *fatent.u.ent32_p;
+			} else {
+				entry = fatent.entry;
+			}
+			if(likely(fsck_flag && (entry < FAT32_MAX_USER_CLUSTER) &&
+					(entry != EOF_FAT32) && 
+					(entry < sbi->max_cluster))) {
+				err = fat_fsck_set_cluster(&sbi->chkdsk, entry);
+				if(unlikely(err == -EEXIST)) {
+					printk("fix the cluser:%08lx, set the end flag.\n", entry);
+					ops->ent_put(&fatent, FAT_ENT_EOF);
+				}
+			}
+		} while (fat_ent_next(sbi, &fatent));
+	}
+	fatent_brelse(&fatent);
+
+	if(fsck_flag)
+		fat_fsck_release(&sbi->chkdsk);
+
+	diff_time = jiffies - diff_time;
+	printk("Scan disk finish, spend time:%dms.\n",
+		   	(diff_time*1000)/HZ);
+out:
+	unlock_fat(sbi);
+	return err;
+}
+
+
+void fat_release_disk(struct super_block *sb)
+{
+	struct msdos_sb_info *sbi = MSDOS_SB(sb);
+
+	/*printk("fat filesystem release disk.\n");*/
+	if(support_fcbmp())
+		fcbmp_release(&sbi->fcbmp);
+
+	fat_write_fsck_flags(sb, FSCK_FAT_NORMAL);
+}
+

@@ -8,6 +8,8 @@
 #include <linux/mutex.h>
 #include <linux/ratelimit.h>
 #include <linux/msdos_fs.h>
+#include "fat_fsck.h"
+#include "fc_bmp.h"
 
 /*
  * vfat shortname flags
@@ -21,6 +23,10 @@
 #define FAT_ERRORS_CONT		1      /* ignore error and continue */
 #define FAT_ERRORS_PANIC	2      /* panic on error */
 #define FAT_ERRORS_RO		3      /* remount r/o on error */
+
+#define FSCK_FAT_DIRTY 		(0xff)
+#define FSCK_FAT_NORMAL  	(0x00)
+
 
 struct fat_mount_options {
 	uid_t fs_uid;
@@ -88,6 +94,11 @@ struct msdos_sb_info {
 
 	spinlock_t inode_hash_lock;
 	struct hlist_head inode_hashtable[FAT_HASH_SIZE];
+
+	/*add by lixinhai, use for chkdsk.*/
+	unsigned int fsck_flags;
+	struct fat_chkdsk chkdsk;
+	struct fat_fcbmp fcbmp;
 };
 
 #define FAT_CACHE_VALID	0	/* special case for valid cache */
@@ -292,6 +303,19 @@ static inline void fatent_brelse(struct fat_entry *fatent)
 	fatent->fat_inode = NULL;
 }
 
+static inline void chkdsk_set_chk_flags(struct msdos_sb_info *sbi, unsigned int flags)
+{
+	sbi->fsck_flags = flags;
+}
+
+
+static inline int chkdsk_disk_status(struct msdos_sb_info *sbi)
+{
+	return sbi->fsck_flags;
+}
+
+
+
 extern void fat_ent_access_init(struct super_block *sb);
 extern int fat_ent_read(struct inode *inode, struct fat_entry *fatent,
 			int entry);
@@ -342,6 +366,11 @@ extern void fat_time_fat2unix(struct msdos_sb_info *sbi, struct timespec *ts,
 extern void fat_time_unix2fat(struct msdos_sb_info *sbi, struct timespec *ts,
 			      __le16 *time, __le16 *date, u8 *time_cs);
 extern int fat_sync_bhs(struct buffer_head **bhs, int nr_bhs);
+
+extern int fat_write_fsck_flags(struct super_block *sb, unsigned int flags);
+
+extern int fat_scan_disk(struct super_block *sb);
+extern void fat_release_disk(struct super_block *sb);
 
 int fat_cache_init(void);
 void fat_cache_destroy(void);

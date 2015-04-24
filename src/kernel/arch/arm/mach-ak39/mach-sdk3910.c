@@ -39,6 +39,7 @@
 #include "cpu.h"
 #include "irq.h"
 
+#include <mach/reboot.h>
 
 #define SPI_ONCHIP_CS 	(0)		/*means not need gpio*/
 static unsigned long ak39_spidev_cs[AKSPI_CS_NUM] = {
@@ -399,6 +400,17 @@ static struct platform_device *ak3910_platform_devices[] __initdata = {
 	&ak39_gpio_keys_device,
 	&ak39_adkey_device,
 };
+void wdt_enable(void);
+void wdt_keepalive(unsigned int heartbeat);
+
+static void ak39_restart(char str, const char *cmd)
+{
+	//ak39_reboot_sys_by_soft();
+#if defined CONFIG_AK39_WATCHDOG || defined CONFIG_AK39_WATCHDOG_TOP
+	wdt_enable();
+	wdt_keepalive(2);
+#endif
+}
 
 static void __init ak3910_init_machine(void)
 {
@@ -436,7 +448,7 @@ MACHINE_START(AK39XX, "SDK3910 Board")
 	.init_machine = ak3910_init_machine,
 	.init_early = NULL,
 	.timer = &ak39_timer, 
-    .restart = NULL,
+    .restart = ak39_restart,
     
 MACHINE_END
 

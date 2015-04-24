@@ -1,9 +1,0 @@
-[config_addr]
-mac_current_low_0_F=Y
-mac_current_low_0_A=00:00:8B
-serial_current_low_0_F=Y
-serial_current_low_0_A=000138
-mac_current_low_1_F=Y
-mac_current_low_1_A=00:00:8C
-serial_current_low_1_F=Y
-serial_current_low_1_A=000139

@@ -408,6 +408,53 @@ static T_VOID cam_ov7725_set_sharpness(T_CAMERA_SHARPNESS sharpness)
     }
 }
 
+static T_VOID cam_ov7725_set_hue(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_1_TAB);
+            break;
+        case CAMERA_SHARPNESS_2:
+            camera_setup(HUE_2_TAB);
+            break;
+        case CAMERA_SHARPNESS_3:
+            camera_setup(HUE_3_TAB);
+            break;
+        case CAMERA_SHARPNESS_4:
+            camera_setup(HUE_4_TAB);
+            break;
+        case CAMERA_SHARPNESS_5:
+            camera_setup(HUE_5_TAB);
+            break;
+		case CAMERA_SHARPNESS_6:
+            camera_setup(HUE_6_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue parameter error!\n");
+            break;
+    }
+}
+
+static T_VOID cam_ov7725_set_hue_auto(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_AUTO_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_AUTO_1_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue auto parameter error!\n");
+            break;
+    }
+}
+
 /**
  * @brief Set camera AWB mode 
  * @author xia_wenting 
@@ -686,6 +733,31 @@ static T_VOID cam_ov7725_set_night_mode(T_NIGHT_MODE mode)
     }
 }
 
+static T_VOID cam_ov7725_set_anti_flicker(T_U32 value)
+{
+    switch(value) {
+    case V4L2_CID_POWER_LINE_FREQUENCY_DISABLED:
+        camera_setup(ANTI_FLICKER_DISABLE_TAB);
+		//akprintf(C1, M_DRVSYS, "Anti-flicker not support 'Disable', Error."
+		//" please select other frequency!\n");
+        break;
+    case V4L2_CID_POWER_LINE_FREQUENCY_50HZ:
+        camera_setup(ANTI_FLICKER_50HZ_TAB);
+        break;
+	case V4L2_CID_POWER_LINE_FREQUENCY_60HZ:
+        camera_setup(ANTI_FLICKER_60HZ_TAB);
+        break;
+    case V4L2_CID_POWER_LINE_FREQUENCY_AUTO:
+        camera_setup(ANTI_FLICKER_AUTO_TAB);
+		//akprintf(C1, M_DRVSYS, "Anti-flicker not support 'Auto', Error."
+		//" please select other frequency!\n");
+        break;
+    default:
+        akprintf(C1, M_DRVSYS, "set Anti-flicker parameter error!\n");
+        break;
+    }
+}
+
 static T_BOOL cam_ov7725_set_to_cap(T_U32 srcWidth, T_U32 srcHeight)
 {    
     T_CAMERA_MODE Cammode;
@@ -751,6 +823,11 @@ static T_VOID cam_ov7725_set_sensor_param(T_U32 cmd, T_U32 data)
 	sccb_write_data(CAMERA_SCCB_ADDR, (T_U8)cmd, &value, 1);
 }
 
+static T_U16 cam_ov7725_get_sensor_param(T_U32 cmd)
+{
+	return sccb_read_data(CAMERA_SCCB_ADDR, (T_U8)cmd);
+}
+
 static T_CAMERA_FUNCTION_HANDLER ov7725_function_handler = 
 {
     OV7725_CAMERA_MCLK,
@@ -764,18 +841,21 @@ static T_CAMERA_FUNCTION_HANDLER ov7725_function_handler =
     cam_ov7725_set_contrast,
     cam_ov7725_set_saturation,
     cam_ov7725_set_sharpness,
+    cam_ov7725_set_hue,
+    cam_ov7725_set_hue_auto,
     cam_ov7725_set_AWB,
     cam_ov7725_set_mirror,
     cam_ov7725_set_effect,
     cam_ov7725_set_digital_zoom,
     cam_ov7725_set_night_mode,
     AK_NULL,
-    AK_NULL,
+    cam_ov7725_set_anti_flicker,
     cam_ov7725_set_to_cap,
     cam_ov7725_set_to_prev,
     cam_ov7725_set_to_record,
     cam_ov7725_get_type,
-    cam_ov7725_set_sensor_param
+    cam_ov7725_set_sensor_param,
+    cam_ov7725_get_sensor_param
 };
 
 #ifndef CONFIG_LINUX_AKSENSOR
@@ -800,13 +880,17 @@ static const char * resolution_menu[] = {
 };
 
 static const char * hflip_menu[] = {
-      [0] = "normal",
-      [1] = "horizontal flip",
+	[CAMERA_MIRROR_NORMAL] = "Normal",
+	[CAMERA_MIRROR_V] = "VFlip",
+    [CAMERA_MIRROR_H] = "Mirror",
+    [CAMERA_MIRROR_FLIP] = "H/VFlip",
 };
 
 static const char * vflip_menu[] = {
-      [0] = "normal",
-      [1] = "vertical flip",
+	[CAMERA_MIRROR_NORMAL] = "Normal",
+	[CAMERA_MIRROR_V] = "VFlip",
+    [CAMERA_MIRROR_H] = "Mirror",
+    [CAMERA_MIRROR_FLIP] = "H/VFlip",
 };
 
 static const char * night_menu[] = {
@@ -814,11 +898,37 @@ static const char * night_menu[] = {
       [CAMERA_NIGHT_MODE] = "night",
 };
 
+static const char * anti_flicker_menu[] = {
+      [V4L2_CID_POWER_LINE_FREQUENCY_DISABLED] = "Disable",
+      [V4L2_CID_POWER_LINE_FREQUENCY_50HZ] = "50Hz",
+      [V4L2_CID_POWER_LINE_FREQUENCY_60HZ] = "60Hz",
+      [V4L2_CID_POWER_LINE_FREQUENCY_AUTO] = "Auto",
+};
+
 static int ov7725_s_ctl(struct v4l2_ctrl *ctrl)
 {
 	int ret = -EINVAL;
 
 	switch (ctrl->id) {
+		case V4L2_CID_AUTO_WHITE_BALANCE:
+			if (ov7725_function_handler.cam_set_AWB_func) {
+				ov7725_function_handler.cam_set_AWB_func(ctrl->val);
+				ret = 0;
+			}
+			break;
+		case V4L2_CID_COLORFX:
+			if (ov7725_function_handler.cam_set_effect_func) {
+				ov7725_function_handler.cam_set_effect_func(ctrl->val);
+				ret = 0;
+			}
+			break;
+			
+		case V4L2_CID_BRIGHTNESS:
+			if (ov7725_function_handler.cam_set_brightness_func) {
+				ov7725_function_handler.cam_set_brightness_func(ctrl->val);
+				ret = 0;
+			}
+			break;	
 		case V4L2_CID_CONTRAST:
 			if (ov7725_function_handler.cam_set_contrast_func) {
 				ov7725_function_handler.cam_set_contrast_func(ctrl->val);
@@ -828,6 +938,24 @@ static int ov7725_s_ctl(struct v4l2_ctrl *ctrl)
 		case V4L2_CID_SATURATION:
 			if (ov7725_function_handler.cam_set_saturation_func) {
 				ov7725_function_handler.cam_set_saturation_func(ctrl->val);
+				ret = 0;
+			}
+			break;	
+		case V4L2_CID_SHARPNESS:
+			if (ov7725_function_handler.cam_set_sharpness_func) {
+				ov7725_function_handler.cam_set_sharpness_func(ctrl->val);
+				ret = 0;
+			}
+			break;
+		case V4L2_CID_HUE:
+			if (ov7725_function_handler.cam_set_hue) {
+				ov7725_function_handler.cam_set_hue(ctrl->val);
+				ret = 0;
+			}
+			break;	
+		case V4L2_CID_HUE_AUTO:
+			if (ov7725_function_handler.cam_set_hue_auto) {
+				ov7725_function_handler.cam_set_hue_auto(ctrl->val);
 				ret = 0;
 			}
 			break;	
@@ -848,6 +976,12 @@ static int ov7725_s_ctl(struct v4l2_ctrl *ctrl)
 		case V4L2_CID_NIGHTMODE:
 			if (ov7725_function_handler.cam_set_night_mode_func) {
 				ov7725_function_handler.cam_set_night_mode_func(ctrl->val);
+				ret = 0;
+			}
+			break;
+		case V4L2_CID_POWER_LINE_FREQUENCY:
+			if (ov7725_function_handler.cam_set_anti_flicker_func) {
+				ov7725_function_handler.cam_set_anti_flicker_func(ctrl->val);
 				ret = 0;
 			}
 			break;
@@ -935,6 +1069,19 @@ static const struct v4l2_ctrl_config ov7725_ctrls[] = {
 		.step		= 1,
 		.def		= 0,
 	},
+	{
+		.ops		= &ov7725_ctrl_ops,
+		.id			= V4L2_CID_POWER_LINE_FREQUENCY,
+		.type		= V4L2_CTRL_TYPE_MENU,
+		.name		= "anti flicker",
+		.min		= V4L2_CID_POWER_LINE_FREQUENCY_DISABLED,
+		.max		= V4L2_CID_POWER_LINE_FREQUENCY_AUTO,
+		.step		= 0,
+		.def		= V4L2_CID_POWER_LINE_FREQUENCY_50HZ,
+		.flags		= 0,
+		.menu_skip_mask = V4L2_CID_POWER_LINE_FREQUENCY_DISABLED,
+		.qmenu		= anti_flicker_menu,
+	}
 };
 
 

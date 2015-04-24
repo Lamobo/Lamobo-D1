@@ -34,7 +34,6 @@ static T_CAMERA_TYPE camera_hm1375_type = CAMERA_2M;
 static T_NIGHT_MODE night_mode = CAMERA_DAY_MODE;
 static T_CAMERA_MODE s_hm1375_CurMode = CAMERA_MODE_VGA;
 
-#if 0
 static T_VOID camera_setbit(T_U16 reg, T_U8 bit, T_U8 value)
 {
     T_U8 tmp;
@@ -51,7 +50,7 @@ static T_VOID camera_setbit(T_U16 reg, T_U8 bit, T_U8 value)
     
     sccb_write_short(CAMERA_SCCB_ADDR, reg, &tmp, 1);
 }
-#endif
+
 static T_U32 cam_hm1375_read_id(T_VOID);
 
 static T_BOOL camera_set_param(const T_U16 tabParameter[])
@@ -434,8 +433,58 @@ static T_VOID cam_hm1375_set_sharpness(T_CAMERA_SHARPNESS sharpness)
         case CAMERA_SHARPNESS_5:
             camera_setup(SHARPNESS_5_TAB);
             break;
+		case CAMERA_SHARPNESS_6:
+            camera_setup(SHARPNESS_6_TAB);
+            break;
         default:
             akprintf(C1, M_DRVSYS, "set sharpness parameter error!\n");
+            break;
+    }
+}
+
+static T_VOID cam_hm1375_set_hue(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_1_TAB);
+            break;
+        case CAMERA_SHARPNESS_2:
+            camera_setup(HUE_2_TAB);
+            break;
+        case CAMERA_SHARPNESS_3:
+            camera_setup(HUE_3_TAB);
+            break;
+        case CAMERA_SHARPNESS_4:
+            camera_setup(HUE_4_TAB);
+            break;
+        case CAMERA_SHARPNESS_5:
+            camera_setup(HUE_5_TAB);
+            break;
+		case CAMERA_SHARPNESS_6:
+            camera_setup(HUE_6_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue parameter error!\n");
+            break;
+    }
+}
+
+static T_VOID cam_hm1375_set_hue_auto(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_AUTO_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_AUTO_1_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue auto parameter error!\n");
             break;
     }
 }
@@ -486,14 +535,26 @@ static T_VOID cam_hm1375_set_mirror(T_CAMERA_MIRROR mirror)
     switch(mirror)
     {
         case CAMERA_MIRROR_V:
-            break;
+			camera_setbit(0x0006, 0, 0);
+			camera_setbit(0x0006, 1, 1);
+            //camera_setup(MIRROR_V_TAB);
+            break;    
         case CAMERA_MIRROR_H:
+			camera_setbit(0x0006, 0, 1);
+			camera_setbit(0x0006, 1, 0);
+            //camera_setup(MIRROR_H_TAB);
             break;
         case CAMERA_MIRROR_NORMAL:
-            break;
+			camera_setbit(0x0006, 0, 1);
+			camera_setbit(0x0006, 1, 1);
+            //camera_setup(MIRROR_NORMAL_TAB);
+            break;    
         case CAMERA_MIRROR_FLIP:
-            break;
-        default:
+			camera_setbit(0x0006, 0, 0);
+			camera_setbit(0x0006, 1, 0);
+            //camera_setup(MIRROR_FLIP_TAB);
+            break; 
+		default:
             akprintf(C1, M_DRVSYS, "set mirror parameter error!\n");
             break;
     }
@@ -692,6 +753,11 @@ static T_VOID cam_hm1375_set_sensor_param(T_U32 cmd, T_U32 data)
 	sccb_write_short(CAMERA_SCCB_ADDR, (T_U16)cmd, &value, 1);
 }
 
+static T_U16 cam_hm1375_get_sensor_param(T_U32 cmd)
+{
+	return sccb_read_short(CAMERA_SCCB_ADDR, (T_U16)cmd);
+}
+
 static T_CAMERA_FUNCTION_HANDLER hm1375_function_handler = 
 {
     HM1375_CAMERA_MCLK,
@@ -705,6 +771,8 @@ static T_CAMERA_FUNCTION_HANDLER hm1375_function_handler =
     cam_hm1375_set_contrast,
     cam_hm1375_set_saturation,
     cam_hm1375_set_sharpness,
+    cam_hm1375_set_hue,
+    cam_hm1375_set_hue_auto,
     cam_hm1375_set_AWB,
     cam_hm1375_set_mirror,
     cam_hm1375_set_effect,
@@ -716,7 +784,8 @@ static T_CAMERA_FUNCTION_HANDLER hm1375_function_handler =
     cam_hm1375_set_to_prev,
     cam_hm1375_set_to_record,
     cam_hm1375_get_type,
-    cam_hm1375_set_sensor_param
+    cam_hm1375_set_sensor_param,
+    cam_hm1375_get_sensor_param
 };
 
 #ifndef CONFIG_LINUX_AKSENSOR
@@ -767,13 +836,17 @@ static const char * resolution_menu[] = {
 };
 
 static const char * hflip_menu[] = {
-      [0] = "normal",
-      [1] = "horizontal flip",
+	[CAMERA_MIRROR_NORMAL] = "Normal",
+	[CAMERA_MIRROR_V] = "VFlip",
+    [CAMERA_MIRROR_H] = "Mirror",
+    [CAMERA_MIRROR_FLIP] = "H/VFlip",
 };
 
 static const char * vflip_menu[] = {
-      [0] = "normal",
-      [1] = "vertical flip",
+	[CAMERA_MIRROR_NORMAL] = "Normal",
+	[CAMERA_MIRROR_V] = "VFlip",
+    [CAMERA_MIRROR_H] = "Mirror",
+    [CAMERA_MIRROR_FLIP] = "H/VFlip",
 };
 
 static const char * night_menu[] = {
@@ -830,17 +903,22 @@ static int hm1375_s_ctl(struct v4l2_ctrl *ctrl)
 			ret = 0;
 		}
 		break;	
-	case V4L2_CID_HFLIP:
-		if (hm1375_function_handler.cam_set_mirror_func) {
-			hm1375_function_handler.cam_set_mirror_func( 
-				ctrl->val ? CAMERA_MIRROR_H : CAMERA_MIRROR_NORMAL);
+	case V4L2_CID_HUE:
+		if (hm1375_function_handler.cam_set_hue) {
+			hm1375_function_handler.cam_set_hue(ctrl->val);
+			ret = 0;
+		}
+		break;	
+	case V4L2_CID_HUE_AUTO:
+		if (hm1375_function_handler.cam_set_hue_auto) {
+			hm1375_function_handler.cam_set_hue_auto(ctrl->val);
 			ret = 0;
 		}
 		break;
+	case V4L2_CID_HFLIP:
 	case V4L2_CID_VFLIP:
 		if (hm1375_function_handler.cam_set_mirror_func) {
-			hm1375_function_handler.cam_set_mirror_func(
-				ctrl->val ? CAMERA_MIRROR_V : CAMERA_MIRROR_NORMAL);
+			hm1375_function_handler.cam_set_mirror_func(ctrl->val);
 			ret = 0;
 		}
 		break;

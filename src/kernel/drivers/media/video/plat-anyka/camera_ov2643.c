@@ -425,6 +425,53 @@ static T_VOID cam_ov2643_set_sharpness(T_CAMERA_SHARPNESS sharpness)
     }
 }
 
+static T_VOID cam_ov2643_set_hue(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_1_TAB);
+            break;
+        case CAMERA_SHARPNESS_2:
+            camera_setup(HUE_2_TAB);
+            break;
+        case CAMERA_SHARPNESS_3:
+            camera_setup(HUE_3_TAB);
+            break;
+        case CAMERA_SHARPNESS_4:
+            camera_setup(HUE_4_TAB);
+            break;
+        case CAMERA_SHARPNESS_5:
+            camera_setup(HUE_5_TAB);
+            break;
+		case CAMERA_SHARPNESS_6:
+            camera_setup(HUE_6_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue parameter error!\n");
+            break;
+    }
+}
+
+static T_VOID cam_ov2643_set_hue_auto(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_AUTO_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_AUTO_1_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue auto parameter error!\n");
+            break;
+    }
+}
+
 /**
  * @brief Set camera AWB mode 
  * @author xia_wenting 
@@ -660,6 +707,11 @@ static T_VOID cam_ov2643_set_sensor_param(T_U32 cmd, T_U32 data)
 	sccb_write_data(CAMERA_SCCB_ADDR, (T_U8)cmd, &value, 1);
 }
 
+static T_U16 cam_ov2643_get_sensor_param(T_U32 cmd)
+{
+	return sccb_read_data(CAMERA_SCCB_ADDR, (T_U8)cmd);
+}
+
 static T_CAMERA_FUNCTION_HANDLER ov2643_function_handler = 
 {
     OV2643_CAMERA_MCLK,
@@ -673,6 +725,8 @@ static T_CAMERA_FUNCTION_HANDLER ov2643_function_handler =
     cam_ov2643_set_contrast,
     cam_ov2643_set_saturation,
     cam_ov2643_set_sharpness,
+    cam_ov2643_set_hue,
+    cam_ov2643_set_hue_auto,
     cam_ov2643_set_AWB,
     cam_ov2643_set_mirror,
     cam_ov2643_set_effect,
@@ -684,7 +738,8 @@ static T_CAMERA_FUNCTION_HANDLER ov2643_function_handler =
     cam_ov2643_set_to_prev,
     cam_ov2643_set_to_record,
     cam_ov2643_get_type,
-    cam_ov2643_set_sensor_param
+    cam_ov2643_set_sensor_param,
+    cam_ov2643_get_sensor_param
 };
 
 #ifndef CONFIG_LINUX_AKSENSOR
@@ -735,13 +790,17 @@ static const char * resolution_menu[] = {
 };
 
 static const char * hflip_menu[] = {
-      [0] = "normal",
-      [1] = "horizontal flip",
+	[CAMERA_MIRROR_NORMAL] = "Normal",
+	[CAMERA_MIRROR_V] = "VFlip",
+    [CAMERA_MIRROR_H] = "Mirror",
+    [CAMERA_MIRROR_FLIP] = "H/VFlip",
 };
 
 static const char * vflip_menu[] = {
-      [0] = "normal",
-      [1] = "vertical flip",
+	[CAMERA_MIRROR_NORMAL] = "Normal",
+	[CAMERA_MIRROR_V] = "VFlip",
+    [CAMERA_MIRROR_H] = "Mirror",
+    [CAMERA_MIRROR_FLIP] = "H/VFlip",
 };
 
 static const char * night_menu[] = {
@@ -790,7 +849,19 @@ static int ov2643_s_ctl(struct v4l2_ctrl *ctrl)
 			ov2643_function_handler.cam_set_sharpness_func(ctrl->val);
 			ret = 0;
 		}
+		break;
+	case V4L2_CID_HUE:
+		if (ov2643_function_handler.cam_set_hue) {
+			ov2643_function_handler.cam_set_hue(ctrl->val);
+			ret = 0;
+		}
 		break;	
+	case V4L2_CID_HUE_AUTO:
+		if (ov2643_function_handler.cam_set_hue_auto) {
+			ov2643_function_handler.cam_set_hue_auto(ctrl->val);
+			ret = 0;
+		}
+		break;
 	case V4L2_CID_HFLIP:
 		if (ov2643_function_handler.cam_set_mirror_func) {
 			ov2643_function_handler.cam_set_mirror_func( 

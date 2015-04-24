@@ -126,8 +126,12 @@ static unsigned long long dac_clock;
  *************/
 #define USE_FORMATS 		(SNDRV_PCM_FMTBIT_U8 | SNDRV_PCM_FMTBIT_S16_LE)
 #define USE_RATE			(SNDRV_PCM_RATE_CONTINUOUS | SNDRV_PCM_RATE_8000_96000)
-#define USE_RATE_MIN		5500
-#define USE_RATE_MAX		96000
+
+#define CAPTURE_USE_RATE_MIN		5500
+#define CAPTURE_USE_RATE_MAX		96000
+
+#define PLAYBACK_USE_RATE_MIN		5500
+#define PLAYBACK_USE_RATE_MAX		192000
 
 #define CAPTURE_USE_CHANNELS_MIN 	1
 #define CAPTURE_USE_CHANNELS_MAX 	1
@@ -137,10 +141,17 @@ static unsigned long long dac_clock;
 
 #define akpcm_playback_buf_bytes_max     (64*1024)
 #define akpcm_playback_period_bytes_min  512
+
+#ifdef CONFIG_SUPPORT_AEC
 #define akpcm_playback_period_bytes_max  512
+#else
+#define akpcm_playback_period_bytes_max  32768
+#endif
+
 #define akpcm_playback_period_aligned		128
 #define akpcm_playback_periods_min       4
-#define akpcm_playback_periods_max       128
+
+#define akpcm_playback_periods_max       2048
 
 #define DELAY_TIME_FOR_CLOSING_DAC		(HZ * 30)
 
@@ -951,8 +962,8 @@ static struct snd_pcm_hardware akpcm_playback_hardware = {
 				 SNDRV_PCM_INFO_MMAP_VALID),
 	.formats =		USE_FORMATS,
 	.rates =		USE_RATE,
-	.rate_min =		USE_RATE_MIN,
-	.rate_max =		USE_RATE_MAX,
+	.rate_min =		PLAYBACK_USE_RATE_MIN,
+	.rate_max =		PLAYBACK_USE_RATE_MAX,
 	.channels_min =		PLAYBACK_USE_CHANNELS_MIN,
 	.channels_max =		PLAYBACK_USE_CHANNELS_MAX,
 	.buffer_bytes_max =	akpcm_playback_buf_bytes_max,
@@ -971,8 +982,8 @@ static struct snd_pcm_hardware akpcm_capture_hardware = {
 				 SNDRV_PCM_INFO_MMAP_VALID),
 	.formats =		USE_FORMATS,
 	.rates =		USE_RATE,
-	.rate_min =		USE_RATE_MIN,
-	.rate_max =		USE_RATE_MAX,
+	.rate_min =		CAPTURE_USE_RATE_MIN,
+	.rate_max =		CAPTURE_USE_RATE_MAX,
 	.channels_min =		CAPTURE_USE_CHANNELS_MIN,
 	.channels_max =		CAPTURE_USE_CHANNELS_MAX,
 	.buffer_bytes_max =	akpcm_capture_buf_bytes_max,

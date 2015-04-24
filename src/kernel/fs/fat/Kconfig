@@ -83,6 +83,44 @@ config FAT_DEFAULT_CODEPAGE
 	  It can be overridden with the "codepage" mount option.
 	  See <file:Documentation/filesystems/vfat.txt> for more information.
 
+
+config FAT_FCBMP
+	tristate "Free clusters bitmap support for FAT"
+	depends on MSDOS_FS || VFAT_FS
+	select BMP_TREE
+	default n 
+	help
+	  This option should be set to support the fast alloc clusters of your
+	  FAT filesystems. 
+
+
+choice 
+	prompt "Fat Filesystem check disk Algorithm"
+	depends on MSDOS_FS || VFAT_FS
+
+
+config FAT_FSCK
+	bool "Check disk support by Bmptree"
+	select BMP_TREE
+	help
+	  This option should be set to check disk when FAT filesystems
+	   execption by bitmap tree. 
+
+
+config FAT_CHK_DISK
+	bool "Check disk support by Anyka Rtos Alg"
+	help
+	  This option should be set to check disk when FAT filesystems execption (Anyka Rtos). 
+
+config FAT_NOT_CHKDSK
+	bool "Unsupport Fat filesystem disk check."
+
+endchoice
+
+
+config BMP_TREE
+	bool
+
 config FAT_DEFAULT_IOCHARSET
 	string "Default iocharset for FAT"
 	depends on VFAT_FS

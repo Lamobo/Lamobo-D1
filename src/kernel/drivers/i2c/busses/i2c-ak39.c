@@ -36,8 +36,8 @@
 #include <mach/i2c.h>
 #include <mach/reset.h>
 
-#define AK39_I2C_INTERRUPT_MODE
-//#define AK39_I2C_POLL_MODE
+//#define AK39_I2C_INTERRUPT_MODE
+#define AK39_I2C_POLL_MODE
 
 /* i2c controller state */
 enum ak39_i2c_state {

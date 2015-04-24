@@ -1,8 +1,8 @@
 # Lamobo-D1 Development Environment
----
+
+[![Build Status](https://drone.io/github.com/Lamobo/Lamobo-D1/status.png)](https://drone.io/github.com/Lamobo/Lamobo-D1/latest)
 
 ## Firmware Build Steps
----
 
 0. Tested OS
 
@@ -36,7 +36,6 @@
     ```
 
 ## Firmware Flash Steps
----
 
 0. Tested OS
 

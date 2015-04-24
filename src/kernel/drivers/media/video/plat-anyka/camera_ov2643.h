@@ -1086,6 +1086,52 @@ static const T_U8 SHARPNESS_6_TAB[] =
     END_FLAG, END_FLAG
 };
 
+/****************   Camera hue Table   ****************/
+static const T_U8 HUE_0_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_1_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_2_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_3_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_4_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_5_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_6_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_AUTO_0_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
+static const T_U8 HUE_AUTO_1_TAB[] = 
+{
+    END_FLAG, END_FLAG
+};
+
 /****************   Camera AWB Table   ****************/
 static const T_U8 AWB_AUTO_TAB[] = 
 {

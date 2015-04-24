@@ -24,6 +24,9 @@ s32 aksensor_i2c_write_word_data(u8 daddr, u16 raddr, u16 *data, u32 size);
 s32 aksensor_i2c_read_word_data(u8 daddr, u16 raddr);
 
 void aksensor_set_param(u32 cmd, u32 data);
+u16 aksensor_get_param(u32 cmd);
+
+const char *get_sensor_name(void);
 
 
 /*

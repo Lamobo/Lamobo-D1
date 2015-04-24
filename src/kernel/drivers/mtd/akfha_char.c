@@ -25,6 +25,7 @@
 #include <mtd/mtd-abi.h>
 #include <mach-anyka/nand_list.h>
 #include <mach-anyka/fha.h>
+#include <mach-anyka/fha_asa.h>
 #ifdef CONFIG_MTD_NAND_ANYKA
 #include <plat-anyka/wrap_nand.h>
 #include <plat-anyka/anyka_cpu.h>
@@ -41,7 +42,15 @@
 #define AK_FHA_UPDATE_BOOT		0xb2
 #define AK_FHA_UPDATE_BIN_BEGIN		0xb3
 #define AK_FHA_UPDATE_BIN		0xb4
+#define AK_FHA_UPDATE_MAC	0xb5
+#define AK_FHA_UPDATE_SER	0xb6
+#define AK_FHA_UPDATE_BSER	0xb7
+
 #define MAX_BUF_LEN 64*1024
+#define MAC_FILE_NAME "MACADDR"
+#define SN_FILE_NAME "SERADDR"
+#define BSN_FILE_NAME "BCADDR"
+
 extern int ak_fha_init_for_update(int n);
 extern T_U32 ak_fha_read_callback(T_U32 chip_num, T_U32 page_num, T_U8 *data,
 		T_U32 data_len, T_U8 *oob, T_U32 oob_len, T_U32 eDataType);
@@ -389,6 +398,56 @@ static int fhachar_UpdateBin(unsigned long arg)
 	}
 	return 0;
 }
+static int UpdateAsaFile(unsigned long arg, char* filename)
+{
+	unsigned char file_buf[64] = {0};
+	unsigned char file_len[4] = {0};
+	unsigned char ttbuf[64];
+	printk("filename:%s\n", filename);
+	if(FHA_asa_read_file(filename, file_len, 4) == AK_FALSE)
+	{
+		printk("no %s file in asa!!\n", filename);
+		return -1;
+	}
+
+	printk("file_len:0x%x 0x%x 0x%x 0x%x\n", file_len[0], file_len[1], file_len[2], file_len[3]);
+
+	if(FHA_asa_read_file(filename, file_buf, *(unsigned long*)file_len + 4) == AK_FALSE)
+	{
+		printk("read %s file in asa error!!!\n", filename);
+		return -1;
+	}
+
+	if(copy_from_user(pBufInfo, (T_BufInfo*)arg, sizeof(T_BufInfo)) != 0)
+	{
+		return -1;
+	}
+
+	printk("new file:%s\n", pBufInfo->buff);
+
+	memset(ttbuf, 0, 64);
+	ttbuf[0] = pBufInfo->buflen;
+	memcpy(ttbuf + 4, pBufInfo->buff, pBufInfo->buflen);
+	if(FHA_asa_write_file(filename, ttbuf, pBufInfo->buflen + 4, ASA_MODE_CREATE) == AK_FALSE)
+	{
+		printk("write %s file in asa error!!\n", filename);
+		return -1;
+	}
+
+	return 0;
+}
+static int fhachar_UpdateMac(unsigned long arg)
+{
+	return UpdateAsaFile(arg, MAC_FILE_NAME);
+}
+static int fhachar_UpdateSer(unsigned long arg)
+{
+	return UpdateAsaFile(arg, SN_FILE_NAME);
+}
+static int fhachar_UpdateBSer(unsigned long arg)
+{
+	return UpdateAsaFile(arg, BSN_FILE_NAME);
+}
 /**
  * @brief :Command Control interface for burntool .
  * 
@@ -425,6 +484,21 @@ static long akfha_char_ioctl(/*struct inode *inode, */struct file *filp,
 		case AK_FHA_UPDATE_BIN:
 		{
 			ret = fhachar_UpdateBin(arg);
+			break;
+		}
+		case AK_FHA_UPDATE_MAC:
+		{
+			ret = fhachar_UpdateMac(arg);
+			break;
+		}
+		case AK_FHA_UPDATE_SER:
+		{
+			ret = fhachar_UpdateSer(arg);
+			break;
+		}
+		case AK_FHA_UPDATE_BSER:
+		{
+			ret = fhachar_UpdateBSer(arg);
 			break;
 		}
 		default:

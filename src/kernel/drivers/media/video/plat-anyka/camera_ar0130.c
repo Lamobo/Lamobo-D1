@@ -455,6 +455,53 @@ static T_VOID cam_ar0130_set_sharpness(T_CAMERA_SHARPNESS sharpness)
     }
 }
 
+static T_VOID cam_ar0130_set_hue(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_1_TAB);
+            break;
+        case CAMERA_SHARPNESS_2:
+            camera_setup(HUE_2_TAB);
+            break;
+        case CAMERA_SHARPNESS_3:
+            camera_setup(HUE_3_TAB);
+            break;
+        case CAMERA_SHARPNESS_4:
+            camera_setup(HUE_4_TAB);
+            break;
+        case CAMERA_SHARPNESS_5:
+            camera_setup(HUE_5_TAB);
+            break;
+		case CAMERA_SHARPNESS_6:
+            camera_setup(HUE_6_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue parameter error!\n");
+            break;
+    }
+}
+
+static T_VOID cam_ar0130_set_hue_auto(T_U32 value)
+{
+    switch(value)
+    {
+        case CAMERA_SHARPNESS_0:
+            camera_setup(HUE_AUTO_0_TAB);
+            break;
+        case CAMERA_SHARPNESS_1:
+            camera_setup(HUE_AUTO_1_TAB);
+            break;
+        default:
+            akprintf(C1, M_DRVSYS, "set hue auto parameter error!\n");
+            break;
+    }
+}
+
 /**
  * @brief Set camera AWB mode 
  * @author cao_lianming 
@@ -707,6 +754,11 @@ static T_VOID cam_ar0130_set_sensor_param(T_U32 cmd, T_U32 data)
 	sccb_write_word(CAMERA_SCCB_ADDR, (T_U16)cmd, &value, 1);
 }
 
+static T_U16 cam_ar0130_get_sensor_param(T_U32 cmd)
+{
+	return sccb_read_word(CAMERA_SCCB_ADDR, (T_U16)cmd);
+}
+
 static T_CAMERA_FUNCTION_HANDLER ar0130_function_handler = 
 {
     AR0130_CAMERA_MCLK,
@@ -720,6 +772,8 @@ static T_CAMERA_FUNCTION_HANDLER ar0130_function_handler =
     cam_ar0130_set_contrast,
     cam_ar0130_set_saturation,
     cam_ar0130_set_sharpness,
+    cam_ar0130_set_hue,
+    cam_ar0130_set_hue_auto,
     cam_ar0130_set_AWB,
     cam_ar0130_set_mirror,
     cam_ar0130_set_effect,
@@ -731,7 +785,8 @@ static T_CAMERA_FUNCTION_HANDLER ar0130_function_handler =
     cam_ar0130_set_to_prev,
     cam_ar0130_set_to_record,
     cam_ar0130_get_type,
-    cam_ar0130_set_sensor_param
+    cam_ar0130_set_sensor_param,
+    cam_ar0130_get_sensor_param
 };
 
 #ifndef CONFIG_LINUX_AKSENSOR
@@ -844,6 +899,18 @@ static int ar0130_s_ctl(struct v4l2_ctrl *ctrl)
 			ret = 0;
 		}
 		break;	
+	case V4L2_CID_HUE:
+		if (ar0130_function_handler.cam_set_hue) {
+			ar0130_function_handler.cam_set_hue(ctrl->val);
+			ret = 0;
+		}
+		break;	
+	case V4L2_CID_HUE_AUTO:
+		if (ar0130_function_handler.cam_set_hue_auto) {
+			ar0130_function_handler.cam_set_hue_auto(ctrl->val);
+			ret = 0;
+		}
+		break;
 	case V4L2_CID_HFLIP:
 		if (ar0130_function_handler.cam_set_mirror_func) {
 			ar0130_function_handler.cam_set_mirror_func( 

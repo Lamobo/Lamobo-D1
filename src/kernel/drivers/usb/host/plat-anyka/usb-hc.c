@@ -28,7 +28,7 @@
 
 
 static int period_epfifo;
-static struct workqueue_struct *g_otghc_wq;
+struct workqueue_struct *g_otghc_wq;
 static struct delayed_work	g_otg_rest;
 //static char *trans_desc[4] = {"iso", "intterrup", "conroller", "bulk"};
 static u8 ep_fifos[] = { USB_FIFO_EP0, USB_FIFO_EP1, USB_FIFO_EP2, USB_FIFO_EP3, USB_FIFO_EP4, USB_FIFO_EP5};
@@ -1779,6 +1779,8 @@ int akotg_usbhc_start(struct usb_hcd *hcd)
 	struct akotg_usbhc *akotghc = hcd_to_akotg_usbhc(hcd);
 	
 	g_otghc_wq = create_singlethread_workqueue("usb_otg_wq");
+	if (!g_otghc_wq)
+		goto err_otghc_queue;
 	INIT_DELAYED_WORK(&g_otg_rest, reset_otg);
 	/*after reset usbhc, set stat to running.*/
 	hcd->state = HC_STATE_RUNNING;
@@ -1798,5 +1800,8 @@ int akotg_usbhc_start(struct usb_hcd *hcd)
 	//enable_irq(akotghc->dma_irq);
 
 	return 0;
+err_otghc_queue:
+	printk(KERN_ERR "akotg_usbhc couldn't create workqueue\n");
+	return -ENOMEM;		
 }
 
