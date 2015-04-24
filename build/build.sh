@@ -21,14 +21,14 @@ config_kernel()
 {
     echo Configuring kernel...
     cd $DEV_ROOT/src/kernel
-    make menuconfig
+    make aimer39_ak3918_D1_defconfig
+    #make menuconfig
 }
 
 build_kernel()
 {
     echo Building kernel...
     cd $DEV_ROOT/src/kernel
-    make aimer39_ak3918_D1_defconfig
     make LOCALVERSION=
     cd $DEV_ROOT/src
     cp -v kernel/arch/arm/boot/zImage $DEV_ROOT/output
@@ -156,7 +156,7 @@ mkdir -p $DEV_ROOT/output
 
 if [ "$1" == "" ]; then
     prepare_tools
-    #config_kernel
+    config_kernel
     build_kernel
     config_busybox
     build_busybox
