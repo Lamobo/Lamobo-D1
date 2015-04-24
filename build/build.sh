@@ -43,6 +43,49 @@ clean_kernel()
     git checkout lib
 }
 
+config_busybox()
+{
+    echo Configuring busybox...
+    cd $DEV_ROOT/src/busybox
+    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s lamobo_d1_defconfig
+    #make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s menuconfig
+}
+
+build_busybox()
+{
+    echo Building busybox...
+    cd $DEV_ROOT/src/busybox
+    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s
+
+    rm -rf rootfs
+    rm rootfs.tar.gz
+    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- CONFIG_PREFIX=rootfs -s install
+
+    echo Merging with the prebuilt...
+    cd rootfs
+    rm -v linuxrc
+    sudo tar zxpf $DEV_ROOT/build/rootfs_prebuilt.tgz
+    chmod 755 bin
+    chmod 755 etc
+    chmod 755 sbin
+    chmod 755 usr
+    chmod 755 usr/bin
+    chmod 755 usr/sbin
+    cd ..
+
+    find rootfs/ -exec touch -h {} \;
+    tar zcpf rootfs.tar.gz rootfs
+    #cp -v rootfs.tar.gz ../librootfs/rootfs.tar.gz
+}
+
+clean_busybox()
+{
+    echo Cleaning busybox...
+    cd $DEV_ROOT/src/busybox
+    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s distclean
+    #make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s clean
+}
+
 build_rootfs()
 {
     echo Building rootfs...
@@ -115,10 +158,13 @@ if [ "$1" == "" ]; then
     prepare_tools
     #config_kernel
     build_kernel
+    config_busybox
+    build_busybox
     build_rootfs
     build_samples
 elif [ "$1" == "clean" ]; then
     clean_kernel
+    clean_busybox
     clean_rootfs
     clean_samples
 fi
