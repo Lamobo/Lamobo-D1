@@ -63,7 +63,7 @@ build_busybox()
     make O=$DEV_ROOT/output/busybox \
         ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -j$NCPU
 
-    rm -rf $DEV_ROOT/output/busybox/rootfs
+    sudo rm -rf $DEV_ROOT/output/busybox/rootfs
     rm     $DEV_ROOT/output/busybox/rootfs.tar.gz
     make O=$DEV_ROOT/output/busybox \
         ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- CONFIG_PREFIX=rootfs -s install
@@ -72,15 +72,15 @@ build_busybox()
     cd $DEV_ROOT/output/busybox/rootfs
     rm -v linuxrc
     sudo tar zxpf $DEV_ROOT/build/rootfs_prebuilt.tgz
-    chmod 755 bin
-    chmod 755 etc
-    chmod 755 sbin
-    chmod 755 usr
-    chmod 755 usr/bin
-    chmod 755 usr/sbin
+    sudo chmod 755 bin
+    sudo chmod 755 etc
+    sudo chmod 755 sbin
+    sudo chmod 755 usr
+    sudo chmod 755 usr/bin
+    sudo chmod 755 usr/sbin
     cd ..
 
-    find rootfs/ -exec touch -h {} \;
+    find rootfs/ -exec sudo touch -h {} \;
     tar zcpf rootfs.tar.gz rootfs
     cp -v rootfs.tar.gz $DEV_ROOT/src/librootfs/rootfs.tar.gz
 }
