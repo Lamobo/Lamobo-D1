@@ -174,6 +174,21 @@ clean_node()
     make -s distclean
 }
 
+build_updater()
+{
+    echo Building updater...
+    cd $DEV_ROOT/src/updater
+    make -s
+    cp -v updater $DEV_ROOT/output
+}
+
+clean_updater()
+{
+    echo Building updater...
+    cd $DEV_ROOT/src/updater
+    make -s clean
+}
+
 #
 # main
 #
@@ -195,12 +210,14 @@ if [ "$1" == "" ]; then
     build_rootfs
     build_samples
     build_node
+    build_updater
 elif [ "$1" == "clean" ]; then
     clean_kernel
     clean_busybox
     clean_rootfs
     clean_samples
     clean_node
+    clean_updater
 else
     echo Usage: $0 [clean]
 fi
