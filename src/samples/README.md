@@ -27,3 +27,7 @@ Just copy them to the TF card.
 
 - **record_video**: Recording video.
     - ./record_video -H
+
+- **node**: Hello world by node.js 
+    - ./node hello.js
+    - visit http://ip:8080
