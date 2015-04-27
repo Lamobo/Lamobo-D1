@@ -149,6 +149,31 @@ clean_samples()
     make -s clean
 }
 
+build_node()
+{
+    echo Building node...
+    cd $DEV_ROOT/src/node
+
+    AR=arm-none-linux-gnueabi-ar \
+    CC=arm-none-linux-gnueabi-gcc \
+    CXX=arm-none-linux-gnueabi-g++ \
+    LINK=arm-none-linux-gnueabi-g++ \
+        ./configure \
+            --without-snapshot \
+            --dest-cpu=arm --dest-os=linux
+
+    make -s -j$NCPU
+
+    cp -v $DEV_ROOT/src/node/out/Release/node $DEV_ROOT/output
+}
+
+clean_node()
+{
+    echo Cleaning node...
+    cd $DEV_ROOT/src/node
+    make -s distclean
+}
+
 #
 # main
 #
@@ -169,11 +194,13 @@ if [ "$1" == "" ]; then
     build_busybox
     build_rootfs
     build_samples
+    build_node
 elif [ "$1" == "clean" ]; then
     clean_kernel
     clean_busybox
     clean_rootfs
     clean_samples
+    clean_node
 else
     echo Usage: $0 [clean]
 fi
