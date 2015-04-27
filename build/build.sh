@@ -21,24 +21,24 @@ config_kernel()
 {
     echo Configuring kernel...
     cd $DEV_ROOT/src/kernel
-    make aimer39_ak3918_D1_defconfig
-    #make menuconfig
+    mkdir -p $DEV_ROOT/output/kernel
+    make O=$DEV_ROOT/output/kernel aimer39_ak3918_D1_defconfig
+    #make O=$DEV_ROOT/output/kernel menuconfig
 }
 
 build_kernel()
 {
     echo Building kernel...
     cd $DEV_ROOT/src/kernel
-    make LOCALVERSION=
-    cd $DEV_ROOT/src
-    cp -v kernel/arch/arm/boot/zImage $DEV_ROOT/output
+    make O=$DEV_ROOT/output/kernel LOCALVERSION= -j$NCPU
+    cp -v $DEV_ROOT/output/kernel/arch/arm/boot/zImage $DEV_ROOT/output
 }
 
 clean_kernel()
 {
     echo Cleaning kernel...
+    rm -rf $DEV_ROOT/output/kernel
     cd $DEV_ROOT/src/kernel
-    make -s clean
     # restore kernel/lib/libakaec.a and kernel/lib/libfha.a
     git checkout lib
 }
@@ -47,22 +47,29 @@ config_busybox()
 {
     echo Configuring busybox...
     cd $DEV_ROOT/src/busybox
-    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s lamobo_d1_defconfig
-    #make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s menuconfig
+    mkdir -p $DEV_ROOT/output/busybox
+    make O=$DEV_ROOT/output/busybox \
+        ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- \
+        -s lamobo_d1_defconfig
+
+    #make O=$DEV_ROOT/output/busybox \
+    #    ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s menuconfig
 }
 
 build_busybox()
 {
     echo Building busybox...
     cd $DEV_ROOT/src/busybox
-    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s
+    make O=$DEV_ROOT/output/busybox \
+        ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -j$NCPU
 
-    rm -rf rootfs
-    rm rootfs.tar.gz
-    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- CONFIG_PREFIX=rootfs -s install
+    rm -rf $DEV_ROOT/output/busybox/rootfs
+    rm     $DEV_ROOT/output/busybox/rootfs.tar.gz
+    make O=$DEV_ROOT/output/busybox \
+        ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- CONFIG_PREFIX=rootfs -s install
 
     echo Merging with the prebuilt...
-    cd rootfs
+    cd $DEV_ROOT/output/busybox/rootfs
     rm -v linuxrc
     sudo tar zxpf $DEV_ROOT/build/rootfs_prebuilt.tgz
     chmod 755 bin
@@ -75,15 +82,13 @@ build_busybox()
 
     find rootfs/ -exec touch -h {} \;
     tar zcpf rootfs.tar.gz rootfs
-    cp -v rootfs.tar.gz ../librootfs/rootfs.tar.gz
+    cp -v rootfs.tar.gz $DEV_ROOT/src/librootfs/rootfs.tar.gz
 }
 
 clean_busybox()
 {
     echo Cleaning busybox...
-    cd $DEV_ROOT/src/busybox
-    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s distclean
-    #make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- -s clean
+    rm -rf $DEV_ROOT/output/busybox
 }
 
 build_rootfs()
@@ -150,6 +155,8 @@ clean_samples()
 DEV_ROOT=`dirname $0`/..
 DEV_ROOT=`cd $DEV_ROOT; pwd`
 
+NCPU=$((`grep '^processor' /proc/cpuinfo | wc -l` * 2))
+
 export PATH=$DEV_ROOT/compiler/arm-2009q3/bin:$PATH
 
 mkdir -p $DEV_ROOT/output
@@ -167,4 +174,6 @@ elif [ "$1" == "clean" ]; then
     clean_busybox
     clean_rootfs
     clean_samples
+else
+    echo Usage: $0 [clean]
 fi
