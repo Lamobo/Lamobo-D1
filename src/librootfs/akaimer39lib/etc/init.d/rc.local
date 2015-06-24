@@ -8,7 +8,7 @@ echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-0/new_device
 hwclock -s
 ifconfig lo up
 
-/usr/bin/tcpsvd 0 21 ftpd /mnt &
+/usr/bin/tcpsvd 0 21 ftpd -w /mnt &
 
 /usr/bin/telnetd
 ntpd -p 218.75.4.130
