@@ -81,7 +81,7 @@ build_busybox()
     cd ..
 
     find rootfs/ -exec sudo touch -h {} \;
-    tar zcpf rootfs.tar.gz rootfs
+    sudo tar zcpf rootfs.tar.gz rootfs
     cp -v rootfs.tar.gz $DEV_ROOT/src/librootfs/rootfs.tar.gz
 }
 

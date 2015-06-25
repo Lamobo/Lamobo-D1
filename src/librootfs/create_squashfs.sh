@@ -1,8 +1,23 @@
 #!/bin/sh
 
-#	第一个参数指定要打包目录
-#	第二个参数指定输出文件名
-#	第三个参数指定打包方式
+echo Creating SquashFS image...
 
-./mksquashfs rootfs/ root.sqsh4 -noappend
+# prepare rootfs/etc contains the essential files
+cd rootfs
+rm -rf _etc
+mv etc _etc
+mkdir -p etc/init.d
+cp _etc/init.d/rcS etc/init.d/
+cp _etc/fstab      etc/
+cp _etc/inittab    etc/
+cd ..
 
+# packing
+rm root.sqsh4
+./mksquashfs rootfs root.sqsh4 -noappend -no-progress -e _etc
+
+# recover rootfs/etc
+cd rootfs
+rm -rf etc
+mv _etc etc
+cd ..
