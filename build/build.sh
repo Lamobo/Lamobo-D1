@@ -3,7 +3,7 @@
 prepare_tools()
 {
     sudo apt-get update -y
-    sudo apt-get install -yq lzop
+    sudo apt-get install -yq lzop zip
 
     if [ `uname -m` == 'x86_64' ]; then
         sudo apt-get install -yq --force-yes ia32-libs ia32-libs-multiarch liblzo2-2:i386 liblzma5:i386
@@ -117,19 +117,23 @@ build_samples()
 
     cd $DEV_ROOT/src/samples/gpio
     make
-    cp -v gpio-led $DEV_ROOT/output
+    arm-none-linux-gnueabi-strip gpio-led
+    cp -v gpio-led $DEV_ROOT/output/bin
 
     cd $DEV_ROOT/src/samples/i2c
     make
-    cp -v i2c-test $DEV_ROOT/output
+    arm-none-linux-gnueabi-strip i2c-test
+    cp -v i2c-test $DEV_ROOT/output/bin
 
     cd $DEV_ROOT/src/samples/record_audio
+    arm-none-linux-gnueabi-strip record_audio
     make
-    cp -v ./BUILD_record_audio_EXEC/record_audio $DEV_ROOT/output
+    cp -v ./BUILD_record_audio_EXEC/record_audio $DEV_ROOT/output/bin
 
     cd $DEV_ROOT/src/samples/record_video
+    arm-none-linux-gnueabi-strip record_video
     make
-    cp -v ./BUILD_record_video_EXEC/record_video $DEV_ROOT/output
+    cp -v ./BUILD_record_video_EXEC/record_video $DEV_ROOT/output/bin
 }
 
 clean_samples()
@@ -164,7 +168,8 @@ build_node()
 
     make -s -j$NCPU
 
-    cp -v $DEV_ROOT/src/node/out/Release/node $DEV_ROOT/output
+    arm-none-linux-gnueabi-strip $DEV_ROOT/src/node/out/Release/node
+    cp -v $DEV_ROOT/src/node/out/Release/node $DEV_ROOT/output/bin
 }
 
 clean_node()
@@ -179,7 +184,7 @@ build_updater()
     echo Building updater...
     cd $DEV_ROOT/src/updater
     make -s
-    cp -v updater $DEV_ROOT/output
+    cp -v updater $DEV_ROOT/output/bin
 }
 
 clean_updater()
@@ -189,17 +194,53 @@ clean_updater()
     make -s clean
 }
 
+pack_basic()
+{
+    echo Packing Firmware...
+    cd $DEV_ROOT/output
+    rm -rf burntool
+    mkdir burntool
+    cp -v ../tool/burntool/* burntool/
+    cp -v zImage burntool/
+    cp -v root.sqsh4 burntool/
+    cp -v root.jffs2 burntool/
+    git rev-parse HEAD >rev.txt
+    rm -f D1_Basic_$REV_ID.zip
+    zip -r D1_Basic_$REV_ID.zip burntool
+}
+
+pack_extra()
+{
+    echo Packing TFCard...
+    cd $DEV_ROOT/output
+    git rev-parse HEAD >rev.txt
+    cat >bin/readme.txt << EOF
+Readme: D1 Extra Program
+========================
+
+D1 has very limited storage. To enhance rootfs, we build some extra programs.
+
+To install these programs, just put bin folder to TFCard.
+To use these programs, just login to D1 termimal, and invoke them.
+EOF
+    rm -f D1_Extra_$REV_ID.zip
+    zip -r D1_Extra_$REV_ID.zip bin
+}
+
 #
 # main
 #
 DEV_ROOT=`dirname $0`/..
 DEV_ROOT=`cd $DEV_ROOT; pwd`
 
+REV_ID=`git rev-parse HEAD`
+REV_ID=${REV_ID:0:7}
+
 NCPU=$((`grep '^processor' /proc/cpuinfo | wc -l` * 2))
 
 export PATH=$DEV_ROOT/compiler/arm-2009q3/bin:$PATH
 
-mkdir -p $DEV_ROOT/output
+mkdir -p $DEV_ROOT/output/bin
 
 if [ "$1" == "" ]; then
     prepare_tools
@@ -221,3 +262,6 @@ elif [ "$1" == "clean" ]; then
 else
     echo Usage: $0 [clean]
 fi
+
+pack_basic
+pack_extra
