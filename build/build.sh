@@ -17,6 +17,12 @@ prepare_tools()
     fi
 }
 
+clean_tools()
+{
+    echo Cleaning tools...
+    rm -rf $DEV_ROOT/compiler/arm-2009q3
+}
+
 config_kernel()
 {
     echo Configuring kernel...
@@ -89,6 +95,7 @@ clean_busybox()
 {
     echo Cleaning busybox...
     rm -rf $DEV_ROOT/output/busybox
+    rm -f $DEV_ROOT/src/librootfs/rootfs.tar.gz
 }
 
 build_rootfs()
@@ -118,22 +125,22 @@ build_samples()
     cd $DEV_ROOT/src/samples/gpio
     make
     arm-none-linux-gnueabi-strip gpio-led
-    cp -v gpio-led $DEV_ROOT/output/bin
+    cp -v gpio-led $DEV_ROOT/output/local/bin
 
     cd $DEV_ROOT/src/samples/i2c
     make
     arm-none-linux-gnueabi-strip i2c-test
-    cp -v i2c-test $DEV_ROOT/output/bin
+    cp -v i2c-test $DEV_ROOT/output/local/bin
 
     cd $DEV_ROOT/src/samples/record_audio
     arm-none-linux-gnueabi-strip record_audio
     make
-    cp -v ./BUILD_record_audio_EXEC/record_audio $DEV_ROOT/output/bin
+    cp -v ./BUILD_record_audio_EXEC/record_audio $DEV_ROOT/output/local/bin
 
     cd $DEV_ROOT/src/samples/record_video
     arm-none-linux-gnueabi-strip record_video
     make
-    cp -v ./BUILD_record_video_EXEC/record_video $DEV_ROOT/output/bin
+    cp -v ./BUILD_record_video_EXEC/record_video $DEV_ROOT/output/local/bin
 }
 
 clean_samples()
@@ -169,7 +176,7 @@ build_node()
     make -s -j$NCPU
 
     arm-none-linux-gnueabi-strip $DEV_ROOT/src/node/out/Release/node
-    cp -v $DEV_ROOT/src/node/out/Release/node $DEV_ROOT/output/bin
+    cp -v $DEV_ROOT/src/node/out/Release/node $DEV_ROOT/output/local/bin
 }
 
 clean_node()
@@ -177,6 +184,13 @@ clean_node()
     echo Cleaning node...
     cd $DEV_ROOT/src/node
     make -s distclean
+    rm -f deps/v8/tools/jsmin.pyc
+    rm -f tools/gyp/pylib/gyp/__init__.pyc
+    rm -f tools/gyp/pylib/gyp/common.pyc
+    rm -f tools/gyp/pylib/gyp/generator/__init__.pyc
+    rm -f tools/gyp/pylib/gyp/generator/make.pyc
+    rm -f tools/gyp/pylib/gyp/input.pyc
+    rm -f tools/gyp/pylib/gyp/xcode_emulation.pyc
 }
 
 build_updater()
@@ -184,7 +198,7 @@ build_updater()
     echo Building updater...
     cd $DEV_ROOT/src/updater
     make -s
-    cp -v updater $DEV_ROOT/output/bin
+    cp -v updater $DEV_ROOT/output/local/bin
 }
 
 clean_updater()
@@ -204,7 +218,6 @@ pack_basic()
     cp -v zImage burntool/
     cp -v root.sqsh4 burntool/
     cp -v root.jffs2 burntool/
-    git rev-parse HEAD >rev.txt
     rm -f D1_Basic_$REV_ID.zip
     zip -r D1_Basic_$REV_ID.zip burntool
 }
@@ -213,8 +226,7 @@ pack_extra()
 {
     echo Packing TFCard...
     cd $DEV_ROOT/output
-    git rev-parse HEAD >rev.txt
-    cat >bin/readme.txt << EOF
+    cat >local/readme.txt << EOF
 Readme: D1 Extra Program
 ========================
 
@@ -224,7 +236,7 @@ To install these programs, just put bin folder to TFCard.
 To use these programs, just login to D1 termimal, and invoke them.
 EOF
     rm -f D1_Extra_$REV_ID.zip
-    zip -r D1_Extra_$REV_ID.zip bin
+    zip -r D1_Extra_$REV_ID.zip local
 }
 
 #
@@ -240,10 +252,10 @@ NCPU=$((`grep '^processor' /proc/cpuinfo | wc -l` * 2))
 
 export PATH=$DEV_ROOT/compiler/arm-2009q3/bin:$PATH
 
-mkdir -p $DEV_ROOT/output/bin
-
 if [ "$1" == "" ]; then
     prepare_tools
+    mkdir -p $DEV_ROOT/output/local/bin
+    mkdir -p $DEV_ROOT/output/local/lib
     config_kernel
     build_kernel
     config_busybox
@@ -252,16 +264,19 @@ if [ "$1" == "" ]; then
     build_samples
     build_node
     build_updater
+    pack_basic
+    pack_extra
 elif [ "$1" == "clean" ]; then
+    clean_tools
     clean_kernel
     clean_busybox
     clean_rootfs
     clean_samples
     clean_node
     clean_updater
+    cd $DEV_ROOT
+    rm -rf $DEV_ROOT/output
+    git status --ignored
 else
     echo Usage: $0 [clean]
 fi
-
-pack_basic
-pack_extra
