@@ -49,7 +49,6 @@
 
     1. [PC] Connect D1 flashing port to PC via USB cable
     2. [PC] Extract D1_Basic*.zip (firmware and burntool)
-    to the directory where BurnTool.exe resides
 
 2. Flash
 
