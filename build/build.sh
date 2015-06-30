@@ -94,7 +94,7 @@ build_busybox()
 clean_busybox()
 {
     echo Cleaning busybox...
-    rm -rf $DEV_ROOT/output/busybox
+    sudo rm -rf $DEV_ROOT/output/busybox
     rm -f $DEV_ROOT/src/librootfs/rootfs.tar.gz
 }
 
@@ -116,6 +116,7 @@ clean_rootfs()
     echo Cleaning rootfs...
     cd $DEV_ROOT/src/ipcamera
     make -s clean
+    rm -f $DEV_ROOT/src/ipcamera/rootfs/rootfs.tar.gz
 }
 
 build_samples()
