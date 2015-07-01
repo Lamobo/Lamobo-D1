@@ -36,8 +36,17 @@ build_kernel()
 {
     echo Building kernel...
     cd $DEV_ROOT/src/kernel
+    mkdir -p $DEV_ROOT/output/kernel
     make O=$DEV_ROOT/output/kernel LOCALVERSION= -j$NCPU
     cp -v $DEV_ROOT/output/kernel/arch/arm/boot/zImage $DEV_ROOT/output
+
+    make O=$DEV_ROOT/output/kernel LOCALVERSION= -j$NCPU modules
+    make O=$DEV_ROOT/output/kernel LOCALVERSION= -j$NCPU modules_prepare
+
+    cd $DEV_ROOT/src/kernel/drivers/net/wireless/rtl8188EUS_rtl8189ES
+    make -j$NCPU KSRC=$DEV_ROOT/output/kernel modules
+    make -j$NCPU KSRC=$DEV_ROOT/output/kernel strip
+    cp -v 8188eu.ko $DEV_ROOT/src/librootfs/akwifilib/root
 }
 
 clean_kernel()
@@ -47,6 +56,9 @@ clean_kernel()
     cd $DEV_ROOT/src/kernel
     # restore kernel/lib/libakaec.a and kernel/lib/libfha.a
     git checkout lib
+
+    cd $DEV_ROOT/src/kernel/drivers/net/wireless/rtl8188EUS_rtl8189ES
+    make -j$NCPU KSRC=$DEV_ROOT/output/kernel clean
 }
 
 config_busybox()
