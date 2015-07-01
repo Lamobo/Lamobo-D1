@@ -27,7 +27,11 @@ Just copy them to the TF card.
 
 - **record_video**: Recording video.
     - ./record_video -H
+    - ./record_video -p Output -w 640 -h 480
+    - # Wait for one minutes
+    - # CTRL+C
+    - ls -l Output
 
-- **node**: Hello world by node.js 
+- **node**: Hello world by node.js
     - ./node hello.js
     - visit http://ip:8080
