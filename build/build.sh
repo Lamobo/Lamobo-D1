@@ -58,7 +58,7 @@ clean_kernel()
     git checkout lib
 
     cd $DEV_ROOT/src/kernel/drivers/net/wireless/rtl8188EUS_rtl8189ES
-    make -j$NCPU KSRC=$DEV_ROOT/output/kernel clean
+    make -s -j$NCPU KSRC=$DEV_ROOT/output/kernel clean
 }
 
 config_busybox()
@@ -289,7 +289,7 @@ elif [ "$1" == "clean" ]; then
     clean_updater
     cd $DEV_ROOT
     rm -rf $DEV_ROOT/output
-    git status --ignored
+    git status -s --ignored
 else
     echo Usage: $0 [clean]
 fi
