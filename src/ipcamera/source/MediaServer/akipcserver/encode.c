@@ -33,7 +33,7 @@ static T_pVOID enc_mutex_create(T_VOID)
 {
 	pthread_mutex_t *pMutex;
 	pMutex = malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(pMutex, NULL); 
+	pthread_mutex_init(pMutex, NULL);
 	return pMutex;
 }
 
@@ -51,11 +51,11 @@ static T_S32 enc_mutex_unlock(T_pVOID pMutex)
 
 static T_VOID enc_mutex_release(T_pVOID pMutex)
 {
-	int rc = pthread_mutex_destroy( pMutex ); 
-    if ( rc == EBUSY ) {                      
-        pthread_mutex_unlock( pMutex );             
-        pthread_mutex_destroy( pMutex );    
-    } 
+	int rc = pthread_mutex_destroy( pMutex );
+    if ( rc == EBUSY ) {
+        pthread_mutex_unlock( pMutex );
+        pthread_mutex_destroy( pMutex );
+    }
 	free(pMutex);
 }
 /*
@@ -67,7 +67,7 @@ static T_VOID enc_mutex_release(T_pVOID pMutex)
 T_BOOL ak_enc_delay(T_U32 ticks)
 {
 	//printf("delay 0x%lx ticks\n",ticks);
-	
+
 	//usleep (ticks*1000);
 	akuio_wait_irq();
 	return AK_TRUE;
@@ -75,12 +75,12 @@ T_BOOL ak_enc_delay(T_U32 ticks)
 
 /**
 * @brief  init video encoder
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 int encode_init(void)
 {
@@ -93,7 +93,7 @@ int encode_init(void)
 	init_cb_fun.m_FunMalloc  		= (MEDIALIB_CALLBACK_FUN_MALLOC)malloc;
 	init_cb_fun.m_FunFree    		= free;
 	init_cb_fun.m_FunRtcDelay       = ak_enc_delay;
-				
+
 	init_cb_fun.m_FunDMAMalloc		= (MEDIALIB_CALLBACK_FUN_DMA_MALLOC)akuio_alloc_pmem;
   	init_cb_fun.m_FunDMAFree		= (MEDIALIB_CALLBACK_FUN_DMA_FREE)akuio_free_pmem;
   	init_cb_fun.m_FunVaddrToPaddr	= (MEDIALIB_CALLBACK_FUN_VADDR_TO_PADDR)akuio_vaddr2paddr;
@@ -111,18 +111,18 @@ int encode_init(void)
 
 	ret = VideoStream_Enc_Init(&init_cb_fun);
 	printf("enc init %d\n",ret);
-	
+
 	return 0;
 }
 
 /**
 * @brief  destroy vedio encoder
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 int encode_destroy(void)
 {
@@ -133,12 +133,12 @@ int encode_destroy(void)
 
 /**
 * @brief  open vedio encoder
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 
 
@@ -147,13 +147,13 @@ int encode_open(T_ENC_INPUT *pencInput)
 	T_VIDEOLIB_ENC_OPEN_INPUT open_input;
 	T_VIDEOLIB_ENC_OPEN_INPUT open_input2;
 	T_U32 temp;
-	
+
 	poutbuf = akuio_alloc_pmem(ENCMEM);
 	if (AK_NULL == poutbuf)
 	{
 		return -1;
 	}
-	
+
 	temp = akuio_vaddr2paddr(poutbuf) & 7;
 	//编码buffer 起始地址必须8字节对齐
 	pencbuf = ((T_U8 *)poutbuf) + ((8-temp)&7);
@@ -164,14 +164,14 @@ int encode_open(T_ENC_INPUT *pencInput)
 		open_input.encFlag = VIDEO_DRV_H264;
 		s_encType[0] = VIDEO_DRV_H264;
 		open_input.encH264Par.width = pencInput->width;			//实际编码图像的宽度，能被4整除
-		open_input.encH264Par.height = pencInput->height;			//实际编码图像的长度，能被2整除 
+		open_input.encH264Par.height = pencInput->height;			//实际编码图像的长度，能被2整除
 		open_input.encH264Par.rotation = 0;		//编码前yuv图像的旋转
 		open_input.encH264Par.frameRateDenom = 1;	//帧率的分母
 		open_input.encH264Par.frameRateNum = pencInput->framePerSecond;	//帧率的分子
 		open_input.encH264Par.qpHdr = -1;			//初始的QP的值
-	  	//open_input.encH264Par.qpMin = 1;//pencInput->minQp;           
-		//open_input.encH264Par.qpMax = 50;//pencInput->maxQp;    
-		open_input.encH264Par.gopLen = 150;       
+	  	//open_input.encH264Par.qpMin = 1;//pencInput->minQp;
+		//open_input.encH264Par.qpMax = 50;//pencInput->maxQp;
+		open_input.encH264Par.gopLen = 150;
 		open_input.encH264Par.fixedIntraQp = 30;	//为所有的intra帧设置QP
 		open_input.encH264Par.bitPerSecond = parse.kbps1;	//目标bps
 		open_input.encH264Par.streamType = 0;		//有startcode和没startcode两种
@@ -179,16 +179,21 @@ int encode_open(T_ENC_INPUT *pencInput)
 		open_input.encH264Par.lumHeightSrc = 720;
 		open_input.encH264Par.horOffsetSrc = 0;
 		open_input.encH264Par.verOffsetSrc = 0;
+
+		//High Profile
+		open_input.encH264Par.enableCabac = 1;
+		open_input.encH264Par.transform8x8Mode = 2;
+
 		if (parse.kbps_mode1 == 0)
 		{
-			open_input.encH264Par.qpMin = 1;           
+			open_input.encH264Par.qpMin = 1;
 			open_input.encH264Par.qpMax = 50;
 			open_input.encH264Par.qpHdr = -1;
 			open_input.encH264Par.fixedIntraQp = 0;
 		}
 		else
 		{
-			open_input.encH264Par.qpMin = 35;           
+			open_input.encH264Par.qpMin = 35;
 			open_input.encH264Par.qpMax = 36;
 			open_input.encH264Par.fixedIntraQp = 30;
 			open_input.encH264Par.bitPerSecond = 8 * 1000 * 1000;
@@ -212,7 +217,7 @@ int encode_open(T_ENC_INPUT *pencInput)
 	}
 
 	hVS1 = VideoStream_Enc_Open(&open_input);
-	
+
 	// 2nd channel
 	poutbuf2 = akuio_alloc_pmem(ENCMEM);
 	if (AK_NULL == poutbuf2)
@@ -230,14 +235,14 @@ int encode_open(T_ENC_INPUT *pencInput)
 		open_input2.encFlag = VIDEO_DRV_H264;
 		s_encType[1] = VIDEO_DRV_H264;
 		open_input2.encH264Par.width = parse.width2;			//实际编码图像的宽度，能被4整除
-		open_input2.encH264Par.height = parse.height2;			//实际编码图像的长度，能被2整除 
+		open_input2.encH264Par.height = parse.height2;			//实际编码图像的长度，能被2整除
 		open_input2.encH264Par.rotation = 0;		//编码前yuv图像的旋转
 		open_input2.encH264Par.frameRateDenom = 1;	//帧率的分母
 		open_input2.encH264Par.frameRateNum = parse.fps2;	//帧率的分子
 		open_input2.encH264Par.qpHdr = -1;			//初始的QP的值
-	    //open_input2.encH264Par.qpMin = 1;//pencInput->minQp;           
-		//open_input2.encH264Par.qpMax = 50;//pencInput->maxQp;    
-		open_input2.encH264Par.gopLen = 150;       
+	    //open_input2.encH264Par.qpMin = 1;//pencInput->minQp;
+		//open_input2.encH264Par.qpMax = 50;//pencInput->maxQp;
+		open_input2.encH264Par.gopLen = 150;
 		open_input2.encH264Par.fixedIntraQp = 30;	//为所有的intra帧设置QP
 		open_input2.encH264Par.bitPerSecond = parse.kbps2;	//目标bps
 		open_input2.encH264Par.streamType = 0;		//有startcode和没startcode两种
@@ -245,17 +250,21 @@ int encode_open(T_ENC_INPUT *pencInput)
 		open_input2.encH264Par.lumHeightSrc = parse.real_height2;
 		open_input2.encH264Par.horOffsetSrc = (parse.real_width2-parse.width2)/2;
 		open_input2.encH264Par.verOffsetSrc = (parse.real_height2-parse.height2)/2;
-		
+
+		//High Profile
+		open_input2.encH264Par.enableCabac = 1;
+		open_input2.encH264Par.transform8x8Mode = 2;
+
 		if(parse.kbps_mode2 == 0)
 		{
-			open_input2.encH264Par.qpMin = 1;           
+			open_input2.encH264Par.qpMin = 1;
 			open_input2.encH264Par.qpMax = 50;
 			open_input2.encH264Par.qpHdr = -1;
 			open_input2.encH264Par.fixedIntraQp = 0;
 		}
 		else
 		{
-			open_input2.encH264Par.qpMin = 35;           
+			open_input2.encH264Par.qpMin = 35;
 			open_input2.encH264Par.qpMax = 36;
 			open_input2.encH264Par.fixedIntraQp = 30;
 			open_input2.encH264Par.bitPerSecond = 8 * 1000 * 1000;
@@ -284,18 +293,18 @@ int encode_open(T_ENC_INPUT *pencInput)
 	}
 
 	hVS2 = VideoStream_Enc_Open(&open_input2);
-	
+
 	return 0;
 }
 
 /**
 * @brief  vedio encode one frame
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 //int encode_frame(void *pinbuf, void **poutbuf, unsigned long *size, int* nIsIFrame)
 int encode_frame(T_ENC_INPUT *pencInput1, void *pinbuf, void **poutbuf,int *nIsIFrame1, T_ENC_INPUT *pencInput2, void *pinbuf2, void **poutbuf2, int* nIsIFrame2)
@@ -304,7 +313,7 @@ int encode_frame(T_ENC_INPUT *pencInput1, void *pinbuf, void **poutbuf,int *nIsI
 	T_VIDEOLIB_ENC_IO_PAR video_enc_io_param2;
 	static int IPctrl1 = 0;
 	static int IPctrl2 = 0;
-	
+
 	video_enc_io_param1.QP = 0;					//编码当前帧的QP
 	if (s_encType[0] == VIDEO_DRV_H264 && IPctrl1 == 0)
 	{
@@ -315,7 +324,7 @@ int encode_frame(T_ENC_INPUT *pencInput1, void *pinbuf, void **poutbuf,int *nIsI
 	else
 	{
 		*nIsIFrame1 = 0;
-		video_enc_io_param1.mode = 1;				
+		video_enc_io_param1.mode = 1;
 		//video_enc_io_param2.mode = 1;
 	}
 	video_enc_io_param2.QP = 0;
@@ -329,7 +338,7 @@ int encode_frame(T_ENC_INPUT *pencInput1, void *pinbuf, void **poutbuf,int *nIsI
 	else
 	{
 		*nIsIFrame2 = 0;
-				
+
 		video_enc_io_param2.mode = 1;
 	}
 
@@ -353,18 +362,18 @@ int encode_frame(T_ENC_INPUT *pencInput1, void *pinbuf, void **poutbuf,int *nIsI
 	IPctrl2++;
 	if (IPctrl2 >= parse.group2)
 		IPctrl2 = 0;
-	
+
 	return 0;
 }
 
 /**
 * @brief  close vedio encoder
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 int encode_close(void)
 {
@@ -373,6 +382,6 @@ int encode_close(void)
 
 	VideoStream_Enc_Close(hVS2);
 	akuio_free_pmem(poutbuf2);
-	
+
 	return 0;
 }

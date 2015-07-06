@@ -126,7 +126,7 @@
 extern "C" {
 #endif
 
-#define VIDEO_LIB_VERSION		"AK39 Encoder Lib V1.1.00"
+#define VIDEO_LIB_VERSION		"AK39 Encoder Lib V1.2.00"
 
 //typedef enum
 //{
@@ -235,6 +235,8 @@ typedef struct _VIDEO_ENC_H264_PAR
 	T_S32	horOffsetSrc;	//Cropping功能使用,表示横轴上cropping图像的起始位置,相对于原始图像的左上角的位置
 	T_S32	verOffsetSrc;	//Cropping功能使用,表示纵轴上cropping图像的起始位置,相对于原始图像的左上角的位置
 
+	T_U32	enableCabac;		//置1为使用，0为不使用。是否使用cabac特性，也是baseline，main，high profile的区分点。不使用cabac特性为baseline。
+	T_U32	transform8x8Mode;	//置2为使用，0为不使用。是否使用transform8x8特性，也是baseline，main，high profile的区分点。使用transform8x8特性为high profile。
 }T_VIDEOLIB_ENC_H264_PAR;
 
 

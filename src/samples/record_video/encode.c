@@ -30,7 +30,7 @@ static T_pVOID enc_mutex_create(T_VOID)
 {
 	pthread_mutex_t *pMutex;
 	pMutex = malloc(sizeof(pthread_mutex_t));
-	pthread_mutex_init(pMutex, NULL); 
+	pthread_mutex_init(pMutex, NULL);
 	return pMutex;
 }
 
@@ -48,11 +48,11 @@ static T_S32 enc_mutex_unlock(T_pVOID pMutex)
 
 static T_VOID enc_mutex_release(T_pVOID pMutex)
 {
-	int rc = pthread_mutex_destroy( pMutex ); 
-    if ( rc == EBUSY ) {                      
-        pthread_mutex_unlock( pMutex );             
-        pthread_mutex_destroy( pMutex );    
-    } 
+	int rc = pthread_mutex_destroy( pMutex );
+    if ( rc == EBUSY ) {
+        pthread_mutex_unlock( pMutex );
+        pthread_mutex_destroy( pMutex );
+    }
 	free(pMutex);
 }
 /*
@@ -64,7 +64,7 @@ static T_VOID enc_mutex_release(T_pVOID pMutex)
 T_BOOL ak_enc_delay(T_U32 ticks)
 {
 	//printf("delay 0x%lx ticks\n",ticks);
-	
+
 	//usleep (ticks*1000);
 	akuio_wait_irq();
 	return AK_TRUE;
@@ -72,12 +72,12 @@ T_BOOL ak_enc_delay(T_U32 ticks)
 
 /**
 * @brief  init video encoder
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 int encode_init(void)
 {
@@ -90,7 +90,7 @@ int encode_init(void)
 	init_cb_fun.m_FunMalloc  		= (MEDIALIB_CALLBACK_FUN_MALLOC)malloc;
 	init_cb_fun.m_FunFree    		= free;
 	init_cb_fun.m_FunRtcDelay       = ak_enc_delay;
-				
+
 	init_cb_fun.m_FunDMAMalloc		= (MEDIALIB_CALLBACK_FUN_DMA_MALLOC)akuio_alloc_pmem;
   	init_cb_fun.m_FunDMAFree		= (MEDIALIB_CALLBACK_FUN_DMA_FREE)akuio_free_pmem;
   	init_cb_fun.m_FunVaddrToPaddr	= (MEDIALIB_CALLBACK_FUN_VADDR_TO_PADDR)akuio_vaddr2paddr;
@@ -113,12 +113,12 @@ int encode_init(void)
 
 /**
 * @brief  destroy vedio encoder
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 int encode_destroy(void)
 {
@@ -129,28 +129,48 @@ int encode_destroy(void)
 static T_pVOID encode_openLib(T_ENC_INPUT *pEncIn)
 {
 	T_VIDEOLIB_ENC_OPEN_INPUT open_input;
-	
+
 	if (pEncIn->video_tytes == 0)
 	{
 		open_input.encFlag = VIDEO_DRV_H264;
 		open_input.encH264Par.width = pEncIn->width;	//实际编码图像的宽度，能被4整除
-		open_input.encH264Par.height = pEncIn->height;	//实际编码图像的长度，能被2整除 
+		open_input.encH264Par.height = pEncIn->height;	//实际编码图像的长度，能被2整除
 		open_input.encH264Par.rotation = 0; 			//编码前yuv图像的旋转
 		open_input.encH264Par.frameRateDenom = 1;		//帧率的分母
 		open_input.encH264Par.frameRateNum = 30;		//帧率的分子
 		open_input.encH264Par.qpHdr = pEncIn->qpHdr;			//初始的QP的值
-		open_input.encH264Par.qpMin = pEncIn->qpMin;	//25;			 
-		open_input.encH264Par.qpMax = pEncIn->qpMax; 
-		open_input.encH264Par.gopLen = 30; 	// 150; 	  
+		open_input.encH264Par.qpMin = pEncIn->qpMin;	//25;
+		open_input.encH264Par.qpMax = pEncIn->qpMax;
+		open_input.encH264Par.gopLen = 30; 	// 150;
 		open_input.encH264Par.fixedIntraQp = 0;//pencInput1->iqpHdr;	//为所有的intra帧设置QP
 		open_input.encH264Par.bitPerSecond = pEncIn->bitPerSecond; //目标bps
 		open_input.encH264Par.streamType = 0;			//有startcode和没startcode两种
 		//open_input.encH264Par.maxVideoSize = outbuflen;
-		//open_input.encH264Par.outStreamBuf = pencbuf;		
+		//open_input.encH264Par.outStreamBuf = pencbuf;
 		open_input.encH264Par.lumWidthSrc 	= pEncIn->width;
 		open_input.encH264Par.lumHeightSrc 	= pEncIn->height;
 		open_input.encH264Par.horOffsetSrc 	= 0;
 		open_input.encH264Par.verOffsetSrc 	= 0;
+		switch (pEncIn->profile)
+		{
+		case 0:
+			// Baseline Profile
+			open_input.encH264Par.enableCabac = 0;
+			open_input.encH264Par.transform8x8Mode = 0;
+			break;
+		case 1:
+			// Main Profile
+			open_input.encH264Par.enableCabac = 1;
+			open_input.encH264Par.transform8x8Mode = 0;
+			break;
+		case 2:
+			// High Profile
+			open_input.encH264Par.enableCabac = 1;
+			open_input.encH264Par.transform8x8Mode = 2;
+			break;
+		default:
+			break;
+		}
 	}
 	else if (pEncIn->video_tytes == 1)
 	{
@@ -164,29 +184,29 @@ static T_pVOID encode_openLib(T_ENC_INPUT *pEncIn)
 		open_input.encMJPEGPar.qLevel = 7;
 		open_input.encMJPEGPar.width = pEncIn->width;
 		open_input.encMJPEGPar.height = pEncIn->height;
-		
+
 		open_input.encMJPEGPar.lumWidthSrc = pEncIn->width;
 		open_input.encMJPEGPar.lumHeightSrc = pEncIn->height;
 		open_input.encMJPEGPar.horOffsetSrc = 0;
 		open_input.encMJPEGPar.verOffsetSrc = 0;
 	}
-	
+
 	return VideoStream_Enc_Open(&open_input);
 }
 
 /**
 * @brief  open vedio encoder
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 int encode_open(T_ENC_INPUT *pEncIn1, T_ENC_INPUT *pEncIn2)
 {
 	T_U32 temp;
-	
+
 	if (pEncIn1)
 	{
 		videoEnc[eCHAN_UNI].pBuff = akuio_alloc_pmem(ENCMEM);
@@ -216,26 +236,26 @@ int encode_open(T_ENC_INPUT *pEncIn1, T_ENC_INPUT *pEncIn2)
 		printf("pencbuf %p \n", videoEnc[eCHAN_DUAL].pPhysBuff);
 		videoEnc[eCHAN_DUAL].hVS = encode_openLib(pEncIn2);
 	}
-		
+
 	return 0;
 }
 
 /**
 * @brief  vedio encode one frame
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
-int encode_frame(long *frameLenA, void *pinbuf, void **poutbuf, 
+int encode_frame(long *frameLenA, void *pinbuf, void **poutbuf,
 					long *frameLenB, void *pinbuf2, void **poutbuf2, int *nIsIFrame)
 {
 	T_VIDEOLIB_ENC_IO_PAR video_enc_param1;
 	T_VIDEOLIB_ENC_IO_PAR video_enc_param2;
 	static int IPctrl = 0;
-	
+
 	video_enc_param1.QP = 0;					//编码当前帧的QP
 	if (IPctrl == 0)
 	{
@@ -253,7 +273,7 @@ int encode_frame(long *frameLenA, void *pinbuf, void **poutbuf,
 	video_enc_param1.p_vlc_data = videoEnc[eCHAN_UNI].pPhysBuff;			//码流输出地址
 	video_enc_param1.out_stream_size = ENCMEM;	//输出码流的大小
 
-	//dual encode 
+	//dual encode
 	if (pinbuf2 != AK_NULL)
 	{
 		video_enc_param2.QP = 0;					//编码当前帧的QP
@@ -269,35 +289,35 @@ int encode_frame(long *frameLenA, void *pinbuf, void **poutbuf,
 	{
 		VideoStream_Enc_Encode(videoEnc[eCHAN_UNI].hVS, AK_NULL, &video_enc_param1, AK_NULL);
 	}
-	
+
 	*poutbuf = video_enc_param1.p_vlc_data;
 	*frameLenA = video_enc_param1.out_stream_size;
-	
+
 	IPctrl++;
 	//I frame interval is 30
 	if (IPctrl >= 30)
 		IPctrl = 0;
-	
+
 	return 0;
 }
 
 /**
 * @brief  close vedio encoder
-* 
+*
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param[in]
 * @return T_S32
-* @retval if return 0 success, otherwise failed 
+* @retval if return 0 success, otherwise failed
 */
 int encode_close(T_REC_CHAN chan)
 {
 	VideoStream_Enc_Close(videoEnc[chan].hVS);
 	videoEnc[chan].hVS = NULL;
-	
+
 	akuio_free_pmem(videoEnc[chan].pBuff);
 	videoEnc[chan].pBuff = NULL;
 	videoEnc[chan].pPhysBuff = NULL;
-	
+
 	return 0;
 }
