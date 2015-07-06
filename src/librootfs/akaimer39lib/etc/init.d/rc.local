@@ -11,6 +11,6 @@ ifconfig lo up
 /usr/bin/tcpsvd 0 21 ftpd -w /mnt &
 
 /usr/bin/telnetd
-ntpd -p 218.75.4.130
+ntpd -q -p time.windows.com
 /etc/init.d/monitor.sh &
 /etc/jffs2/service.sh &
