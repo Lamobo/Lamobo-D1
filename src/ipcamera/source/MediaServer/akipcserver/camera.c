@@ -419,10 +419,7 @@ void * p_draw[11]=
 	osd_buff_9,
 	osd_buff_d
 };
-/*
- * n:pos
- * num: what to draw.
- */
+
 void draw(int n, int num, int size, T_U8 * time[], char *buff)
 {
 

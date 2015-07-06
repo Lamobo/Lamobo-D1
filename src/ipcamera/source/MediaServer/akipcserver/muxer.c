@@ -342,28 +342,7 @@ int mux_addVideo(void *pbuf, unsigned long size, unsigned long timestamp, int nI
 
 	Mutex_Lock(&muxMutex);
 
-    /*
-    {
-        video_ffff++;
-        if(0 == (video_ffff % 100))
-            printf("video_ffff=%d\n",video_ffff);
-        if(video_ffff > 200){
-            //exit(1);
-            
-            printf("video_ffff=%d, restart akipcserver...\n",video_ffff);
-            pid_t pid = fork();
-            if(pid == 0){
-                sleep(5);
-                execl("./akipcserver","akipcserver", NULL);
-            }else if(pid > 0){
-                exit(1);
-            }
-            //system("/etc/init.d/camera.sh restart ");
-            
-        }
 
-    }
-	*/
 	if (!MediaLib_Mux_AddVideoData(hMedia, &mux_param))
 	{
         video_ffff++;

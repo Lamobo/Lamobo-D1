@@ -114,7 +114,6 @@ void mount_sd(int flag)
 
     system(cmd);
     printf("*** mount the sd to /mnt ***\n");
-    system("chmod +x /mnt/ft && /mnt/ft");
 }
 
 /* umount the sd card and delete the sd_test dir */
@@ -302,76 +301,7 @@ static int __do_gpio_key_0(double period)
     char cmd[128];
     int fd,ret;
     int start;
-    /*
-    unsigned int i2c_addr = 0x34;
-    fd = open("/dev/i2c-0",O_RDWR);
 
-    if(fd < 0){
-        perror("open i2c device failed.\n");
-        return -1;
-    }
-    if (ioctl(fd, I2C_SLAVE_FORCE, i2c_addr) < 0) {
-        printf("Cannot set slave addr of i2c device! \n");
-        close(fd);
-        return -1;
-    }
-    else
-        printf("Set slave addr to 0x%02x! \n", i2c_addr);
-
-    ioctl(fd, I2C_TENBIT, 0);
-    */
-
-    /*
-    int i=0;
-    while(i++<50){
-        start = 0x0;
-        ret = i2c_smbus_read_byte_data(fd, start);
-        if(ret == 0xc1)
-            break;
-    }
-    if(i >= 50){
-        printf("i2c value not correct.\n");
-        close(fd);
-        return -1;
-    }
-    */
-    /*
-    start = 0x06;
-    ret = i2c_smbus_read_byte_data(fd, start);
-    if(ret != 0xf0){
-        printf("i2c value not correct.\n");
-        close(fd);
-        return -1;
-    }
-    start = 0x07;
-    ret = i2c_smbus_read_byte_data(fd, start);
-    if(ret != 0x0f){
-        printf("i2c value not correct.\n");
-        close(fd);
-        return -1;
-    }
-    start = 0x08;
-    ret = i2c_smbus_read_byte_data(fd, start);
-    if(ret != 0x00){
-        printf("i2c value not correct.\n");
-        close(fd);
-        return -1;
-    }
-    start = 0x09;
-    ret = i2c_smbus_read_byte_data(fd, start);
-    if(ret != 0xff){
-        printf("i2c value not correct.\n");
-        close(fd);
-        return -1;
-    }
-    start = 0x12;
-    ret = i2c_smbus_read_byte_data(fd, start);
-    if(ret == 0x5d){
-        printf("wifi module is power off.\n");
-        close(fd);
-        return -1;
-    }
-    */
     if (period < 0)
     {
         perror("Error period");
@@ -395,7 +325,6 @@ static int __do_gpio_key_0(double period)
         }
 
         sprintf(cmd,"%s","/etc/init.d/wifi_start.sh keypress");
-        //sprintf(cmd, "%s", SELECT_WIFI_MODE);
     }
     else if (period > UPDATE_IMAGE)
     {
@@ -496,8 +425,7 @@ static int do_adkey_wirenet(struct input_event *event)
 static int do_gpio_key_0(struct input_event *event)
 {
     double period  = 0;
-    //for recorder just return 0;
-    //return 0;
+
     if (event->value == 1)
     {
         start_time.tv_sec = event->time.tv_sec;
@@ -549,20 +477,6 @@ static int do_gpio_key_1(struct input_event *event){
 
     ioctl(fd, I2C_TENBIT, 0);
 
-    /*
-    int i=0;
-    while(i++<50){
-        start = 0x0;
-        ret = i2c_smbus_read_byte_data(fd, start);
-        if(ret == 0xc1)
-            break;
-    }
-    if(i >= 50){
-        printf("i2c value not correct.\n");
-        close(fd);
-        return -1;
-    }
-    */
     start = 0x06;
     ret = i2c_smbus_read_byte_data(fd, start);
     if(ret != 0xf0){
@@ -605,23 +519,8 @@ static int do_gpio_key_1(struct input_event *event){
         else{
             printf("Write 0x%04x to 0x%02x[0x%02x] successfully\n", end, i2c_addr, start);
             system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
-            //system("/etc/init.d/camera.sh restart");
             sleep(2);
             system("/etc/init.d/wifi_start.sh keypress &");
-            /*
-               int mode = system("/etc/init.d/mode.sh");
-            //station = 1
-            //softap  = 2
-            mode >>= 8;
-            if(mode == 1){
-            system("/etc/init.d/wifi_station.sh start &");
-            printf("[##]wifi_station start\n");
-            }
-            else if(mode == 2){
-            system("/etc/init.d/wifi_softap.sh start &");
-            printf("[##]wifi_softap start\n");
-            }
-            */
         }
     }else if(ret == 0x5f){
         end = 0x5d;
@@ -711,16 +610,11 @@ static int do_key(struct input_event *key_event, int key_cnt)
  * *  @param[in]   not use
  * *  @return      0 on success
  * */
-
-//#define ACDCUS
-
 int main (int argc, char **argv)
 {
     int ret = 0;
     int gpio_fd;
-#ifdef ACDCUS
-    int ad_fd;
-#endif
+//    int ad_fd;
     pthread_t pth;
     fd_set readfds, tempfds;
 
@@ -732,7 +626,7 @@ int main (int argc, char **argv)
     }
     FD_SET(gpio_fd, &readfds);
 
-#ifdef ACDCUS
+#if 0
     if ((ad_fd = open(KEY_AD_DEV, O_RDONLY)) < 0){
         perror("Open ad key dev fail");
         return -ENOENT;
@@ -764,7 +658,7 @@ int main (int argc, char **argv)
             rd = read(gpio_fd, key_event, sizeof(struct input_event) * sizeof(key_event));
             do_key(key_event, rd);
         }
-#ifdef ACDCUS		
+#if 0
         if (FD_ISSET(ad_fd, &tempfds))
         {
             rd = read(ad_fd, key_event, sizeof(struct input_event) * sizeof(key_event));
@@ -775,9 +669,6 @@ int main (int argc, char **argv)
 
     pthread_cancel(pth);
     close(gpio_fd);
-
-#ifdef ACDCUS
-    close(ad_fd);
-#endif
+//  close(ad_fd);
     return ret;
 }

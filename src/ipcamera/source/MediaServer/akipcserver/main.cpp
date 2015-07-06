@@ -89,7 +89,6 @@ static void appExit()
 	
     record_rename_file();
 
-
 }
 static void sigprocess(int sig)
 {
@@ -259,8 +258,6 @@ int main( int argc, char **argv )
 	// access to the server.
 #endif
        
-
-
 	// Create the RTSP server:
 	RTSPServer* rtspServer = AKRTSPServer::createNew(*env, RTSPPORT, authDB);
 	if (rtspServer == NULL) 
@@ -449,11 +446,7 @@ int main( int argc, char **argv )
     printf("[##]start record...\n");
     auto_record_file();
     printf("[##]auto_record_file() called..\n");
-    /*
-    while(1){
-        sleep(5);
-    }
-    */
+
 	//at last,start rtsp loop
 	env->taskScheduler().doEventLoop(); // does not return
 

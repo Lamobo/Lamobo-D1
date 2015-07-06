@@ -44,6 +44,7 @@ static Condition		g_conMangerRun;
 static T_pSTR MakeFileName();
 
 static T_S32 recmgr_del_file( T_BOOL bNeedLast, T_U16 needRecNum );
+
 static T_S32 RemoveOldestFile( T_BOOL bNeedLast );
 
 static T_S64 GetDiskFreeSize( T_pSTR pstrRecPath, T_S32 *bavail, T_S32 *bsize );
@@ -321,7 +322,6 @@ static T_S64 GetOldFilesSize( T_pSTR pstrRecPath )
 			continue;
 		}
 
-        //printf("%s[#####] file name [%s]\n", __func__, direntp->d_name);
 		if ( !(IsOurCycFile( direntp->d_name )) ) {
 			continue;
 		}
@@ -379,8 +379,6 @@ static T_S32 RemoveOldestFile( T_BOOL bNeedLast )
 			 !( strcmp( direntp->d_name, SIGN_FILE_NAME ) ) ) {
 			continue;
 		}
-
-        //printf("%s[#####] file name [%s]\n",__func__,direntp->d_name);
 
 		if ( !(IsOurCycFile( direntp->d_name )) ) {
 			continue;

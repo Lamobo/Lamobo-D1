@@ -91,8 +91,7 @@ void mount_sd(void)
     printf("*** mount the sd to /mnt ***\n");
     
 #if 1
-    system("mount /mnt/usr/local /usr/local");
-    system("mount /mnt/usr/com.elastos.runtime /usr/com.elastos.runtime");
+    system("mount /mnt/local /usr/local");
 #endif
 	
 	sd_mount = 1;
