@@ -442,6 +442,6 @@ signed long long  GetDiskFreeSize( T_pSTR pstrRecPath )
 		}
 	}
 	//printf("f_bavail = %lld, f_bsize = %lld", disk_statfs.f_bavail, disk_statfs.f_bsize);
-	return (signed long long)(disk_statfs.f_bavail) * (signed long long)(disk_statfs.f_bsize)/1000000;
+	return (signed long long)(disk_statfs.f_bavail) * (signed long long)(disk_statfs.f_bsize) >> 20;
 }
 

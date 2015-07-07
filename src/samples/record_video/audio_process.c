@@ -13,7 +13,7 @@
 #define DV_DENOISE
 #undef DV_DENOISE
 
-#define PCM_BUFFER_NUM (30)
+#define PCM_BUFFER_NUM (100)
 #define DECLARE_SAFE_SIZE	20
 #define ENCODE_SIZE 4096
 typedef struct {
@@ -228,13 +228,14 @@ T_S32 audio_process_close()
 */
 T_S32 audio_process_writedata(T_pVOID pdata, T_U32 size)
 {	
-	if (AK_TRUE == gaudioproc.bIsStop)
+	if (gaudioproc.bIsStop)
 	{
 		return -1;
 	}
 	
 	if (((gaudioproc.wpos+1)%PCM_BUFFER_NUM) == gaudioproc.rpos)
 	{
+		printf("Audio Write DATA overflow\n");
 		return -1;
 	}
 
@@ -344,18 +345,21 @@ static T_pVOID thread_enc( T_pVOID user )
 			//encode the pcm data
 			ret = audio_encode(pRawBuffer+AUDIO_INFORM_LENGTH, size-AUDIO_INFORM_LENGTH,
 									handle->pEncBuffer, ENCODE_SIZE/*handle->nEncBufferSize*/ );
-			if ( ret <= 0 ) {
+			if ( ret <= 0 )
+			{
 				if ( ret < 0 )
 					printf( "recorder thread encode pcm data error!\n" );
-				else {
+				else
+				{
 					if ( bNeedUpdateTime )
 						nRecTimeStamp = nTimeStamp;
 					bNeedUpdateTime = AK_FALSE;
 				}
+				
 				audio_process_useok();
 				continue;
 			}
-
+			
 			if ( !bNeedUpdateTime ) {
 				nTimeStamp = nRecTimeStamp;
 			}

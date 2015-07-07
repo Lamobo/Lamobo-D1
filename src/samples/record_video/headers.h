@@ -88,10 +88,12 @@ typedef struct demo_setting {
 	long times;
 	unsigned long abitsrate;
 	unsigned long aSamplerate;
-
 	unsigned long enc_time; //编码时间，单位秒;
 	char *rec_path; //编码路径;
 	long filetype;
+	unsigned char vbr;	// Support VBR(0: CBR1, : VBR)
+	unsigned char profile;	// H264 Profile Level, 0 : baseline, 1: main, 2: high profile
+	
 }demo_setting;
 
 

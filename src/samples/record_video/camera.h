@@ -36,7 +36,7 @@ int camera_open(demo_setting * Setting);
 * @return T_S32
 * @retval if return 0 success, otherwise failed 
 */
-int camera_getframe(void **pbuf, unsigned long *size, unsigned long *timeStamp);
+int camera_getframe(void **ppBuf, unsigned long *size, unsigned long *timeStamp);
 
 /**
 * @brief call this when camera buffer unused
@@ -46,7 +46,7 @@ int camera_getframe(void **pbuf, unsigned long *size, unsigned long *timeStamp);
 * @return T_S32
 * @retval if return 0 success, otherwise failed 
 */
-int camera_usebufok(void *pbuf);
+int camera_usebufok(void);
 
 /**
 * @brief close camera

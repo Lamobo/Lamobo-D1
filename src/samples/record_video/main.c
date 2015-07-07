@@ -24,8 +24,12 @@
 #include "Tool.h"
 
 #define FILE_NAME_LEN 12
+#define MAX_WIDTH	1280
+#define MAX_HEIGHT	720
 int g_exit = 0;
 int g_width = 0;
+int g_height = 0;
+
 const char* avi_fname_1 = "test.avi";
 const char* avi_fname_2 = "test_2.avi";
 
@@ -40,6 +44,14 @@ const char* mp4_fname_2 = "test_2.mp4";
     }                                           \
   } while( 0 )
 
+#define DV_FPS	30
+/*
+ * 当宏定义DUAL_CHAN_PAR 为真时, 为双通道并行编码,
+ * 否则, 为双通道串行编码.
+ */
+#define DUAL_CHAN_PAR
+//#undef DUAL_CHAN_PAR
+
 //长操作命令的定义，-Help/-help
 #define LONG_OPTIONS()
 const struct option long_options[] =
@@ -52,7 +64,7 @@ const struct option long_options[] =
 };
 
 //短操作命令的定义，-h/-H,带参数的操作命令后面跟':'符号
-const char short_options[] = "h:w:b:q:i:t:p:a:s:r:v:m:x:y:e:f:z:c:HM:V:l:";
+const char short_options[] = "h:w:b:q:i:t:p:a:s:r:v:m:x:y:e:f:z:c:HM:V:l:r:P:";
 //即-H后面可以跟输入，-h后面不跟，带不带参数根据长操作命令定义中的required_argument/no_argument决定
 
 //init the demo setting struct
@@ -162,15 +174,21 @@ static void video_proc(demo_setting* ext_gSettings)
 	unsigned long times;
 	struct timeval tv;
 	unsigned long timestamp = 0;	
-	
+	unsigned long t0;
+	unsigned long t1 = 0;
+	unsigned long num = 0;
+	unsigned long insert_num = 0;
 	
 	gettimeofday(&tv, NULL);
-	times = (tv.tv_sec*1000 + tv.tv_usec/1000) + (ext_gSettings->enc_time*1000) + 500;
+	t0 = tv.tv_sec*1000 + tv.tv_usec/1000;
+	times = t0 + ext_gSettings->enc_time*1000;
 	
 	do{
 		void *pbuf;
 		void *pencbuf;
 		void *pencbuf2;
+
+		gettimeofday(&tv, NULL);
 		if (1 != camera_getframe(&pbuf, &size, &ts))
 		{
 			if( g_exit == 1 )
@@ -178,107 +196,90 @@ static void video_proc(demo_setting* ext_gSettings)
 			printf("Error!!! CAN NOT Get frame\n");
 			continue;
 		}
-#if 1	
+
 		// discard init FRAME
 		if (0 == time_flag)
 		{
 			if (ts > 1000)
 			{
 				printf("get ts is %ld\n",ts);
-				camera_usebufok(pbuf);
-				continue;
-			}
-			else
-			{
-				time_flag = 1;
-			}
-		}
-#endif
-#if 0
-		T_U32 temp;
-		T_U32 x;
-		int y;
-		int num = 0;
-		unsigned long lasttime = 0;	
-		
-		// stamp re-calculate
-		num++;
-		if (lasttime != 0)
-		{
-			if (num == 100 )
-			{
-				num = 0;
-				camera_usebufok(pbuf);
-				lasttime = ts;
-				continue;
-			}
-			
-			if (ts < lasttime)
-			{
-				//if(ts > 1000 && ts < 2000)
-				{
-					printf("del timestamp = %ld, ts =%ld lasttime =%ld\n", timestamp, ts, lasttime);
-					camera_usebufok(pbuf);
-					continue;
-				}
-				//timestamp += 33;
-			}
-			else
-			{
-				temp = ts - lasttime;
-				if(temp < 33)
-				{
-					temp = 33;
-					y -= 33 - temp;
-				}
-				x = temp / 33;
-				if( y > 33)
-				{
-					x++;
-					y -= 33;
-				}
-				
-				y += temp % 33;
-				timestamp += x * 33;
-				printf("x = %ld, y =%d, times = %ld ts = %ld\n", x, y, timestamp, ts);
-			}
-		}
-		
-		lasttime = ts;
-#endif	
-		timestamp = ts;
-		long frameLenA;
-		int iframe;
-		if (ext_gSettings->mode == 2)
-		{
-			long frameLenB;
-			long offset = (ext_gSettings->height*ext_gSettings->width*3/2);
+				camera_usebufok();
 
-			encode_frame(&frameLenA, pbuf, &pencbuf, &frameLenB, pbuf+offset, &pencbuf2, &iframe);
-			mux_addVideo(eCHAN_DUAL, pencbuf2, frameLenB, timestamp, iframe);
+				gettimeofday(&tv, NULL);
+				t0 = tv.tv_sec*1000 + tv.tv_usec/1000;
+				times = t0 + ext_gSettings->enc_time*1000;
+				
+				continue;
+			}
+			
+			time_flag = 1;
 		}
-		else
+
+		t1 = (tv.tv_sec*1000 + tv.tv_usec/1000);
+		unsigned long ts1 = t1-t0;
+		
+		if (ts1 > timestamp + 1000/DV_FPS)
+		{	
+			int diff_num;
+			if ((diff_num = (ts1 - timestamp)*DV_FPS/1000) > 2)
+				printf("t: %lu/%lu, %lu  +%d\n", timestamp, ts1, ts, diff_num);
+			num += diff_num;
+			insert_num += diff_num;
+			timestamp += diff_num*1000/DV_FPS;
+		}
+		else if (ts1 + 300 < timestamp)
 		{
-			encode_frame(&frameLenA, pbuf, &pencbuf, NULL, NULL, NULL, &iframe);
+			// Discard Frame, When Video stamp faster than system stamp, 300ms.
+			printf("T: %lu/%lu, %lu\n", timestamp, ts1, ts);
+			camera_usebufok();
+			continue;			
+		}		
+		
+		long frameLenA;
+		int iframe;		
+		// Dual Channel Mode
+		if (ext_gSettings->mode == 2) {
+			long frameLenB;
+			int iframe2;
+			long offset = (ext_gSettings->height*ext_gSettings->width*3/2);
+#ifdef DUAL_CHAN_PAR
+			// 1st & 2nd Channel Encode
+			encode_frame(&frameLenA, pbuf, &pencbuf, &iframe, &frameLenB, pbuf+offset, &pencbuf2, &iframe2, ext_gSettings->vbr);			
+#else
+			// 1st Channel Encode
+			encode_frame(&frameLenA, pbuf, &pencbuf, &iframe, NULL, NULL, NULL, NULL, ext_gSettings->vbr);
+			// 2nd Channel Encode
+			encode_frame(NULL, NULL, NULL, NULL, &frameLenB, pbuf+offset, &pencbuf2, &iframe2, ext_gSettings->vbr);
+#endif		
+			// Write 2nd Channel Data
+			mux_addVideo(eCHAN_DUAL, pencbuf2, frameLenB, timestamp, iframe2);
+		}
+		// Single Channle Mode
+		else {
+			encode_frame(&frameLenA, pbuf, &pencbuf, &iframe, NULL, NULL, NULL, NULL, ext_gSettings->vbr);
 		}
 			
-		camera_usebufok(pbuf);	
+		camera_usebufok();	
+		// Write 1nd Channel Data
+		if (mux_addVideo(eCHAN_UNI, pencbuf, frameLenA, timestamp, iframe) < 0)	{
+			printf("mux_addVideo err \n");
+			break;
+		}
 		
 		if (!ext_gSettings->bhasAudio)
 		{
 			ts = timestamp;
 		}
-
-		if (mux_addVideo(eCHAN_UNI, pencbuf, frameLenA, timestamp, iframe) < 0)
-		{
-			printf("mux_addVideo err \n");
-			break;
-		}
+#if 1
+		timestamp = ++num * 1000 / DV_FPS;
+#else
+		timestamp = mux_getToltalTime(eCHAN_UNI) + 33;
+#endif
 		
-		gettimeofday(&tv, NULL);
-	}while((tv.tv_sec*1000 + tv.tv_usec/1000) < times && !g_exit);
-	
+	}while(t1 <= times && !g_exit);
+	g_exit = 1;
 	printf("video thread eixt \n");
+	printf("insert frame: %lu/%lu\n", insert_num, num);
 }
 
 void dump(int signo)
@@ -325,15 +326,38 @@ int main( int argc, char **argv )
 	}
 
 	//init the setting struct
-	Settings_Initialize( ext_gSettings );
-	
+	Settings_Initialize(ext_gSettings);
 	// read settings from command-line parameters
 	Settings_ParseCommandLine(argc, argv, ext_gSettings);
-
+	if (ext_gSettings->width > MAX_WIDTH
+		|| ext_gSettings->height > MAX_HEIGHT){
+		//Unsupport Size
+		printf("Unsupport Size, W: %lu, H: %lu\n", ext_gSettings->width, ext_gSettings->height);
+		free(ext_gSettings);
+		return -1;
+	}
+#if 0	
+	// MJPEG
+	if (ext_gSettings->video_types == 1	
+		&& (ext_gSettings->width > 720 || ext_gSettings->height > 480)){
+		printf("1st channel Unsuppose Format, MJPEG W: %lu, H: %lu\n", ext_gSettings->width, ext_gSettings->height);
+		free(ext_gSettings);
+		return -1;
+	}
+	
+	// MJPEG 	
+	if (ext_gSettings->video_types2 == 1	
+		&& (ext_gSettings->width2 > 640 || ext_gSettings->height2 > 480)){
+		printf("2nd channel Unsuppose Format, MJPEG W: %ld, H: %ld\n", ext_gSettings->width2, ext_gSettings->height2);
+		free(ext_gSettings);
+		return -1;
+	}
+#endif	
 	if (access("/dev/mmcblk0", R_OK) < 0)
 	{
 		//no sd card
 		printf("no SDsard exit \n");
+		free(ext_gSettings);
 		return -1;
 	}
 	else
@@ -348,17 +372,18 @@ int main( int argc, char **argv )
 	if (Disksize < (T_S64)30)
 	{
 		printf("disk full \n");
+		free(ext_gSettings);
 		return -1;
 	}
 			
 	// init dma memory
 	akuio_pmem_init();
 	
+	g_width 	= ext_gSettings->width;
+	g_height 	= ext_gSettings->height;
 	// open camera device
 	camera_open(ext_gSettings);
-	printf("camera_open ok\n");	
-	
-	g_width = ext_gSettings->width;
+	printf("camera_open ok\n");		
 
 	// init encode lib
 	encode_init();
@@ -376,6 +401,7 @@ int main( int argc, char **argv )
 	pEncIn1->qpMin 		= ext_gSettings->qpMin;
 	pEncIn1->bitPerSecond = ext_gSettings->bitPerSecond;	//目标bps
 	pEncIn1->video_tytes = ext_gSettings->video_types;
+	pEncIn1->profile	= ext_gSettings->profile;		// Profile Level
 
 	//the second encode channel
 	if (ext_gSettings->mode == 2)
@@ -390,15 +416,25 @@ int main( int argc, char **argv )
 		pEncIn2->video_tytes = ext_gSettings->video_types2;
 		pEncIn2->qpMax		= ext_gSettings->qpMax;
 		pEncIn2->qpMin 		= ext_gSettings->qpMin;
+		pEncIn2->profile	= ext_gSettings->profile;	// Profile Level
 	}
 	
 	// open encode lib
-	encode_open(pEncIn1, pEncIn2);
+	int ret = encode_open(pEncIn1, pEncIn2);
 
 	if (pEncIn1)
 		free(pEncIn1);
 	if (pEncIn2)
 		free(pEncIn2);
+
+	if (0 != ret) {
+		camera_close();
+		akuio_pmem_fini();
+		encode_destroy();	
+		CloseListenSD();
+
+		return -1;
+	}
 		
 	//mux_open
 	T_MUX_INPUT mux_input1;
@@ -417,7 +453,7 @@ int main( int argc, char **argv )
 	
 	if(-1 == mux_open(eCHAN_UNI, &mux_input1, filename))
 	{
-		printf("mux_open err \n");
+		printf("mux_open eCHAN_UNI err\n");
 		return 0;
 	}
 	
@@ -432,7 +468,7 @@ int main( int argc, char **argv )
 		
 		if(-1 == mux_open(eCHAN_DUAL, &mux_input2, filename))
 		{
-			printf("mux_open err \n");
+			printf("mux_open eCHAN_DUAL err\n");
 			return 0;
 		}
 	}
@@ -463,7 +499,6 @@ int main( int argc, char **argv )
 	
 	//handle video encode and mux
 	video_proc(ext_gSettings);
-
 	
 	if (ext_gSettings->bhasAudio)
 	{
@@ -471,7 +506,7 @@ int main( int argc, char **argv )
 		audio_stop();
 		audio_close();
 	}
-
+	usleep(100*1000);
 	camera_close();
 	encode_close(eCHAN_UNI);
 	mux_close(eCHAN_UNI);
@@ -504,14 +539,16 @@ static void Settings_Initialize( demo_setting *main )
 	// Everything defaults to zero or NULL with
     // this memset. Only need to set non-zero values
     // below.
-    memset( main, 0, sizeof(demo_setting) );
+    memset(main, 0, sizeof(demo_setting));
 	main->width			= 1280;			//实际编码图像的宽度，能被4整除
 	main->height		= 720;			//实际编码图像的长度，能被2整除 
 	main->qpHdr			= -1;			//初始的QP的值
 	main->iqpHdr		= 30;			//初始的iQP的值
 	main->qpMax			= 50;
-	main->qpMin			= 1;
+	main->qpMin			= 10;
 	main->bitPerSecond	= 1024*4000;	//目标bps
+	main->vbr			= 1;			// Default Support VBR
+	main->profile		= 0;			// profile level
 	main->enc_time		= 300;          //默认300秒
 	
 	main->bhasAudio 	= 1;
@@ -527,7 +564,7 @@ static void Settings_Initialize( demo_setting *main )
 	main->width2  		= 320;
 	main->height2		= 240;
 	
-	main->times			= 1;
+	main->times			= 0;
 }
 
 /**
@@ -544,8 +581,8 @@ static void Settings_ParseCommandLine( int argc, char **argv, demo_setting *mSet
 {
     int option = 0;
 	//find out the option
-    while ( (option = gnu_getopt_long( argc, argv, short_options, long_options, NULL )) != EOF ) {
-        Settings_Interpret( option, gnu_optarg, mSettings );
+    while (EOF != (option = gnu_getopt_long(argc, argv, short_options, long_options, NULL ))) {
+        Settings_Interpret(option, gnu_optarg, mSettings);
     }
 
 	for ( int i = gnu_optind; i < argc; i++ ) {
@@ -564,12 +601,12 @@ static void Settings_ParseCommandLine( int argc, char **argv, demo_setting *mSet
 * @param[out] mExtSettings  	setting struct pointer.
 * @return NONE
 */
-static void Settings_Interpret( char option, const char *optarg, 
+static void Settings_Interpret(char option, const char *optarg, 
 								   demo_setting *mExtSettings )
 {
 	assert( mExtSettings );
 	
-	switch( option ) {
+	switch (option) {
 		
 	case 'H':	//printf the help document
 		help( NULL );
@@ -596,7 +633,12 @@ static void Settings_Interpret( char option, const char *optarg,
 	case 'i':	
 		mExtSettings->iqpHdr = (T_U32)(atoi( optarg ));
 		break;
-		
+	case 'r':
+		mExtSettings->vbr = (T_U8)(atoi(optarg));
+		break;
+	case 'P':
+		mExtSettings->profile = (T_U8)(atoi(optarg));
+		break;
 	case 't':	
 		mExtSettings->enc_time = (T_U32)(atoi( optarg ));
 		break;
@@ -713,5 +755,10 @@ static void help( char * strHelpArg )
 	printf( "\
 		-s --- set audio samplerate,default is 8000 Hz\n" );
 	printf( "\
-		-l --set file type 0 is avi, 1 is mp4 \n");
+		-l --set file type 0 is avi, 1 is mp4\n");
+	printf( "\
+		-r --set VBR/CBR, 0 is CBR, 1 is VBR\n");
+	printf( "\
+		-P --set H264 Profile, 0 is baseline, 1 is main, 2 is high profile\n");
+
 }

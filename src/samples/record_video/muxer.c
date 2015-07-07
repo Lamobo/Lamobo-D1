@@ -11,13 +11,6 @@
 #include "Mutex.h"
 #include "Tool.h"
 
-void *hMedia = AK_NULL;
-
-
-long audio_bytes = 0;
-long video_bytes = 0;
-unsigned long video_tytes = 0;
-
 typedef struct{
 	void *hMedia;
 	long fd;
@@ -186,6 +179,7 @@ int mux_open(T_REC_CHAN chan, T_MUX_INPUT *mux_input, char *filename)
 {
 	T_MEDIALIB_MUX_INFO MuxInfo;
 	T_CHR	strFile[MAX_PATH];
+	int wrBuf;
 
 	if (filename == AK_NULL)
 	{
@@ -204,8 +198,8 @@ int mux_open(T_REC_CHAN chan, T_MUX_INPUT *mux_input, char *filename)
 	{
 		muxMgr[chan].fd = open(filename, O_LARGEFILE | O_RDWR | O_CREAT | O_TRUNC);
 	}
-	if (muxMgr[chan].fd <= 0)
-	{
+	if (muxMgr[chan].fd <= 0) {
+		printf("Open File Failure\n");
 		goto err;
 	}
 	
@@ -222,29 +216,26 @@ int mux_open(T_REC_CHAN chan, T_MUX_INPUT *mux_input, char *filename)
 		sprintf(strFile, "%sindex", filename);
 		muxMgr[chan].index_fd = open(strFile, O_RDWR | O_CREAT | O_TRUNC); //create avi file index 
 	}
-	if (muxMgr[chan].index_fd <= 0)
-	{
-		goto err;
-	}
-	
-	muxMgr[chan].pfile1 = ak_rec_cb_load(muxMgr[chan].fd, AK_FALSE, 2*1024*1024, 16 * 1024);
-	muxMgr[chan].pfile2 = ak_rec_cb_load(muxMgr[chan].index_fd, AK_TRUE, 1*1024*1024, 16 * 1024);
-	if (muxMgr[chan].pfile1 == AK_NULL || muxMgr[chan].pfile1 == AK_NULL)
-	{
+	if (muxMgr[chan].index_fd <= 0) {
+		printf("Open Index File Failure\n");
 		goto err;
 	}
 
-	muxMgr[chan].hMedia = mux_openLib(mux_input, chan);
-	if (NULL == muxMgr[chan].hMedia)
-		goto err;
-	
-	if (!MediaLib_Mux_GetInfo(muxMgr[chan].hMedia, &MuxInfo))
-	{
+	if (mux_input->m_eVideoType == MEDIALIB_VIDEO_MJPEG)
+		wrBuf = 6<<20;
+	else
+		wrBuf = 2<<20;
+	muxMgr[chan].pfile1 = ak_rec_cb_load(muxMgr[chan].fd, AK_FALSE, wrBuf, 16 * 1024);
+	muxMgr[chan].pfile2 = ak_rec_cb_load(muxMgr[chan].index_fd, AK_FALSE, 1*1024*1024, 16 * 1024);
+	if (muxMgr[chan].pfile1 == AK_NULL || muxMgr[chan].pfile1 == AK_NULL) {
+		printf("Open AsynWrite Failure\n");
 		goto err;
 	}
 
-	if (!MediaLib_Mux_Start(muxMgr[chan].hMedia))
-	{
+	if (!(muxMgr[chan].hMedia = mux_openLib(mux_input, chan))
+		|| !MediaLib_Mux_GetInfo(muxMgr[chan].hMedia, &MuxInfo)
+		|| !MediaLib_Mux_Start(muxMgr[chan].hMedia)) {
+		printf("Open MuxLib Failure\n");
 		goto err;
 	}
 
@@ -311,12 +302,12 @@ int mux_addAudio(void *pbuf, unsigned long size, unsigned long timestamp)
 	}
 	else
 	{
-		MediaLib_Mux_Handle(hMedia);
+		//MediaLib_Mux_Handle(hMedia);
 	}
 	
 	Mutex_Unlock(&muxMutex);
 	
-	mux_status = MediaLib_Mux_GetStatus(hMedia);
+	mux_status = MediaLib_Mux_GetStatus(muxMgr[eCHAN_UNI].hMedia);
 	if (MEDIALIB_MUX_SYSERR == mux_status
 		|| MEDIALIB_MUX_MEMFULL == mux_status)
 	{
@@ -340,7 +331,7 @@ int mux_addVideo(T_REC_CHAN chan, void *pbuf, unsigned long size, unsigned long 
 	T_eMEDIALIB_MUX_STATUS mux_status;
 	T_MEDIALIB_MUX_PARAM mux_param;
 	
-	mux_param.m_pStreamBuf = pbuf;
+	mux_param.m_pStreamBuf 	= pbuf;
 	mux_param.m_ulStreamLen = size;
 	mux_param.m_ulTimeStamp = timestamp;
 	mux_param.m_bIsKeyframe = iframe;
@@ -374,6 +365,19 @@ int mux_addVideo(T_REC_CHAN chan, void *pbuf, unsigned long size, unsigned long 
 		return -1;
 	}
 	
+	return 0;
+}
+
+T_U32 mux_getToltalTime(T_REC_CHAN chan)
+{
+	T_MEDIALIB_MUX_INFO pInfo;
+	
+	if (MediaLib_Mux_GetInfo(muxMgr[chan].hMedia, &pInfo))
+	{
+		return pInfo.m_ulTotalTime_ms;
+	}
+		
+
 	return 0;
 }
 

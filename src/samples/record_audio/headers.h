@@ -75,7 +75,7 @@ typedef enum
 #undef  AUDIO_AGC
 
 #define AUDIO_RESAMPLE
-//#undef  AUDIO_RESAMPLE
+#undef  AUDIO_RESAMPLE
 
 #endif /* HEADERS_H */
 

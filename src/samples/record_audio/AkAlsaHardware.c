@@ -76,8 +76,7 @@ typedef enum {
 
 static T_pVOID pSdFilter = NULL;
 
-#ifdef AUDIO_RESAMPLE
-static T_S32 OpenSDFilter( int nChannels, int nActuallySR, int nSampleRate )
+static T_pVOID OpenSDFilter( int nChannels, int nActuallySR, int nSampleRate )
 {
 	T_AUDIO_FILTER_INPUT 	s_ininfo;
 
@@ -97,21 +96,8 @@ static T_S32 OpenSDFilter( int nChannels, int nActuallySR, int nSampleRate )
 	s_ininfo.m_info.m_Private.m_resample.reSampleArithmetic = RESAMPLE_ARITHMETIC_1; //1是新算法，比较省内存；0是老算法，比较耗内存。
 
 	printf("resample support.\n");
-	pSdFilter = _SD_Filter_Open(&s_ininfo);
-	if ( AK_NULL == pSdFilter ) {
-		loge( "can't open the sd filter!\n" );
-		return -1;
-	}
-
-	return 0;
+	return _SD_Filter_Open(&s_ininfo);
 }
-#else
-static T_S32 OpenSDFilter( int nChannels, int nActuallySR, int nSampleRate )
-{
-	printf("unsupport resample!\n");
-	return 0;
-}
-#endif
 
 /**
  * opens a sound mixer for the given sound card.
@@ -900,13 +886,13 @@ done:
 	err = setHardwareParams(handle);
 	if ( err == 0 ) err = setSoftwareParams(handle);
 
-#ifdef AUDIO_RESAMPLE
+
 	switch (nSampleRate)
 	{
 		case 8000:
 			nActuallySR = 10986;
 			break;
-
+#ifdef AUDIO_RESAMPLE
 		case 11025:
 			nActuallySR = 10986;
 			break;
@@ -926,17 +912,18 @@ done:
 		case 48000:
 			nActuallySR = 48491;
 			break;
+#endif
 		default:
 			nActuallySR = nSampleRate;
 	}
-
-	OpenSDFilter(nChannels, nActuallySR, nSampleRate);
-	if( NULL == pSdFilter)
-	{
-		printf("open sd Filter err \n");
-		return -1;
-	}
+#ifndef AUDIO_RESAMPLE
+	if (nSampleRate == 8000)
 #endif
+		if (!(pSdFilter = OpenSDFilter(nChannels, nActuallySR, nSampleRate))) {
+			printf("open sd Filter err \n");
+			return -1;
+		}
+
 	return err;
 }
 
@@ -1043,16 +1030,15 @@ T_S32 ReadAD( alsa_handle_t * handle, T_U8 * pPcmData, T_U32 nBytes )
 					return (T_S32)(snd_pcm_frames_to_bytes( handle->handle, n ));
 				}
 			} while ( n == -EAGAIN );
-
-#ifdef AUDIO_RESAMPLE
-			fbuf_strc.buf_in = temp_buff;
-			fbuf_strc.buf_out = temp_buff; //输入输出允许同buffer，但是要保证buffer够大，因为输出数据会比输入数据长
-			fbuf_strc.len_in = nBytes; // 这里指输入ibuf中的有效数据长度
-			fbuf_strc.len_out = BUFF_LENG; // 这里指输出buffer 大小，库里面做判断用，防止写buffer越界。
-			nReSRDataLen = _SD_Filter_Control( pSdFilter, &fbuf_strc );
-#else
-			nReSRDataLen = nBytes;
-#endif
+			if (pSdFilter) {
+				fbuf_strc.buf_in = temp_buff;
+				fbuf_strc.buf_out = temp_buff; //输入输出允许同buffer，但是要保证buffer够大，因为输出数据会比输入数据长
+				fbuf_strc.len_in = nBytes; // 这里指输入ibuf中的有效数据长度
+				fbuf_strc.len_out = BUFF_LENG; // 这里指输出buffer 大小，库里面做判断用，防止写buffer越界。
+				nReSRDataLen = _SD_Filter_Control( pSdFilter, &fbuf_strc );
+			}
+			else
+				nReSRDataLen = nBytes;
 
 			if(g_audio_buff.audio_index + nReSRDataLen > BUFF_LENG)
 			{
@@ -1149,8 +1135,8 @@ T_S32 ReadAD( alsa_handle_t * handle, T_U8 * pPcmData, T_U32 nBytes )
 		handle->handle = NULL;
 	}
 
-	if ( pSdFilter ) {
-		_SD_Filter_Close( pSdFilter );
+	if (pSdFilter) {
+		_SD_Filter_Close(pSdFilter);
 		pSdFilter = NULL;
 	}
 	return err;

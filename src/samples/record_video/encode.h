@@ -14,6 +14,7 @@ typedef struct _ENC_INPUT_PAR
 	T_S32	iqpHdr;			//初始的i帧的QP值
 	T_S32	bitPerSecond;	//目标bps
 	T_U32 	video_tytes;
+	T_U8	profile;	// H264 Profile Level, 0: baseline, 1: main, 2: high Profile
 }T_ENC_INPUT;
 
 /**
@@ -48,7 +49,7 @@ int encode_open(T_ENC_INPUT *pencInput1, T_ENC_INPUT *pencInput2);
 * @return T_S32
 * @retval if return 0 success, otherwise failed 
 */
-int encode_frame(long *frameLenA, void *pinbuf, void **poutbuf,long *frameLenB, void *pinbuf2, void **poutbuf2, int *nIsIFrame);
+int encode_frame(long *frameLenA, void *pinbuf, void **poutbuf,int *nIsIFrame,long *frameLenB, void *pinbuf2, void **poutbuf2, int *nIsIFrame2, unsigned char vbr);
 
 /**
 * @brief  close vedio encoder

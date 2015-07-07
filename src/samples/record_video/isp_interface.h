@@ -71,6 +71,7 @@ struct isp_occlusion_color {
 
 struct isp_zoom_info {
 	int type;
+	int channel;		// value: 1 indicate isp master channel, 2  indicate the second channel
 	int cut_xpos;
 	int cut_ypos;
 	int cut_width;
