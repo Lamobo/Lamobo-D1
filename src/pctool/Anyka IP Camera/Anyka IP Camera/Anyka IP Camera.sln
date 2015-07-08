@@ -1,0 +1,66 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "Setup\Setup.vdproj", "{F59B87BF-ABE1-4583-9C7D-452D4BA57E8B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ISPControl", "..\..\ISPControl\ISPControl.vcproj", "{2AF09AA2-6991-41B9-8980-E8E4FF1AE0B3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83B9811C-3AAA-4900-8F32-E3BE32E460CF} = {83B9811C-3AAA-4900-8F32-E3BE32E460CF}
+		{CD441D53-3C67-4D6C-B000-6A194DE06930} = {CD441D53-3C67-4D6C-B000-6A194DE06930}
+		{B616516A-506F-4797-8BF0-D97B32A64601} = {B616516A-506F-4797-8BF0-D97B32A64601}
+		{5619B596-0F64-4B8F-A9D4-49D2530FBCD6} = {5619B596-0F64-4B8F-A9D4-49D2530FBCD6}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Anyka IP Camera", "Anyka IP Camera\Anyka IP Camera.vcproj", "{D77AA2AF-1F7D-4DBC-A5B4-65C176F932DB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83B9811C-3AAA-4900-8F32-E3BE32E460CF} = {83B9811C-3AAA-4900-8F32-E3BE32E460CF}
+		{CD441D53-3C67-4D6C-B000-6A194DE06930} = {CD441D53-3C67-4D6C-B000-6A194DE06930}
+		{B616516A-506F-4797-8BF0-D97B32A64601} = {B616516A-506F-4797-8BF0-D97B32A64601}
+		{5619B596-0F64-4B8F-A9D4-49D2530FBCD6} = {5619B596-0F64-4B8F-A9D4-49D2530FBCD6}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BasicUsageEnvironment", "..\..\live555-latest\live\BasicUsageEnvironment\BasicUsageEnvironment\BasicUsageEnvironment\BasicUsageEnvironment.vcproj", "{CD441D53-3C67-4D6C-B000-6A194DE06930}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "groupsock", "..\..\live555-latest\live\groupsock\groupsock\groupsock\groupsock.vcproj", "{B616516A-506F-4797-8BF0-D97B32A64601}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "liveMedia", "..\..\live555-latest\live\liveMedia\liveMedia\liveMedia\liveMedia.vcproj", "{83B9811C-3AAA-4900-8F32-E3BE32E460CF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UsageEnvironment", "..\..\live555-latest\live\UsageEnvironment\UsageEnvironment\UsageEnvironment\UsageEnvironment.vcproj", "{5619B596-0F64-4B8F-A9D4-49D2530FBCD6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F59B87BF-ABE1-4583-9C7D-452D4BA57E8B}.Debug|Win32.ActiveCfg = Debug
+		{F59B87BF-ABE1-4583-9C7D-452D4BA57E8B}.Release|Win32.ActiveCfg = Release
+		{2AF09AA2-6991-41B9-8980-E8E4FF1AE0B3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2AF09AA2-6991-41B9-8980-E8E4FF1AE0B3}.Debug|Win32.Build.0 = Debug|Win32
+		{2AF09AA2-6991-41B9-8980-E8E4FF1AE0B3}.Release|Win32.ActiveCfg = Release|Win32
+		{2AF09AA2-6991-41B9-8980-E8E4FF1AE0B3}.Release|Win32.Build.0 = Release|Win32
+		{D77AA2AF-1F7D-4DBC-A5B4-65C176F932DB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D77AA2AF-1F7D-4DBC-A5B4-65C176F932DB}.Debug|Win32.Build.0 = Debug|Win32
+		{D77AA2AF-1F7D-4DBC-A5B4-65C176F932DB}.Release|Win32.ActiveCfg = Release|Win32
+		{D77AA2AF-1F7D-4DBC-A5B4-65C176F932DB}.Release|Win32.Build.0 = Release|Win32
+		{CD441D53-3C67-4D6C-B000-6A194DE06930}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CD441D53-3C67-4D6C-B000-6A194DE06930}.Debug|Win32.Build.0 = Debug|Win32
+		{CD441D53-3C67-4D6C-B000-6A194DE06930}.Release|Win32.ActiveCfg = Release|Win32
+		{CD441D53-3C67-4D6C-B000-6A194DE06930}.Release|Win32.Build.0 = Release|Win32
+		{B616516A-506F-4797-8BF0-D97B32A64601}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B616516A-506F-4797-8BF0-D97B32A64601}.Debug|Win32.Build.0 = Debug|Win32
+		{B616516A-506F-4797-8BF0-D97B32A64601}.Release|Win32.ActiveCfg = Release|Win32
+		{B616516A-506F-4797-8BF0-D97B32A64601}.Release|Win32.Build.0 = Release|Win32
+		{83B9811C-3AAA-4900-8F32-E3BE32E460CF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{83B9811C-3AAA-4900-8F32-E3BE32E460CF}.Debug|Win32.Build.0 = Debug|Win32
+		{83B9811C-3AAA-4900-8F32-E3BE32E460CF}.Release|Win32.ActiveCfg = Release|Win32
+		{83B9811C-3AAA-4900-8F32-E3BE32E460CF}.Release|Win32.Build.0 = Release|Win32
+		{5619B596-0F64-4B8F-A9D4-49D2530FBCD6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5619B596-0F64-4B8F-A9D4-49D2530FBCD6}.Debug|Win32.Build.0 = Debug|Win32
+		{5619B596-0F64-4B8F-A9D4-49D2530FBCD6}.Release|Win32.ActiveCfg = Release|Win32
+		{5619B596-0F64-4B8F-A9D4-49D2530FBCD6}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

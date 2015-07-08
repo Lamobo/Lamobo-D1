@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "groupsock", "groupsock\groupsock.vcproj", "{B616516A-506F-4797-8BF0-D97B32A64601}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BasicUsageEnvironment", "..\..\BasicUsageEnvironment\BasicUsageEnvironment\BasicUsageEnvironment\BasicUsageEnvironment.vcproj", "{CD441D53-3C67-4D6C-B000-6A194DE06930}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B616516A-506F-4797-8BF0-D97B32A64601}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B616516A-506F-4797-8BF0-D97B32A64601}.Debug|Win32.Build.0 = Debug|Win32
+		{B616516A-506F-4797-8BF0-D97B32A64601}.Release|Win32.ActiveCfg = Release|Win32
+		{B616516A-506F-4797-8BF0-D97B32A64601}.Release|Win32.Build.0 = Release|Win32
+		{CD441D53-3C67-4D6C-B000-6A194DE06930}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CD441D53-3C67-4D6C-B000-6A194DE06930}.Debug|Win32.Build.0 = Debug|Win32
+		{CD441D53-3C67-4D6C-B000-6A194DE06930}.Release|Win32.ActiveCfg = Release|Win32
+		{CD441D53-3C67-4D6C-B000-6A194DE06930}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

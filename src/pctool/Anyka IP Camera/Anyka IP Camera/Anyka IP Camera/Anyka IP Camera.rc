@@ -1,0 +1,409 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese(China) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#include ""res\\AnykaIPCamera.rc2""  // Non-Microsoft Visual C + + Resource Editor\r\n"
+    "#include ""l.CHS\\afxres.rc""      // Standard Components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\Anyka IP Camera.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,20,20
+    LTEXT           "Anyka IP Camera£¬v1.1.0.2 ",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2013",IDC_STATIC,42,26,114,8
+    DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
+END
+
+IDD_ANYKAIPCAMERA_DIALOG DIALOGEX 0, 0, 463, 373
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "Anyka IP Camera"
+MENU IDR_MENU1
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,12,60,50,75,WS_EX_CLIENTEDGE
+    COMBOBOX        IDC_COMBO1,420,227,30,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "Contrast",IDC_STATIC1,397,229,22,8
+    COMBOBOX        IDC_COMBO2,420,245,30,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "Saturation",IDC_STATIC2,397,248,22,8
+    COMBOBOX        IDC_COMBO3,420,262,30,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "Brightness",IDC_STATIC4,399,265,19,8
+    PUSHBUTTON      "Up",IDC_BUTTON_UP,407,65,23,17,BS_BITMAP
+    PUSHBUTTON      "Left",IDC_BUTTON_LEFT,384,81,23,17,BS_BITMAP
+    PUSHBUTTON      "Right",IDC_BUTTON_RIGHT,429,81,23,17,BS_BITMAP
+    PUSHBUTTON      "Down",IDC_BUTTON_DOWN,407,97,23,17,BS_BITMAP
+    PUSHBUTTON      "Left And Right",IDC_BUTTON_LEFTRIGHT,394,116,23,17,BS_BITMAP
+    PUSHBUTTON      "Up And Down",IDC_BUTTON_UPDOWN,420,116,23,17,BS_BITMAP
+    PUSHBUTTON      "Settings",IDC_BUTTON_REPOSITION_SET,394,135,23,17,BS_BITMAP
+    PUSHBUTTON      "Call",IDC_BUTTON_REPOSITION,420,135,23,17,BS_BITMAP
+    COMBOBOX        IDC_COMBO4,420,279,31,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP,WS_EX_STATICEDGE
+    LTEXT           "Sharpness",IDC_STATIC5,399,280,19,8
+END
+
+IDD_DIALOG_PREVIEW1 DIALOGEX 0, 0, 261, 124
+STYLE DS_ABSALIGN | DS_SETFONT | DS_SETFOREGROUND | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_OVERLAPPEDWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
+IDD_DIALOG_PRIVACY DIALOGEX 0, 0, 368, 274
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Privacy"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,54,50,32,10
+    COMBOBOX        IDC_COMBO1,74,20,48,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO2,119,47,48,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Static",IDC_STATIC1,49,24,17,8
+    LTEXT           "Static",IDC_STATIC2,95,50,17,8
+    PUSHBUTTON      "OK",IDC_BUTTON1,237,41,50,14
+    PUSHBUTTON      "Cancel",IDC_BUTTON2,297,41,50,14
+END
+
+IDD_WAITDIALOG DIALOGEX 0, 0, 107, 36
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION
+CAPTION "Wait"
+FONT 9, "Times New Roman", 400, 0, 0x0
+BEGIN
+    LTEXT           "Being processed, please wait...",IDC_STATIC,18,12,74,8
+END
+
+IDD_DIALOG_MOTION_DETECT DIALOGEX 0, 0, 368, 274
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Motion Detect"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,112,255,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,195,255,50,14
+    COMBOBOX        IDC_COMBO1,99,20,78,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Enable",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,57,48,36,12,WS_EX_RIGHT
+    COMBOBOX        IDC_COMBO2,161,45,48,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Device",IDC_STATIC1,67,24,17,8
+    LTEXT           "Sensibility",IDC_STATIC2,134,48,25,8
+    GROUPBOX        "Detection Areas",IDC_STATIC3,15,70,339,176
+END
+
+IDD_DIALOG_RECORD_PLAY DIALOGEX 0, 0, 572, 310
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Replay"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_NOLABELWRAP | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,461,52,108,222,WS_EX_CLIENTEDGE
+    LTEXT           "Replay",IDC_STATIC,499,12,34,8
+    PUSHBUTTON      "Record Lookup",IDC_BUTTON_GET_FILES,490,24,56,13
+    GROUPBOX        "",IDC_STATIC,459,0,113,44,BS_LEFT
+    GROUPBOX        "",IDC_STATIC,459,44,113,266,BS_LEFT
+    PUSHBUTTON      "Download",IDC_BUTTON_DOWNLOAD,461,283,48,13
+    PUSHBUTTON      "Exit",IDC_BUTTON_EXIT,522,283,47,13
+    CONTROL         "",IDC_SLIDER1,"msctls_trackbar32",TBS_AUTOTICKS | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,36,272,383,13
+    PUSHBUTTON      "Play",IDC_BUTTON_PLAY,8,289,31,13
+    PUSHBUTTON      "Stop",IDC_BUTTON_STOP,44,289,31,13
+    RTEXT           "0",IDC_STATIC_CTIME,2,274,33,8
+    LTEXT           "0",IDC_STATIC_DURATION,419,273,33,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,1,0,3
+ PRODUCTVERSION 1,1,0,3
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080403a8"
+        BEGIN
+            VALUE "CompanyName", "TODO: <Company Name>"
+            VALUE "FileDescription", "TODO: <File Description>"
+            VALUE "FileVersion", "1.1.0.3"
+            VALUE "InternalName", "Anyka IP Camera.exe"
+            VALUE "LegalCopyright", "TODO: (C) <Company Name>¡£All rights reserved¡£"
+            VALUE "OriginalFilename", "Anyka IP Camera.exe"
+            VALUE "ProductName", "TODO: <Product Name>"
+            VALUE "ProductVersion", "1.1.0.3"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 936
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDD_ANYKAIPCAMERA_DIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 361
+    END
+
+    IDD_DIALOG_PRIVACY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 361
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 267
+    END
+
+    IDD_WAITDIALOG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 106
+    END
+
+    IDD_DIALOG_MOTION_DETECT, DIALOG
+    BEGIN
+        TOPMARGIN, 7
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "Image Settings"
+    BEGIN
+        MENUITEM "Privacy Block",                        ID_32771
+        MENUITEM "Motion Detection",                        ID_32772
+    END
+    MENUITEM "Help",                          ID_32783
+END
+
+IDR_MENU2 MENU 
+BEGIN
+    POPUP "SearchMenu"
+    BEGIN
+        MENUITEM "Search Devices",                        ID_32773
+    END
+END
+
+IDR_MENU3 MENU 
+BEGIN
+    POPUP "PreviewChoose"
+    BEGIN
+        MENUITEM "Preview 1",                         ID_PREVIEWCHOOSE_32774
+        MENUITEM "Preview 2",                         ID_PREVIEWCHOOSE_32775
+    END
+END
+
+IDR_MENU4 MENU 
+BEGIN
+    POPUP "PreviewDlgChoose"
+    BEGIN
+        MENUITEM "Open Two-way Intercom",                      ID_PREVIEWDLGCHOOSE_TALKOPEN
+        MENUITEM "Close Preview",                        ID_PREVIEWDLGCHOOSE_CLOSE_PREVIEW
+    END
+    POPUP "PreviewDlgChoose1"
+    BEGIN
+        MENUITEM "Close Two-way Intercom",                      ID_PREVIEWDLGCHOOSE1_TALKCLOSE
+        MENUITEM "Close Preview",                        ID_PREVIEWDLGCHOOSE1_CLOSE_PREVIEW
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_ANYKAIPCAMERA_DIALOG DLGINIT
+BEGIN
+    IDC_COMBO1, 0x403, 2, 0
+0x0030, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0031, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0032, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0033, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0034, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0035, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0036, 
+    IDC_COMBO2, 0x403, 2, 0
+0x0030, 
+    IDC_COMBO2, 0x403, 2, 0
+0x0031, 
+    IDC_COMBO2, 0x403, 2, 0
+0x0032, 
+    IDC_COMBO2, 0x403, 2, 0
+0x0033, 
+    IDC_COMBO2, 0x403, 2, 0
+0x0034, 
+    IDC_COMBO2, 0x403, 2, 0
+0x0035, 
+    IDC_COMBO2, 0x403, 2, 0
+0x0036, 
+    IDC_COMBO3, 0x403, 2, 0
+0x0030, 
+    IDC_COMBO3, 0x403, 2, 0
+0x0031, 
+    IDC_COMBO3, 0x403, 2, 0
+0x0032, 
+    IDC_COMBO3, 0x403, 2, 0
+0x0033, 
+    IDC_COMBO3, 0x403, 2, 0
+0x0034, 
+    IDC_COMBO3, 0x403, 2, 0
+0x0035, 
+    IDC_COMBO3, 0x403, 2, 0
+0x0036, 
+    IDC_COMBO4, 0x403, 2, 0
+0x0030, 
+    IDC_COMBO4, 0x403, 2, 0
+0x0031, 
+    IDC_COMBO4, 0x403, 2, 0
+0x0032, 
+    IDC_COMBO4, 0x403, 2, 0
+0x0033, 
+    IDC_COMBO4, 0x403, 2, 0
+0x0034, 
+    IDC_COMBO4, 0x403, 2, 0
+0x0035, 
+    IDC_COMBO4, 0x403, 2, 0
+0x0036, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "About Anyka IP Camera(&A)..."
+END
+
+#endif    // Chinese(China) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE 4, 2
+#pragma code_page(936)
+#include "res\AnykaIPCamera.rc2"  // Non-Microsoft Visual C + + Resource Editor
+#include "l.CHS\afxres.rc"      // Standard Components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

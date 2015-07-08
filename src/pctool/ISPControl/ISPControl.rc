@@ -1,0 +1,788 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese(China) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#include ""res\\ISPControl.rc2""  // Non-Microsoft Visual C + + Resource Editor\r\n"
+    "#include ""l.CHS\\afxres.rc""      // Standard Components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\ISPControl.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 170, 62
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About ISPControl"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,14,14,21,20
+    LTEXT           "ISPControl£¬v1.0",IDC_STATIC,42,14,114,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2013",IDC_STATIC,42,26,114,8
+    DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
+END
+
+IDD_ISPCONTROL_DIALOG DIALOGEX 0, 0, 319, 199
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "AK ISP TOOL"
+FONT 9, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_TAB1,"SysTabControl32",TCS_MULTILINE,93,75,87,68,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_TREE1,"SysTreeView32",TVS_HASBUTTONS | TVS_LINESATROOT | WS_BORDER | WS_HSCROLL | WS_TABSTOP,14,14,60,50,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Export Parameters",IDC_BUTTON1,16,83,50,14
+    PUSHBUTTON      "Import Parameters",IDC_BUTTON2,16,107,50,14
+    PUSHBUTTON      "Refresh All",IDC_BUTTON3,16,129,50,14
+    LTEXT           "   Average Value:",IDC_STATIC_AVERAGE,217,38,31,8
+    LTEXT           "Standard Deviation:",IDC_STATIC_WARP,217,54,31,8
+    LTEXT           "0",IDC_STATIC_AVERAGE_VAL,251,38,61,8
+    LTEXT           "0",IDC_STATIC_WARP_VAL,251,54,61,8
+    PUSHBUTTON      "Generated Header File",IDC_BUTTON4,16,149,50,14
+END
+
+IDD_DIALOG_PREVIEW DIALOGEX 0, 0, 317, 180
+STYLE DS_ABSALIGN | DS_SETFONT | DS_SETFOREGROUND | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_OVERLAPPEDWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
+IDD_DIALOG_Enable DIALOGEX 0, 0, 316, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Black Balance",IDC_CHECK_BB,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,26,40,10
+    CONTROL         "Lens Calibration",IDC_CHECK_LENS_ADJUST,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,26,48,10
+    CONTROL         "Interpolation",IDC_CHECK_DEMOSAIC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,134,26,32,10
+    CONTROL         "RGB Filter",IDC_CHECK_RGB_FILTER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,26,45,10
+    CONTROL         "UV Filter",IDC_CHECK_UV_FILTER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,47,41,10
+    CONTROL         "Defect Correction",IDC_CHECK_DEFECT_PIXEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,47,48,10
+    CONTROL         "White Balance",IDC_CHECK_WB,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,134,47,40,10
+    CONTROL         "AWB Parameters Calculation",IDC_CHECK_AWB,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,47,63,10
+    CONTROL         "Color Correction",IDC_CHECK_CCORRECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,67,48,10
+    CONTROL         "Gamma",IDC_CHECK_GAMMA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,77,67,39,10
+    CONTROL         "Enhanced Border",IDC_CHECK_BENHANCE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,134,67,48,10
+    CONTROL         "Saturation",IDC_CHECK_SATURATIOn,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,185,67,40,10
+    CONTROL         "Effects Processing",IDC_CHECK_SPECIAL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,26,86,48,10
+END
+
+IDD_DIALOG_BB DIALOGEX 0, 0, 316, 180
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_SLIDER_R_OFFSET,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,59,45,166,10
+    CONTROL         "Enable",IDC_CHECK_BB_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,34,10,WS_EX_RIGHT
+    LTEXT           "R_Offset",IDC_STATIC_R,22,45,29,8
+    LTEXT           "[0]",IDC_STATIC_RVALUE,233,45,29,8
+    LTEXT           "G_Offset",IDC_STATIC_G,22,70,29,8
+    LTEXT           "[0]",IDC_STATIC_GVALUE,233,69,29,8
+    CONTROL         "",IDC_SLIDER_G_OFFSET,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,59,70,166,10
+    LTEXT           "B_Offset",IDC_STATIC_B,22,96,29,8
+    CONTROL         "",IDC_SLIDER_B_OFFSET,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,59,96,166,10
+    LTEXT           "[0]",IDC_STATIC_BVALUE,233,96,29,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,239,137,50,14
+END
+
+IDD_DIALOG_LENS DIALOGEX 0, 0, 458, 228
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK_LENS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,6,37,10,WS_EX_RIGHT
+    EDITTEXT        IDC_EDIT_COEF_A4,182,19,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_YREF,49,34,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_A0,49,49,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B0,49,64,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_C0,49,79,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_A1,49,94,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B1,49,109,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_C1,49,124,30,12,ES_AUTOHSCROLL
+    LTEXT           "Lens_xref",IDC_STATIC,15,21,33,8
+    EDITTEXT        IDC_EDIT_COEF_A2,49,139,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B2,49,154,30,12,ES_AUTOHSCROLL
+    LTEXT           "Lens_yref",IDC_STATIC,15,36,33,8
+    LTEXT           "Lens_coef_0a",IDC_STATIC,3,51,46,8
+    LTEXT           "Lens_coef_0b",IDC_STATIC,3,67,46,8
+    LTEXT           "Lens_coef_0c",IDC_STATIC,3,82,45,8
+    LTEXT           "Lens_coef_1a",IDC_STATIC,3,97,46,8
+    LTEXT           "Lens_coef_1b",IDC_STATIC,3,112,46,8
+    LTEXT           "Lens_coef_1c",IDC_STATIC,3,127,45,8
+    LTEXT           "Lens_coef_2a",IDC_STATIC,3,142,46,8
+    LTEXT           "Lens_coef_2c",IDC_STATIC,3,171,45,8
+    EDITTEXT        IDC_EDIT_COEF_C2,49,169,30,12,ES_AUTOHSCROLL
+    LTEXT           "Lens_coef_2b",IDC_STATIC,3,156,46,8
+    EDITTEXT        IDC_EDIT_COEF_A3,49,184,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B3,49,199,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_C3,49,214,30,12,ES_AUTOHSCROLL
+    LTEXT           "Lens_coef_3a",IDC_STATIC,3,186,46,8
+    LTEXT           "Lens_coef_3b",IDC_STATIC,3,201,46,8
+    LTEXT           "Lens_coef_3c",IDC_STATIC,3,216,45,8
+    LTEXT           "[0~1024*8]",IDC_STATIC,81,21,40,8
+    LTEXT           "[0~1024*8]",IDC_STATIC,81,36,40,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,81,51,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,81,66,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,81,96,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,81,111,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,81,141,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,81,155,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,81,186,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,81,200,46,8
+    LTEXT           "[-511~511]",IDC_STATIC,81,80,38,8
+    LTEXT           "[-511~511]",IDC_STATIC,81,126,38,8
+    LTEXT           "[-511~511]",IDC_STATIC,81,171,38,8
+    LTEXT           "[-511~511]",IDC_STATIC,81,216,38,8
+    LTEXT           "Lens_coef_4a",IDC_STATIC,136,21,46,8
+    EDITTEXT        IDC_EDIT_COEF_B4,182,34,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_C4,182,49,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_A5,182,64,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B5,182,79,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_C6,182,139,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_C5,182,94,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B7,182,169,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_A6,182,109,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_A7,182,154,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B6,182,124,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_C7,182,184,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_A8,182,199,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B8,182,214,30,12,ES_AUTOHSCROLL
+    LTEXT           "Lens_coef_4b",IDC_STATIC,136,36,46,8
+    LTEXT           "Lens_coef_9b",IDC_STATIC,269,51,46,8
+    LTEXT           "Lens_coef_9c",IDC_STATIC,269,66,45,8
+    LTEXT           "Lens_range1",IDC_STATIC,269,96,42,8
+    LTEXT           "Lens_range2",IDC_STATIC,269,111,42,8
+    LTEXT           "Lens_range3",IDC_STATIC,269,126,42,8
+    LTEXT           "Lens_range4",IDC_STATIC,269,141,42,8
+    LTEXT           "Lens_range5",IDC_STATIC,269,156,42,8
+    LTEXT           "Lens_range6",IDC_STATIC,269,171,42,8
+    LTEXT           "Lens_range7",IDC_STATIC,269,186,42,8
+    LTEXT           "Lens_range8",IDC_STATIC,269,201,42,8
+    LTEXT           "Lens_range9",IDC_STATIC,269,216,42,8
+    LTEXT           "Lens_coef_8b",IDC_STATIC,136,216,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,21,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,36,46,8
+    LTEXT           "[-511~511]",IDC_STATIC,214,51,38,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,66,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,81,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,111,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,126,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,155,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,171,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,200,46,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,214,216,46,8
+    LTEXT           "[-511~511]",IDC_STATIC,214,96,38,8
+    LTEXT           "[-511~511]",IDC_STATIC,214,141,38,8
+    LTEXT           "[-511~511]",IDC_STATIC,214,186,38,8
+    EDITTEXT        IDC_EDIT_COEF_C8,315,19,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_A9,315,34,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_B9,315,49,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_COEF_C9,315,64,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE1,315,94,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE5,315,154,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE2,315,109,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE7,315,184,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE3,315,124,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE6,315,169,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE4,315,139,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE8,315,199,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE9,315,214,30,12,ES_AUTOHSCROLL
+    LTEXT           "Lens_coef_4c",IDC_STATIC,136,51,45,8
+    LTEXT           "Lens_coef_5a",IDC_STATIC,136,66,46,8
+    LTEXT           "Lens_coef_5b",IDC_STATIC,136,81,46,8
+    LTEXT           "Lens_coef_5c",IDC_STATIC,136,96,45,8
+    LTEXT           "Lens_coef_6a",IDC_STATIC,136,111,46,8
+    LTEXT           "Lens_coef_6b",IDC_STATIC,136,126,46,8
+    LTEXT           "Lens_coef_6c",IDC_STATIC,136,141,45,8
+    LTEXT           "Lens_coef_7a",IDC_STATIC,136,157,46,8
+    LTEXT           "Lens_coef_7b",IDC_STATIC,136,171,46,8
+    LTEXT           "Lens_coef_7c",IDC_STATIC,136,186,45,8
+    LTEXT           "Lens_coef_8a",IDC_STATIC,136,201,46,8
+    LTEXT           "Lens_coef_9a",IDC_STATIC,269,37,46,8
+    LTEXT           "Lens_coef_8c",IDC_STATIC,269,21,45,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,347,36,46,8
+    LTEXT           "[-511~511]",IDC_STATIC,347,21,38,8
+    LTEXT           "[-1023~1023]",IDC_STATIC,347,51,46,8
+    LTEXT           "[-511~511]",IDC_STATIC,347,66,38,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,96,33,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,111,33,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,126,33,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,141,33,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,156,33,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,171,33,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,186,33,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,201,33,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,216,33,8
+    EDITTEXT        IDC_EDIT_XREF,49,19,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_RANGE0,315,79,30,12,ES_AUTOHSCROLL
+    LTEXT           "Lens_range0",IDC_STATIC,270,81,42,8
+    LTEXT           "[0~2^21]",IDC_STATIC,347,81,33,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,400,202,50,14
+END
+
+IDD_DIALOG_DEMOSAIC DIALOGEX 0, 0, 316, 180
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK_D_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,22,37,10,WS_EX_RIGHT
+    CONTROL         "",IDC_SLIDER_THRESOLD,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,77,50,166,10
+    LTEXT           "Dmsc_thresold",IDC_STATIC,23,50,48,8
+    LTEXT           "[0]",IDC_STATIC_THRESOLD_VAL,246,50,36,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,232,100,50,14
+END
+
+IDD_DIALOG_FILTER DIALOGEX 0, 0, 316, 180
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "RGB Filter Enable",IDC_CHECK_RGBENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,18,71,10,WS_EX_RIGHT
+    CONTROL         "Dfp_spr_thre      ",IDC_CHECK_DFPENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,69,71,10,WS_EX_RIGHT
+    CONTROL         "",IDC_SLIDER_RGBFILTER,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,77,38,166,10
+    LTEXT           "Rgb filter thre",IDC_STATIC,29,38,46,8
+    LTEXT           "[0]",IDC_STATIC_RGBF_VAL,245,38,35,8
+    CONTROL         "",IDC_SLIDER_DFP,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,77,87,166,10
+    LTEXT           "Dfp_spr_en",IDC_STATIC,34,86,38,8
+    LTEXT           "[0]",IDC_STATIC_DFPS_VAL,245,86,36,8
+    CONTROL         "UV Filter Enable  ",IDC_CHECK_UVENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,17,115,70,10,WS_EX_RIGHT
+    PUSHBUTTON      "UV Refresh",IDC_BUTTON1,238,140,50,14
+    PUSHBUTTON      "Dfp Refresh",IDC_BUTTON2,174,140,50,14
+    PUSHBUTTON      "RGB Refresh",IDC_BUTTON3,108,140,50,14
+END
+
+IDD_DIALOG_WB DIALOGEX 0, 0, 316, 180
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK_WB,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,37,10,WS_EX_RIGHT
+    CONTROL         "",IDC_SLIDER_WBR,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,59,45,166,10
+    LTEXT           "Coef_r",IDC_STATIC,32,44,23,8
+    LTEXT           "[0]",IDC_STATIC_RVAL,228,44,35,8
+    CONTROL         "",IDC_SLIDER_WBG,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,59,74,166,10
+    LTEXT           "Coef_g",IDC_STATIC,32,73,24,8
+    LTEXT           "[0]",IDC_STATIC_GVAL,228,73,37,8
+    CONTROL         "",IDC_SLIDER_WBB,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,59,100,166,10
+    LTEXT           "Coef_b",IDC_STATIC,32,100,24,8
+    LTEXT           "[0]",IDC_STATIC_BVAL,228,100,37,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,247,144,50,14
+END
+
+IDD_DIALOG_COLOR_CORRECT DIALOGEX 0, 0, 338, 197
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK_CC_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,37,10,WS_EX_RIGHT
+    CONTROL         "",IDC_SLIDER_C11,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,36,166,10
+    CONTROL         "",IDC_SLIDER_C12,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,49,166,10
+    CONTROL         "",IDC_SLIDER_C13,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,62,166,10
+    CONTROL         "",IDC_SLIDER_C21,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,74,166,10
+    CONTROL         "",IDC_SLIDER_C22,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,86,166,10
+    CONTROL         "",IDC_SLIDER_C23,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,99,166,10
+    CONTROL         "",IDC_SLIDER_C31,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,112,166,10
+    CONTROL         "",IDC_SLIDER_ILOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,147,166,10
+    CONTROL         "",IDC_SLIDER_C33,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,134,166,10
+    CONTROL         "",IDC_SLIDER_C32,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,123,166,10
+    CONTROL         "",IDC_SLIDER_IHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,55,160,166,10
+    LTEXT           "C11",IDC_STATIC,40,36,14,8
+    LTEXT           "C12",IDC_STATIC,40,50,14,8
+    LTEXT           "C13",IDC_STATIC,40,62,14,8
+    LTEXT           "C21",IDC_STATIC,40,74,14,8
+    LTEXT           "C22",IDC_STATIC,40,86,14,8
+    LTEXT           "C23",IDC_STATIC,40,99,14,8
+    LTEXT           "C31",IDC_STATIC,40,112,14,8
+    LTEXT           "C32",IDC_STATIC,40,123,14,8
+    LTEXT           "C33",IDC_STATIC,39,135,14,8
+    LTEXT           "IthreLow",IDC_STATIC,25,147,30,8
+    LTEXT           "IthreHigh",IDC_STATIC,25,160,31,8
+    LTEXT           "[-2560]",IDC_STATIC_C11_VAL,223,36,25,8
+    LTEXT           "[-2560]",IDC_STATIC_C12_VAL,223,50,25,8
+    LTEXT           "[-2560]",IDC_STATIC_C13_VAL,223,62,25,8
+    LTEXT           "[-2560]",IDC_STATIC_C21_VAL,223,74,25,8
+    LTEXT           "[-2560]",IDC_STATIC_C22_VAL,223,86,25,8
+    LTEXT           "[-2560]",IDC_STATIC_C23_VAL,223,99,25,8
+    LTEXT           "[-2560]",IDC_STATIC_C31_VAL,223,112,25,8
+    LTEXT           "[-2560]",IDC_STATIC_C32_VAL,223,123,25,8
+    LTEXT           "[-2560]",IDC_STATIC_C33_VAL,223,135,25,8
+    LTEXT           "[0]",IDC_STATIC_ILOW_VAL,223,147,27,8
+    LTEXT           "[0]",IDC_STATIC_IHIGH_VAL,223,160,29,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,272,171,50,14
+END
+
+IDD_DIALOG_GAMMA DIALOGEX 0, 0, 356, 179
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK_GAMMA,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,14,37,10,WS_EX_RIGHT
+    LTEXT           " 0",IDC_STATIC_COORD1,35,44,8,8
+    LTEXT           "255",IDC_STATIC_COORD2,34,65,13,8
+    LTEXT           "255",IDC_STATIC_COORD3,36,92,12,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,301,164,50,14
+    LTEXT           "",IDC_STATIC_COORD4,255,50,12,8
+    LTEXT           "",IDC_STATIC_COORD5,256,71,12,8
+    LTEXT           "x:",IDC_STATIC_X,239,50,8,8
+    LTEXT           "y:",IDC_STATIC_Y,239,71,8,8
+    PUSHBUTTON      "Import Curve File",IDC_BUTTON2,297,140,56,14
+    CONTROL         "file load",IDC_CHECK_GAMMA2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,303,98,41,10,WS_EX_RIGHT
+END
+
+IDD_DIALOG_SATURATION DIALOGEX 0, 0, 339, 183
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK_S_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,37,10,WS_EX_RIGHT
+    CONTROL         "",IDC_SLIDER_KLOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,46,43,166,10
+    CONTROL         "",IDC_SLIDER_KHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,46,68,166,10
+    CONTROL         "",IDC_SLIDER_CHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,46,92,166,10
+    CONTROL         "",IDC_SLIDER_CLOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,46,117,166,10
+    LTEXT           "klow",IDC_STATIC,28,43,15,8
+    LTEXT           "khigh",IDC_STATIC,28,68,18,8
+    LTEXT           "clow",IDC_STATIC,28,117,15,8
+    LTEXT           "chigh",IDC_STATIC,28,92,18,8
+    LTEXT           "[0]",IDC_STATIC_KLOW_VAL,213,43,39,8
+    LTEXT           "[0]",IDC_STATIC_KHIGH_VAL,213,68,40,8
+    LTEXT           "[0]",IDC_STATIC_CLOW_VAL,213,117,47,8
+    LTEXT           "[0]",IDC_STATIC_CHIGH_VAL,213,92,41,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,257,146,50,14
+END
+
+IDD_DIALOG_BRI_ENHANCE DIALOGEX 0, 0, 316, 180
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK_BRI_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,22,37,10,WS_EX_RIGHT
+    CONTROL         "",IDC_SLIDER_THRE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,61,43,166,10
+    CONTROL         "",IDC_SLIDER_KREG,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,61,75,166,10
+    CONTROL         "",IDC_SLIDER_GAIN,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,61,108,166,10
+    LTEXT           "Yedge_thre",IDC_STATIC,22,43,38,8
+    LTEXT           "Yedge_kreg",IDC_STATIC,22,74,39,8
+    LTEXT           "Yedge_gain",IDC_STATIC,22,108,38,8
+    LTEXT           "[0]",IDC_STATIC_THRE_VAL,228,43,37,8
+    LTEXT           "[0]",IDC_STATIC_KREG_VAL,228,74,34,8
+    LTEXT           "[-63]",IDC_STATIC_GAIN_VAL,228,108,46,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,245,146,50,14
+END
+
+IDD_DIALOG_SPECIAL_EFFECT DIALOGEX 0, 0, 316, 180
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Yuv_effect_enable",IDC_CHECK_YUVE_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,20,77,10,WS_EX_RIGHT
+    CONTROL         "Yuv_solar_enable",IDC_CHECK_SOLAR_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,115,20,73,10,WS_EX_RIGHT
+    CONTROL         "",IDC_SLIDER_SOLAR_THRE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,78,43,166,10
+    CONTROL         "",IDC_SLIDER_COEFA_THRE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,78,55,166,10
+    CONTROL         "",IDC_SLIDER_COEFB_THRE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,78,66,166,10
+    CONTROL         "",IDC_SLIDER_UCOEFA_THRE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,78,90,166,10
+    CONTROL         "",IDC_SLIDER_UCOEFB_THRE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,78,102,166,10
+    CONTROL         "",IDC_SLIDER_VCOEFA_THRE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,78,128,166,10
+    CONTROL         "",IDC_SLIDER_VCOEFB_THRE,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,78,139,166,10
+    LTEXT           "Yuv_eff_solar_thre",IDC_STATIC,13,43,63,8
+    LTEXT           "Y_eff_coefa",IDC_STATIC,36,54,40,8
+    LTEXT           "Y_eff_coefb",IDC_STATIC,36,66,40,8
+    LTEXT           "U_eff_coefa",IDC_STATIC,35,89,41,8
+    LTEXT           "U_eff_coefb",IDC_STATIC,35,102,41,8
+    LTEXT           "V_eff_coefa",IDC_STATIC,36,128,40,8
+    LTEXT           "V_eff_coefb",IDC_STATIC,36,139,40,8
+    LTEXT           "[0]",IDC_STATIC_SOLAR_VAL,245,43,37,8
+    LTEXT           "[-64]",IDC_STATIC_COEFA_VAL,245,54,40,8
+    LTEXT           "[0]",IDC_STATIC_COEFB_VAL,245,66,39,8
+    LTEXT           "[-64]",IDC_STATIC_UCOEFA_VAL,245,89,40,8
+    LTEXT           "[0]",IDC_STATIC_UCOEFB_VAL,245,102,36,8
+    LTEXT           "[-64]",IDC_STATIC_VCOEFA_VAL,245,128,40,8
+    LTEXT           "[0]",IDC_STATIC_VCOEFB_VAL,245,139,46,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,252,153,50,14
+END
+
+IDD_DIALOG_AWB DIALOGEX 0, 0, 333, 180
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Enable",IDC_CHECK_AWB_ENABLE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,12,37,10,WS_EX_RIGHT
+    CONTROL         "",IDC_SLIDER_RHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,29,166,10
+    CONTROL         "",IDC_SLIDER_RLOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,39,166,10
+    CONTROL         "",IDC_SLIDER_GHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,48,166,10
+    CONTROL         "",IDC_SLIDER_GLOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,58,166,10
+    CONTROL         "",IDC_SLIDER_BHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,67,166,10
+    CONTROL         "",IDC_SLIDER_BLOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,76,166,10
+    CONTROL         "",IDC_SLIDER_RGBHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,100,166,10
+    CONTROL         "",IDC_SLIDER_RGBLOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,110,166,10
+    CONTROL         "",IDC_SLIDER_GRHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,119,166,10
+    CONTROL         "",IDC_SLIDER_GRLOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,128,166,10
+    CONTROL         "",IDC_SLIDER_GBHIGH,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,137,166,10
+    CONTROL         "",IDC_SLIDER_GBLOW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,43,146,166,10
+    LTEXT           "R_high",IDC_STATIC,19,29,23,8
+    LTEXT           "R_low",IDC_STATIC,19,39,20,8
+    LTEXT           "G_high",IDC_STATIC,19,48,23,8
+    LTEXT           "G_low",IDC_STATIC,19,58,20,8
+    LTEXT           "B_high",IDC_STATIC,19,67,22,8
+    LTEXT           "B_low",IDC_STATIC,19,76,20,8
+    LTEXT           "RGB_high",IDC_STATIC,11,100,32,8
+    LTEXT           "RGB_low",IDC_STATIC,11,110,29,8
+    LTEXT           "Gr_high",IDC_STATIC,11,119,26,8
+    LTEXT           "Gr_low",IDC_STATIC,11,128,23,8
+    LTEXT           "Gb_high",IDC_STATIC,11,137,27,8
+    LTEXT           "Gb_low",IDC_STATIC,11,146,24,8
+    LTEXT           "[0]",IDC_STATIC_RH_VAL,210,28,25,8
+    LTEXT           "[0]",IDC_STATIC_RL_VAL,210,39,28,8
+    LTEXT           "[0]",IDC_STATIC_GH_VAL,210,48,28,8
+    LTEXT           "[0]",IDC_STATIC_GL_VAL,210,58,30,8
+    LTEXT           "[0]",IDC_STATIC_BH_VAL,210,67,30,8
+    LTEXT           "[0]",IDC_STATIC_BL_VAL,210,76,30,8
+    LTEXT           "[0]",IDC_STATIC_RGBH_VAL,210,100,30,8
+    LTEXT           "[0]",IDC_STATIC_RGBL_VAL,210,110,30,8
+    LTEXT           "[0]",IDC_STATIC_GRH_VAL,210,119,30,8
+    LTEXT           "[0]",IDC_STATIC_GRL_VAL,210,128,30,8
+    LTEXT           "[0]",IDC_STATIC_GBL_VAL,210,146,31,8
+    LTEXT           "[0]",IDC_STATIC_GBH_VAL,210,137,31,8
+    GROUPBOX        "AWB Statistics",IDC_STATIC,241,49,90,86
+    LTEXT           "Total_R:",IDC_STATIC,248,67,28,8
+    LTEXT           "Total_G:",IDC_STATIC,248,89,28,8
+    LTEXT           "Total_B:",IDC_STATIC,248,112,28,8
+    LTEXT           "0",IDC_STATIC_TR_VAL,281,67,43,8
+    LTEXT           "0",IDC_STATIC_TG_VAL,281,89,43,8
+    LTEXT           "0",IDC_STATIC_TB_VAL,281,112,43,8
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,246,148,50,14
+    PUSHBUTTON      "Obtain RGB",IDC_BUTTON2,250,31,50,14
+    COMBOBOX        IDC_COMBO1,251,10,48,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Group",IDC_STATIC,301,12,16,10
+END
+
+IDD_DIALOG_REGISTER DIALOGEX 0, 0, 361, 220
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_EDIT_REFISTERS,15,14,209,185,ES_MULTILINE | ES_AUTOHSCROLL | ES_WANTRETURN
+    LTEXT           "Register entry rules:                       Each set of registers and values separated by semicolons, registers and value separated with commas.",IDC_STATIC,240,16,96,34
+    PUSHBUTTON      "Refresh",IDC_BUTTON1,241,184,50,14
+END
+
+IDD_DIALOG_SHOW_RGB_AVG DIALOGEX 0, 0, 316, 180
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+EXSTYLE WS_EX_TOOLWINDOW
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "G / R (Avg):",IDC_STATIC,30,27,39,8
+    LTEXT           "G / B (Avg):",IDC_STATIC,30,49,39,8
+    LTEXT           "R (Avg):",IDC_STATIC,41,71,28,8
+    LTEXT           "",IDC_STATIC_GR,73,28,63,8
+    LTEXT           "",IDC_STATIC_GB,73,49,63,8
+    LTEXT           "",IDC_STATIC_R,73,70,63,8
+    LTEXT           "G (Avg):",IDC_STATIC,41,90,28,8
+    LTEXT           "",IDC_STATIC_G,73,90,63,8
+    LTEXT           "B (Avg):",IDC_STATIC,41,109,28,8
+    LTEXT           "",IDC_STATIC_B,71,109,63,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,1,0,3
+ PRODUCTVERSION 1,1,0,3
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080403a8"
+        BEGIN
+            VALUE "CompanyName", "TODO: <Company Name>"
+            VALUE "FileDescription", "TODO: <File Description>"
+            VALUE "FileVersion", "1.1.0.3"
+            VALUE "InternalName", "ISPControl.exe"
+            VALUE "LegalCopyright", "TODO: (C) <Company Name>. All rights reserved¡£"
+            VALUE "OriginalFilename", "ISPControl.exe"
+            VALUE "ProductName", "TODO: <Product Name>"
+            VALUE "ProductVersion", "1.1.0.3"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 936
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 163
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDD_ISPCONTROL_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 312
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 192
+    END
+
+    IDD_DIALOG_PREVIEW, DIALOG
+    BEGIN
+        RIGHTMARGIN, 316
+    END
+
+    IDD_DIALOG_Enable, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_DIALOG_BB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 173
+    END
+
+    IDD_DIALOG_DEMOSAIC, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 308
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 173
+    END
+
+    IDD_DIALOG_FILTER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 172
+    END
+
+    IDD_DIALOG_WB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 173
+    END
+
+    IDD_DIALOG_COLOR_CORRECT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 331
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 190
+    END
+
+    IDD_DIALOG_SATURATION, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 332
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 176
+    END
+
+    IDD_DIALOG_BRI_ENHANCE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 173
+    END
+
+    IDD_DIALOG_SPECIAL_EFFECT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 173
+    END
+
+    IDD_DIALOG_REGISTER, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 354
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 213
+    END
+
+    IDD_DIALOG_SHOW_RGB_AVG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 173
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU 
+BEGIN
+    POPUP "SearchMenu"
+    BEGIN
+        MENUITEM "Search Devices",                        32771
+    END
+END
+
+IDR_MENU2 MENU 
+BEGIN
+    POPUP "ImageCalcType"
+    BEGIN
+        MENUITEM "logarithm",                   ID_IMAGECALCTYPE_log
+        MENUITEM "normal",                      ID_IMAGECALCTYPE_NORMAL, CHECKED
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_DIALOG_AWB DLGINIT
+BEGIN
+    IDC_COMBO1, 0x403, 2, 0
+0x0030, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0031, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0032, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0033, 
+    IDC_COMBO1, 0x403, 2, 0
+0x0034, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ABOUTBOX            "About ISPControl(&A)..."
+END
+
+#endif    // Chinese(China) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE 4, 2
+#pragma code_page(936)
+#include "res\ISPControl.rc2"  // Non-Microsoft Visual C + + Resource Editor
+#include "l.CHS\afxres.rc"      // Standard Components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
