@@ -1,0 +1,1065 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\BurnTool.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\BurnTool.ico"
+IDR_BURNTOTYPE          ICON    DISCARDABLE     "res\\BurnToolDoc.ico"
+IDI_ICON_LEFT           ICON    DISCARDABLE     "res\\Left.ico"
+IDI_ICON_RIGHT          ICON    DISCARDABLE     "res\\Right.ico"
+IDI_ICON_PREFERENCE     ICON    DISCARDABLE     "res\\Preferences.ico"
+IDI_ICON_FACE_RED       ICON    DISCARDABLE     "res\\Client1.ico"
+IDI_ICON_FACE_GREEN     ICON    DISCARDABLE     "res\\Client0.ico"
+IDI_ICON_FACE_GRAY      ICON    DISCARDABLE     "res\\Client3.ico"
+IDI_ICON_FACE_YELLOW    ICON    DISCARDABLE     "res\\Client2.ico"
+IDI_ICON_KEY            ICON    DISCARDABLE     "res\\Key manager.ico"
+IDI_ICON_FORMAT         ICON    DISCARDABLE     "res\\format.ico"
+IDI_ICON_EXPORT         ICON    DISCARDABLE     "res\\export.ico"
+IDI_ICON_IMPORT         ICON    DISCARDABLE     "res\\import.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "文件(&F)"
+    BEGIN
+        MENUITEM "导入文件(&I)",                ID_UPDATE_IMPORT
+        MENUITEM "导出文件(&O)",                ID_UPDATE_EXPORT
+    END
+    POPUP "设置(&S)"
+    BEGIN
+        POPUP "Language"
+        BEGIN
+            MENUITEM "中文",                        ID_LANG_CHINESE
+            MENUITEM "English",                     ID_LANG_ENGLISH
+        END
+        MENUITEM "参数设置",                    ID_CONFIG_SETTING
+        MENUITEM "修改密码",                    ID_SETTING_CHANGE_PASSWD
+    END
+    POPUP "工具(&T)"
+    BEGIN
+        MENUITEM "镜像制作(&I)",                ID_TOOL_IMAGE_MAKER
+        MENUITEM "SPI镜像(&S)",                 ID_SPI_IMAGE_MAKER
+        MENUITEM "BIN回读(&B)",                 ID_BIN_READ_BACK
+    END
+    POPUP "配置文件(&C)"
+    BEGIN
+        MENUITEM "config.txt",                  ID_MENU_CONFIG0
+    END
+    POPUP "帮助(&H)"
+    BEGIN
+        MENUITEM "关于 BurnTool(&A)...",        ID_APP_ABOUT
+        MENUITEM "help",                        ID_APP_HELP
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+    VK_ESCAPE,      ID_APP_EXIT,            VIRTKEY, NOINVERT
+    VK_RETURN,      ID_TBTN_START,          VIRTKEY, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  0, 0, 263, 62
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About BurnTool"
+FONT 10, "宋体"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "BurnTool 5.0.10 ",IDC_STATIC_VERSION,40,10,156,20,
+                    SS_NOPREFIX
+    LTEXT           "Copyright(C) 2013 Anyka Software Technology Co.,Ltd. ",
+                    IDC_STATIC_CORP,40,35,131,19
+    DEFPUSHBUTTON   "OK",IDOK,206,7,50,14,WS_GROUP
+END
+
+IDD_CONFIG DIALOG DISCARDABLE  0, 0, 350, 404
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Configuration"
+FONT 10, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,82,387,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,188,387,50,14
+END
+
+IDD_CFG_GENERAL DIALOGEX 0, 0, 295, 302
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "General"
+FONT 10, "宋体", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_EDIT_COM_BASE,208,29,40,14,ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_VISIBLE | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    LTEXT           "串口数：",IDC_STATIC_COM_NUM,75,37,32,8,NOT WS_VISIBLE
+    LTEXT           "第一个串口号：",IDC_STATIC_COM_BASE,178,32,23,8,NOT 
+                    WS_VISIBLE
+    EDITTEXT        IDC_EDIT_PROJECT_NAME,81,2,60,12,ES_AUTOHSCROLL | NOT 
+                    WS_BORDER,WS_EX_STATICEDGE
+    LTEXT           "项目名称：",IDC_STATIC_PROJECT_NAME,13,4,65,8
+    LTEXT           "下载通道数：",IDC_STATIC_DEVICE_NUM,13,18,65,8
+    EDITTEXT        IDC_EDIT_COM_NUM,62,31,36,14,ES_AUTOHSCROLL | ES_NUMBER | 
+                    NOT WS_VISIBLE | NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_EDIT_DEVICE_NUM,81,16,60,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_BORDER,WS_EX_STATICEDGE
+    LTEXT           "Producer: ",IDC_STATIC_PATH_PRODUCER,6,242,41,8
+    LTEXT           "boot: ",IDC_STATIC_PATH_NANDBOOT,6,255,25,8
+    EDITTEXT        IDC_EDIT_PATH_PRODUCER,67,240,162,13,ES_AUTOHSCROLL | 
+                    NOT WS_BORDER,WS_EX_STATICEDGE
+    EDITTEXT        IDC_EDIT_PATH_NANDBOOT,67,255,162,12,ES_AUTOHSCROLL | 
+                    NOT WS_BORDER,WS_EX_STATICEDGE
+    PUSHBUTTON      "浏览",IDC_BTN_BROWSE_PRODUCER,233,240,32,12,BS_FLAT
+    PUSHBUTTON      "浏览",IDC_BTN_BROWSE_NANDBOOT,233,255,32,12,BS_FLAT
+    CONTROL         "打开串口",IDC_CHECK_OPEN_COM,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | NOT WS_VISIBLE | WS_DISABLED | WS_TABSTOP,14,
+                    34,46,10
+    LTEXT           "波特率：",IDC_STATIC_BAUDRATE,126,34,30,8,NOT 
+                    WS_VISIBLE
+    EDITTEXT        IDC_EDIT_BAUDRATE,110,31,60,15,ES_AUTOHSCROLL | 
+                    ES_NUMBER | NOT WS_VISIBLE | NOT WS_BORDER,
+                    WS_EX_STATICEDGE
+    CONTROL         "",IDC_STATIC_L1,"Static",SS_GRAYFRAME | SS_SUNKEN,15,47,
+                    243,1
+    CONTROL         "",IDC_STATIC_L2,"Static",SS_GRAYFRAME | SS_SUNKEN,14,
+                    108,245,1
+    EDITTEXT        IDC_EDIT_PROD_RUN_ADDR,98,225,81,13,ES_AUTOHSCROLL
+    LTEXT           "produce_run_addr:",IDC_STATIC_a1,6,227,69,8
+    LTEXT           "0x",IDC_STATIC_a2,85,228,9,8
+    CONTROL         "配置命令行",IDC_CHK_CONFIG_CMDLINE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,51,109,8
+    LTEXT           "命令行地址：",IDC_GERNERAL_CMD_ADDR,8,63,81,10
+    LTEXT           "命令行数据：",IDC_GERNERAL_CMD_DATA,8,81,82,8
+    EDITTEXT        IDC_EDIT_CMDLINE_DATA,102,75,155,31,ES_MULTILINE
+    EDITTEXT        IDC_EDIT_CMDLINE_ADDR,102,59,72,14,ES_AUTOHSCROLL
+    LTEXT           "0x",IDC_STATIC_0x,90,61,8,8
+    LTEXT           "Event Time(s):",IDC_STATIC_a3,5,286,57,8
+    EDITTEXT        IDC_EVENT_TIME,67,286,27,12,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_STATIC_k1,3,109,287,57
+    GROUPBOX        "",IDC_STATIC_k2,3,165,287,58
+    CONTROL         "烧录MAC地址",IDC_CHECK_MAC_ADDR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,8,119,68,10
+    CONTROL         "烧录序列号",IDC_CHECK_SEQUENCE_ADDR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,9,174,63,10
+    CONTROL         "强制写入MAC地址",IDC_CHECK_FORCE_WRITE_MAC_ADDR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,90,118,96,10
+    CONTROL         "强制写入序列号",IDC_CHECK_FORCE_WRITE_SEQUENCE_ADDR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,92,175,88,10
+    LTEXT           "MAC起始地址(0x):",IDC_STATIC_MAC_START_ADDR,148,136,84,
+                    10
+    LTEXT           "MAC结束地址(0x):",IDC_STATIC_MAC_END_ADDR,146,150,86,10
+    LTEXT           "序列号起始:",IDC_STATIC_SEQUENCE_START,151,192,77,10
+    LTEXT           "序列号结束:",IDC_STATIC_SEQUENCE_END,149,207,78,10
+    EDITTEXT        IDC_EDIT_SEQUENCE_START_ADDR_HIGH,88,189,56,12,
+                    ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_EDIT_SEQUENCE_START_ADDR_LOW,231,189,51,12,
+                    ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
+    EDITTEXT        IDC_EDIT_MAC_START_ADDR_HIGH,91,134,55,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    EDITTEXT        IDC_EDIT_MAC_START_ADDR_LOW,235,134,51,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    EDITTEXT        IDC_EDIT_MAC_END_ADDR_HIGH,90,150,55,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    EDITTEXT        IDC_EDIT_MAC_END_ADDR_LOW,235,150,51,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    EDITTEXT        IDC_EDIT_SEQUENCE_END_ADDR_HIGH,87,205,56,12,
+                    ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_EDIT_SEQUENCE_END_ADDR_LOW,230,205,51,12,
+                    ES_AUTOHSCROLL | ES_NUMBER | WS_DISABLED
+    LTEXT           "平台类型:",IDC_PLANFORM_TYPE,150,5,58,8
+    COMBOBOX        IDC_COMBO_PALNFORM_TYPE,212,3,46,48,CBS_DROPDOWN | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "MAC起始前缀(0x):",IDC_STATIC_MAC_START_NAME,5,136,86,10
+    LTEXT           "MAC结束前缀(0x):",IDC_STATIC_MAC_END_NAME,5,150,84,10
+    LTEXT           "序列号起始前缀:",IDC_STATIC_SERIAL_START_NAME,4,190,82,
+                    11
+    LTEXT           "序列号结束前缀:",IDC_STATIC_SERIAL_END_NAME,4,207,82,10
+    PUSHBUTTON      "当前的MAC地址复位",IDC_MACADDR_RESET,193,116,92,13
+    PUSHBUTTON      "当前的序列号复位",IDC_SEQUENCE_ADDR_RESET,192,173,92,13
+    LTEXT           "PID:",IDC_STATIC_PID,121,286,17,8
+    EDITTEXT        IDC_EDIT_PID,143,286,35,12,ES_AUTOHSCROLL
+    LTEXT           "VID:",IDC_STATIC_VID,198,286,17,8
+    EDITTEXT        IDC_EDIT_VID,222,286,35,12,ES_AUTOHSCROLL
+    LTEXT           "boot(37L): ",IDC_STATIC_PATH_NANDBOOT_NEW,6,270,45,8
+    EDITTEXT        IDC_EDIT_PATH_NANDBOOT_NEW,67,270,162,12,ES_AUTOHSCROLL | 
+                    NOT WS_BORDER,WS_EX_STATICEDGE
+    PUSHBUTTON      "浏览",IDC_BTN_BROWSE_NANDBOOT_NEW,233,270,32,12,BS_FLAT
+END
+
+IDD_CFG_DOWNLOAD DIALOG DISCARDABLE  0, 0, 309, 294
+STYLE WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "Download"
+FONT 10, "宋体"
+BEGIN
+    CONTROL         "List1",IDC_LIST_DOWNLOAD_UDISK,"SysListView32",
+                    LVS_REPORT | WS_BORDER | WS_TABSTOP,10,15,270,75
+    CONTROL         "List2",IDC_LIST_DOWNLOAD_NAND,"SysListView32",
+                    LVS_REPORT | WS_BORDER | WS_TABSTOP,10,210,270,67
+    LTEXT           "下载到U盘路径: ",IDC_STATIC_DOWNLOAD_UDISK,10,5,75,8
+    LTEXT           "下载到flash路径：",IDC_STATIC_DOWNLOAD_NAND,10,200,100,
+                    8
+    LTEXT           "MTD层烧录:",IDC_STATIC_DOWNLOAD_MTD,10,105,80,8
+    CONTROL         "List1",IDC_LIST_DOWNLOAD_MTD,"SysListView32",LVS_REPORT | 
+                    WS_BORDER | WS_TABSTOP,10,115,270,70
+END
+
+IDD_CFG_HARDWARE DIALOG DISCARDABLE  0, 0, 283, 308
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "HardWare"
+FONT 10, "宋体"
+BEGIN
+    COMBOBOX        IDC_CHIP_TYPE_LIST,75,17,60,76,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "USB2.0",IDC_CHECK_USB2,"Button",BS_AUTOCHECKBOX | 
+                    BS_FLAT | WS_TABSTOP,146,20,40,10
+    CONTROL         "MCP",IDC_RADIO_MCP_MODE,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,14,47,29,10
+    CONTROL         "DDR16",IDC_RADIO_DDR_MODE,"Button",BS_AUTORADIOBUTTON,
+                    66,47,42,10
+    CONTROL         "DDR2_16",IDC_RADIO_DDR2_16_MODE,"Button",
+                    BS_AUTORADIOBUTTON,118,47,49,10
+    CONTROL         "SDRAM",IDC_RADIO_SDRAM_MODE,"Button",BS_AUTORADIOBUTTON,
+                    14,63,42,10
+    CONTROL         "DDR32",IDC_RADIO_DDR_MODE32,"Button",BS_AUTORADIOBUTTON,
+                    66,63,43,10
+    CONTROL         "DDR2_32",IDC_RADIO_DDR2_32_MODE,"Button",
+                    BS_AUTORADIOBUTTON,118,63,49,10
+    CONTROL         "m_DDR_16",IDC_RADIO_DDR_16_MOBILE,"Button",
+                    BS_AUTORADIOBUTTON,174,47,62,10
+    CONTROL         "m_DDR_32",IDC_RADIO_DDR_32_MOBILE,"Button",
+                    BS_AUTORADIOBUTTON,174,64,63,10
+    EDITTEXT        IDC_EDIT_FREQ,216,78,29,14,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    COMBOBOX        IDC_RAM_SIZE_LIST,50,100,40,59,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_RAM_ROW_LIST,135,100,40,59,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    COMBOBOX        IDC_RAM_COLUMN_LIST,135,119,40,59,CBS_DROPDOWN | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_RAM_BANK_LIST,50,119,39,59,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "CE2_GPIO:",IDC_STATIC_CE2_GPIO,94,155,37,8
+    EDITTEXT        IDC_EDIT_GPIO_CE2,134,153,30,12,ES_AUTOHSCROLL
+    LTEXT           "CE3_GPIO:",IDC_STATIC_CE3_GPIO,178,156,37,8
+    EDITTEXT        IDC_EDIT_GPIO_CE3,219,153,31,12,ES_AUTOHSCROLL
+    CONTROL         "Nandflash",IDC_RADIO_NANDFLASH,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,15,204,52,10
+    CONTROL         "Spi Flash",IDC_RADIO_SFLASH,"Button",BS_AUTORADIOBUTTON,
+                    167,204,53,10
+    CONTROL         "SD Card",IDC_RADIO_SD,"Button",BS_AUTORADIOBUTTON,115,
+                    204,43,10
+    CONTROL         "Debug",IDC_RADIO_DEBUG,"Button",BS_AUTORADIOBUTTON,72,
+                    204,34,10
+    CONTROL         "JTAG",IDC_RADIO_JTAG,"Button",BS_AUTORADIOBUTTON,222,
+                    204,38,10
+    CONTROL         "Spi_Nand",IDC_RADIO_SPI_NANDFLASH,"Button",
+                    BS_AUTORADIOBUTTON,15,221,48,10
+    CONTROL         "update",IDC_CHECK_UPDATE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,180,221,40,10
+    GROUPBOX        "Mode",IDC_STATIC_BURN_MODE,7,192,267,43,BS_CENTER | 
+                    BS_FLAT
+    LTEXT           "芯片类型：",IDC_STATIC_CHIP_TYPE,15,17,49,8
+    GROUPBOX        "RAM",IDC_STATIC_SD_RAM,7,35,266,101,BS_CENTER | BS_FLAT
+    LTEXT           "Size(M):",IDC_STATIC_RAM_SIZE,14,100,32,8
+    GROUPBOX        "SET GPIO",IDC_GROUP_GPIO,7,142,267,46,BS_CENTER | 
+                    BS_FLAT
+    LTEXT           "Row:",IDC_STATIC_RAM_ROW,102,101,28,8
+    LTEXT           "Column:",IDC_STATIC_RAM_COLUMN,102,120,29,8
+    LTEXT           "Bank:",IDC_STATIC_RAM_BANK,14,120,21,8
+    LTEXT           "DDR_Freq:",IDC_STATIC_DDR_Freq,176,81,37,8
+    LTEXT           "Mhz",IDC_STATIC_Mhz,247,81,13,8
+    PUSHBUTTON      "&Import...",IDC_BUTTON_IMPORT_RAM_CONFIG,207,101,40,14,
+                    WS_DISABLED
+    PUSHBUTTON      "&Export...",IDC_BUTTON_EXPORT_RAM_CONFIG,207,119,40,14,
+                    WS_DISABLED
+    CONTROL         "UDiskBurn",IDC_CHECK_UDISK_UPDATE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,223,219,48,13
+    CONTROL         "LED_PIN:",IDC_CHECK_GPIO_PIN_SELECT,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,174,174,43,10
+    EDITTEXT        IDC_EDIT_GPIO_PIN,219,173,31,12,ES_AUTOHSCROLL
+    GROUPBOX        "BURNED",IDC_STATIC_BURNED,5,239,267,63,BS_CENTER | 
+                    BS_FLAT
+    CONTROL         "NONE",IDC_BURNED_NONE,"Button",BS_AUTORADIOBUTTON,14,
+                    253,32,10
+    CONTROL         "RESET",IDC_BURNED_RESET,"Button",BS_AUTORADIOBUTTON,14,
+                    269,36,10
+    CONTROL         "POWER_OFF",IDC_BURNED_POWER_OFF,"Button",
+                    BS_AUTORADIOBUTTON,14,288,52,10
+    CONTROL         "RTC WAKUP",IDC_BURNED_RTC_WAKUP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,200,255,48,10
+    EDITTEXT        IDC_GPIO_PIN_NUM,121,252,48,12,ES_AUTOHSCROLL
+    CONTROL         "HIGH",IDC_BURNED_LVH,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,84,272,30,10
+    CONTROL         "LOW",IDC_BURNED_LVL,"Button",BS_AUTORADIOBUTTON,84,288,
+                    30,10
+    CONTROL         "UP",IDC_BURNED_PULLUP,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,116,272,25,10
+    CONTROL         "DOWN",IDC_BURNED_PULLDOWN,"Button",BS_AUTORADIOBUTTON,
+                    116,288,30,10
+    CONTROL         "HIGH",IDC_BURNED_RTC_LVH,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,200,272,30,10
+    CONTROL         "LOW",IDC_BURNED_RTC_LVL,"Button",BS_AUTORADIOBUTTON,201,
+                    289,30,10
+    CONTROL         "eff",IDC_GPIO_PULLUP_EN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,148,272,29,10
+    CONTROL         "eff",IDC_GPIO_PULLDOWN_EN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,148,289,30,10
+    LTEXT           "chipsel:",IDC_STATIC_CHIP_SELECT,11,157,33,10
+    COMBOBOX        IDC_COMBO_CHIP_SEL,47,152,33,52,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "GPIO",IDC_BURNED_GPIO,"Button",BS_AUTOCHECKBOX,85,253,
+                    29,10
+    CONTROL         "UpdateSelf",IDC_UPDATESELF,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,121,221,52,10
+    CONTROL         "TestRam",IDC_TEST_RAM,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,74,220,41,10
+    CONTROL         "PLLFrep_Change",IDC_CHECK_PLLFREP,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,194,20,72,10
+END
+
+IDD_CFG_NANDFLASH DIALOGEX 0, 0, 302, 273
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Nandflash"
+FONT 10, "宋体", 0, 0, 0x1
+BEGIN
+    CONTROL         "List1",IDC_LIST_NANDFLASH_PARAM,"SysListView32",
+                    LVS_REPORT | WS_TABSTOP,5,30,290,235,WS_EX_STATICEDGE
+    LTEXT           "Nandflash 列表：",IDC_STATIC_NAND_LIST,5,10,75,8
+END
+
+IDD_CFG_FORMAT DIALOGEX 0, 0, 309, 294
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Format"
+FONT 10, "宋体", 0, 0, 0x1
+BEGIN
+    CONTROL         "List1",IDC_LIST_FS_DISK_FORMAT,"SysListView32",
+                    LVS_REPORT | WS_TABSTOP,10,35,270,135,WS_EX_STATICEDGE
+    LTEXT           "格式化列表：",IDC_STATIC_FS_FORMAT,10,15,75,8
+    LTEXT           "非文件系统保留区(M)：",IDC_STATIC_NONFS_RESV,15,210,100,
+                    8
+    EDITTEXT        IDC_EDIT_NONFS_RESV,130,210,60,15,ES_AUTOHSCROLL | NOT 
+                    WS_BORDER,WS_EX_STATICEDGE
+    LTEXT           "文件系统保留区(block):",IDC_STATIC_FS_RESERVE,15,230,
+                    100,8
+    EDITTEXT        IDC_EDIT_FS_RESERVE,130,230,60,14,ES_AUTOHSCROLL | NOT 
+                    WS_BORDER,WS_EX_STATICEDGE
+    PUSHBUTTON      "设备低格",IDC_BUTTON_LOW_FORMAT,16,182,70,16,0,
+                    WS_EX_CLIENTEDGE
+END
+
+IDD_DLG_CHANGE_PASSWORD DIALOG DISCARDABLE  0, 0, 163, 177
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Change Password"
+FONT 10, "宋体"
+BEGIN
+    EDITTEXT        IDC_EDIT_OLD_PASSWORD,21,51,121,15,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_NEW_PASSWORD,21,88,121,15,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_CONFIRM_PASSWORD,21,126,121,15,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "0K",IDOK,23,156,42,14
+    PUSHBUTTON      "Cancel",IDCANCEL,97,156,42,14
+    LTEXT           "Old Password:",IDC_STATIC_OLD_PASSWORD,21,36,63,11
+    LTEXT           "New Password:",IDC_STATIC_NEW_PASSWORD,21,73,63,11
+    LTEXT           "Confirm:",IDC_STATIC_CONFIRM_PASSWORD,21,111,87,11
+    LTEXT           "User ID：",IDC_STATIC_USER_ID_CHG,21,17,45,8
+    COMBOBOX        IDC_USER_ID_TYPE_LIST_CHG,75,14,60,55,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_DLG_PASSWORD DIALOGEX 0, 0, 232, 116
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+FONT 9, "宋体", 0, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_EDIT_ENTER_PASSWORD,95,55,84,15,ES_PASSWORD | 
+                    ES_AUTOHSCROLL | NOT WS_BORDER,WS_EX_CLIENTEDGE
+    LTEXT           "Password: ",IDC_STATIC_ENTER_PASSWORD,45,55,35,11
+    DEFPUSHBUTTON   "OK",IDOK,120,85,42,14
+    LTEXT           "User Name: ",IDC_STATIC_USER_ID,45,35,40,8
+    COMBOBOX        IDC_USER_ID_TYPE_LIST,95,35,85,55,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP,WS_EX_CLIENTEDGE
+    LTEXT           "Input the User Name and Password: ",
+                    IDC_STATIC_PASSWORD_TIP,10,10,137,8
+    PUSHBUTTON      "Cancel",IDC_BTN_PASSWD_CANCEL,175,85,40,14
+    ICON            IDI_ICON_KEY,IDC_STATIC,10,35,20,20
+END
+
+IDD_CFG_BASEBAND DIALOG DISCARDABLE  0, 0, 293, 291
+STYLE WS_CHILD | WS_CAPTION | WS_SYSMENU
+CAPTION "BaseBand"
+FONT 10, "宋体"
+BEGIN
+    CONTROL         "只做AK端下载",IDC_RADIO_DOWNLOAD_AK,"Button",
+                    BS_AUTORADIOBUTTON,22,30,61,10
+    CONTROL         "只做Infineon下载",IDC_RADIO_DOWNLOAD_INFINEON,"Button",
+                    BS_AUTORADIOBUTTON,101,30,78,10
+    CONTROL         "二者都做",IDC_RADIO_DOWNLOAD_BOTH,"Button",
+                    BS_AUTORADIOBUTTON,209,30,46,10
+    GROUPBOX        "下载模式",IDC_STATIC_DOWNLOAD_MODE,7,15,279,36
+    LTEXT           "波特率:",IDC_STATIC_MODULE_BURN_BAUDRATE,23,81,27,8
+    COMBOBOX        IDC_COMBO_MOUDLE_BURN_BUADRATE,103,81,78,55,CBS_DROPDOWN | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "下载fls文件",IDC_CHECK_DOWNLOAD_FLS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,23,110,74,10
+    CONTROL         "下载eep文件",IDC_CHECK_DOWNLOAD_EEP,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,23,139,72,10
+    EDITTEXT        IDC_EDIT_PATH_EEP,103,139,108,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PATH_FLS,103,110,108,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "浏览",IDC_BTN_BROWSE_FLS,231,109,34,14,BS_FLAT
+    PUSHBUTTON      "浏览",IDC_BTN_BROWSE_EEP,231,139,34,14,BS_FLAT
+    GROUPBOX        "下载相关设置",IDC_STATIC_MODULE_BURN_SETTING,7,63,279,
+                    106
+    LTEXT           "GPIO_DTR:",IDC_STATIC_GPIO_DTR,23,204,37,8
+    LTEXT           "GPIO_MODULE_IGT:",IDC_STATIC_GPIO_MODULE_IGT,23,230,82,
+                    10
+    LTEXT           "GPIO_MODULE_RESET:",IDC_STATIC_GPIO_MODULE_RESET,23,258,
+                    76,8
+    EDITTEXT        IDC_EDIT_GPIO_DTR,118,204,64,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_GPIO_MODULE_IGT,118,230,64,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_GPIO_MODULE_RESET,118,258,64,14,ES_AUTOHSCROLL
+    GROUPBOX        "GPIO设置:",IDC_STATIC_MODULE_GPIO_SETTING,7,183,279,101
+END
+
+IDD_CFG_SPIFLASH DIALOGEX 0, 0, 303, 284
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "SpiFlash"
+FONT 10, "宋体", 0, 0, 0x1
+BEGIN
+    CONTROL         "List1",IDC_LIST_SPIFLASH_PARAM,"SysListView32",
+                    LVS_REPORT | WS_TABSTOP,5,30,290,235,WS_EX_STATICEDGE
+    LTEXT           "SpiFlash 列表：",IDC_STATIC_SPI_LIST,5,10,75,8
+END
+
+IDD_BAR_BURN_INFO DIALOG DISCARDABLE  0, 0, 570, 62
+STYLE WS_CHILD
+FONT 10, "宋体"
+BEGIN
+    CTEXT           "当前连接：",IDC_STATIC_CUR_NUM,12,18,37,8
+    EDITTEXT        IDC_CUR_NUM,56,16,26,12,ES_AUTOHSCROLL | WS_DISABLED
+    CTEXT           "烧录次数：",IDC_STATIC_TOTAL_NUM,10,38,37,8
+    EDITTEXT        IDC_TOTAL_NUM,56,36,26,12,ES_AUTOHSCROLL | WS_DISABLED
+    CTEXT           "可用连接：",IDC_STATIC_CUR_USEFUL,86,18,40,8
+    EDITTEXT        IDC_CUR_USEFUL,134,16,26,12,ES_AUTOHSCROLL | WS_DISABLED
+    CTEXT           "累计通过：",IDC_STATIC_TOTAL_PASS,86,38,41,8
+    EDITTEXT        IDC_TOTAL_PASS,134,36,26,12,ES_AUTOHSCROLL | WS_DISABLED
+    PUSHBUTTON      "清除",IDC_BUTTON_CLR_REC,249,12,36,16
+    CTEXT           "累计失败：",IDC_STATIC_TOTAL_FAIL,170,18,38,8
+    EDITTEXT        IDC_TOTAL_FAIL,211,15,21,12,ES_AUTOHSCROLL | WS_DISABLED
+    CONTROL         "在线制作镜像(只在设备0,并仅制作一次)",
+                    IDC_CHECK_ONLINE_IMAGE_MAKE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,298,22,187,10
+    GROUPBOX        "烧录状态",IDC_STATIC_STATE,8,3,284,50,BS_CENTER
+    CONTROL         "自动烧录",IDC_CHECK_AUTO_BURN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,298,7,46,10
+    CONTROL         "U盘烧录",IDC_CHECK_UDISK_BURN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,355,6,42,10
+    LTEXT           "USB设备:",IDC_STATIC_NOW_UDISK,170,38,38,8
+    EDITTEXT        IDC_EDIT_UDISK_NUM,211,36,21,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    LTEXT           "U盘:",IDC_STATIC_UDISK,237,39,24,8
+    EDITTEXT        IDC_EDIT_UDISK,266,35,20,12,ES_AUTOHSCROLL | WS_DISABLED
+END
+
+IDD_DLG_IMAGE_CREATE DIALOGEX 0, 0, 275, 166
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Image Create Box"
+FONT 10, "宋体", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "浏览",IDC_BUTTON_SOURCE_BROWSER,229,15,32,14
+    PUSHBUTTON      "浏览",IDC_BUTTON_DEST_BROWSER,229,36,32,14
+    EDITTEXT        IDC_EDIT_SOURCE_FOLDER,69,15,150,14,ES_AUTOHSCROLL
+    LTEXT           "源文件夹：",IDC_STATIC_SOURCE_FOLDER,10,17,53,8
+    EDITTEXT        IDC_EDIT_DEST_FOLDER,69,36,151,14,ES_AUTOHSCROLL
+    LTEXT           "目标文件夹：",IDC_STATIC_DEST_FOLDER,10,39,55,8
+    EDITTEXT        IDC_EDIT_IMAGE_NAME,68,62,41,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_CAPACITY,180,61,40,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_COMBO_PAGESIZE,68,80,43,15,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "镜像文件名:",IDC_STATIC_IMAGE_NAME,10,64,53,8
+    LTEXT           "总容量(MByte):",IDC_STATIC_CAPACITY,111,63,65,8
+    LTEXT           "扇区大小(Byte):",IDC_STATIC_SECTORSIZE,112,82,66,8
+    PUSHBUTTON      "创建",IDCREATE,50,138,50,14
+    PUSHBUTTON      "结束",IDCANCEL,172,137,50,14
+    LTEXT           "制作信息:",IDC_MAKE_INFORMATION,13,98,60,8
+    LTEXT           "00:00:00",IDC_STATIC_USED_TIME,228,111,32,8
+    LTEXT           "Ready.....",IDC_CURENT_INFO,100,98,138,8
+    CONTROL         "Progress1",IDC_PROGRESS_MAKING,"msctls_progress32",
+                    PBS_SMOOTH | WS_BORDER,19,113,190,8,WS_EX_ACCEPTFILES
+    LTEXT           "页大小(Byte):",IDC_STATIC_PAGESIZE,9,82,58,9
+    EDITTEXT        IDC_EDIT_SECTORSIZE,180,78,40,14,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    LTEXT           "0%",IDC_STATIC_PROG_TIME,118,124,23,8
+END
+
+IDD_DLG_CHECK_EXPORT DIALOG DISCARDABLE  0, 0, 180, 57
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "输入较验字符串"
+FONT 10, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,28,35,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,100,35,50,14
+    EDITTEXT        IDC_EDIT_CHECK_STRING,20,15,137,14,ES_AUTOHSCROLL
+END
+
+IDD_DLG_SPI_IMAGE DIALOG DISCARDABLE  0, 0, 203, 129
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Spiflash Mirror"
+FONT 10, "宋体"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,95,95,38,14
+    PUSHBUTTON      "Cancel",IDCANCEL,148,96,37,14
+    LTEXT           "请选择SPIFLASH型号：",IDC_STATIC_SPI_CHOOSE,14,18,131,
+                    11
+    LTEXT           "型号：",IDC_STATIC_SPINAME,53,43,27,11
+    ICON            IDI_ICON_FORMAT,IDC_STATIC_SPI_ICON,16,38,20,20
+    COMBOBOX        IDC_COMBO_SPL_TYPE_LIST,93,41,92,51,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_CFG_SPINANDFLASH DIALOGEX 0, 0, 262, 264
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "spi_nandflash"
+FONT 10, "System"
+BEGIN
+    CONTROL         "List1",IDC_LIST_SPINANDFLASH_PARAM,"SysListView32",
+                    LVS_REPORT | WS_TABSTOP,5,26,242,231,WS_EX_STATICEDGE
+    LTEXT           "spi_nandflash列表:",IDC_STATIC_SPI_NANDFLSH_LIST,5,14,
+                    87,8,NOT WS_GROUP | WS_TABSTOP
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 5,0,10,0
+ PRODUCTVERSION 5,0,10,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "BurnTool Microsoft 基础类应用程序\0"
+            VALUE "FileVersion", "5, 0, 10, 00\0"
+            VALUE "InternalName", "BurnTool\0"
+            VALUE "LegalCopyright", "版权所有 (C) 2013\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "BurnTool.EXE\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "BurnTool 应用程序\0"
+            VALUE "ProductVersion", "5, 0, 10, 00\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 256
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 55
+    END
+
+    IDD_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 2
+        RIGHTMARGIN, 349
+        BOTTOMMARGIN, 401
+    END
+
+    IDD_CFG_GENERAL, DIALOG
+    BEGIN
+        RIGHTMARGIN, 293
+        TOPMARGIN, 1
+    END
+
+    IDD_CFG_DOWNLOAD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 287
+    END
+
+    IDD_CFG_HARDWARE, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        RIGHTMARGIN, 276
+        TOPMARGIN, 3
+    END
+
+    IDD_CFG_NANDFLASH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 295
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 266
+    END
+
+    IDD_CFG_FORMAT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 287
+    END
+
+    IDD_DLG_CHANGE_PASSWORD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 156
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 170
+    END
+
+    IDD_DLG_PASSWORD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 225
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 109
+    END
+
+    IDD_CFG_BASEBAND, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 286
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 284
+    END
+
+    IDD_CFG_SPIFLASH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 296
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 277
+    END
+
+    IDD_BAR_BURN_INFO, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 562
+        VERTGUIDE, 170
+        BOTTOMMARGIN, 61
+    END
+
+    IDD_DLG_IMAGE_CREATE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 268
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 158
+    END
+
+    IDD_DLG_CHECK_EXPORT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 173
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 50
+    END
+
+    IDD_DLG_SPI_IMAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 196
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 122
+    END
+
+    IDD_CFG_SPINANDFLASH, DIALOG
+    BEGIN
+        LEFTMARGIN, 5
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 257
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_TLB_BURN TOOLBAR DISCARDABLE  32, 32
+BEGIN
+    BUTTON      ID_TBTN_START
+    BUTTON      ID_TBTN_SETTING
+    BUTTON      ID_TBTN_IMPORT
+    BUTTON      ID_TBTN_EXPORT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_TLB_BURN            BITMAP  DISCARDABLE     "res\\toolbar1.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_CFG_HARDWARE DLGINIT
+BEGIN
+    IDC_CHIP_TYPE_LIST, 0x403, 8, 0
+0x4b41, 0x315f, 0x5830, 0x0058, 
+    IDC_CHIP_TYPE_LIST, 0x403, 8, 0
+0x4b41, 0x315f, 0x5831, 0x0058, 
+    IDC_CHIP_TYPE_LIST, 0x403, 8, 0
+0x4b41, 0x335f, 0x5837, 0x0058, 
+    IDC_CHIP_TYPE_LIST, 0x403, 8, 0
+0x4b41, 0x335f, 0x5839, 0x0058, 
+    IDC_CHIP_TYPE_LIST, 0x403, 8, 0
+0x4b41, 0x395f, 0x3038, 0x0058, 
+    IDC_RAM_SIZE_LIST, 0x403, 2, 0
+0x0038, 
+    IDC_RAM_SIZE_LIST, 0x403, 3, 0
+0x3631, "\000" 
+    IDC_RAM_SIZE_LIST, 0x403, 3, 0
+0x3233, "\000" 
+    IDC_RAM_SIZE_LIST, 0x403, 3, 0
+0x3436, "\000" 
+    IDC_RAM_ROW_LIST, 0x403, 3, 0
+0x3131, "\000" 
+    IDC_RAM_ROW_LIST, 0x403, 3, 0
+0x3231, "\000" 
+    IDC_RAM_ROW_LIST, 0x403, 3, 0
+0x3331, "\000" 
+    IDC_RAM_ROW_LIST, 0x403, 3, 0
+0x3431, "\000" 
+    IDC_RAM_ROW_LIST, 0x403, 3, 0
+0x3531, "\000" 
+    IDC_RAM_COLUMN_LIST, 0x403, 2, 0
+0x0037, 
+    IDC_RAM_COLUMN_LIST, 0x403, 2, 0
+0x0038, 
+    IDC_RAM_COLUMN_LIST, 0x403, 2, 0
+0x0039, 
+    IDC_RAM_COLUMN_LIST, 0x403, 3, 0
+0x3031, "\000" 
+    IDC_RAM_COLUMN_LIST, 0x403, 3, 0
+0x3131, "\000" 
+    IDC_RAM_BANK_LIST, 0x403, 2, 0
+0x0034, 
+    IDC_RAM_BANK_LIST, 0x403, 2, 0
+0x0038, 
+    IDC_COMBO_CHIP_SEL, 0x403, 2, 0
+0x0031, 
+    IDC_COMBO_CHIP_SEL, 0x403, 2, 0
+0x0032, 
+    IDC_COMBO_CHIP_SEL, 0x403, 2, 0
+0x0034, 
+    0
+END
+
+IDD_DLG_PASSWORD DLGINIT
+BEGIN
+    IDC_USER_ID_TYPE_LIST, 0x403, 7, 0
+0xfac9, 0xfab2, 0xdfd5, "\000" 
+    IDC_USER_ID_TYPE_LIST, 0x403, 7, 0
+0xd0d1, 0xa2b7, 0xdfd5, "\000" 
+    0
+END
+
+IDD_DLG_CHANGE_PASSWORD DLGINIT
+BEGIN
+    IDC_USER_ID_TYPE_LIST_CHG, 0x403, 7, 0
+0xfac9, 0xfab2, 0xdfd5, "\000" 
+    IDC_USER_ID_TYPE_LIST_CHG, 0x403, 7, 0
+0xd0d1, 0xa2b7, 0xdfd5, "\000" 
+    0
+END
+
+IDD_CFG_BASEBAND DLGINIT
+BEGIN
+    IDC_COMBO_MOUDLE_BURN_BUADRATE, 0x403, 7, 0
+0x3131, 0x3235, 0x3030, "\000" 
+    IDC_COMBO_MOUDLE_BURN_BUADRATE, 0x403, 7, 0
+0x3634, 0x3830, 0x3030, "\000" 
+    IDC_COMBO_MOUDLE_BURN_BUADRATE, 0x403, 7, 0
+0x3239, 0x3631, 0x3030, "\000" 
+    0
+END
+
+IDD_DLG_IMAGE_CREATE DLGINIT
+BEGIN
+    IDC_COMBO_PAGESIZE, 0x403, 4, 0
+0x3135, 0x0032, 
+    IDC_COMBO_PAGESIZE, 0x403, 5, 0
+0x3031, 0x3432, "\000" 
+    IDC_COMBO_PAGESIZE, 0x403, 5, 0
+0x3032, 0x3834, "\000" 
+    IDC_COMBO_PAGESIZE, 0x403, 5, 0
+0x3034, 0x3639, "\000" 
+    IDC_COMBO_PAGESIZE, 0x403, 5, 0
+0x3138, 0x3239, "\000" 
+    IDC_COMBO_PAGESIZE, 0x403, 6, 0
+0x3631, 0x3833, 0x0034, 
+    0
+END
+
+IDD_CFG_GENERAL DLGINIT
+BEGIN
+    IDC_COMBO_PALNFORM_TYPE, 0x403, 6, 0
+0x494c, 0x554e, 0x0058, 
+    IDC_COMBO_PALNFORM_TYPE, 0x403, 5, 0
+0x5452, 0x534f, "\000" 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "BurnTool\n\nBurnTo\n\n\nBurnTool.Document\nBurnTo Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "BurnTool"
+    AFX_IDS_IDLEMESSAGE     "就绪"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "扩展名"
+    ID_INDICATOR_CAPS       "大写"
+    ID_INDICATOR_NUM        "数字"
+    ID_INDICATOR_SCRL       "滚动"
+    ID_INDICATOR_OVR        "改写"
+    ID_INDICATOR_REC        "记录"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "建立新文档\n新建"
+    ID_FILE_OPEN            "打开一个现有文档\n打开"
+    ID_FILE_CLOSE           "关闭活动文档\n关闭"
+    ID_FILE_SAVE            "保存活动文档\n保存"
+    ID_FILE_SAVE_AS         "将活动文档以一个新文件名保存\n另存为"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "显示程序信息，版本号和版权\n关于"
+    ID_APP_EXIT             "退出应用程序；提示保存文档\n退出"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "打开该文档"
+    ID_FILE_MRU_FILE2       "打开该文档"
+    ID_FILE_MRU_FILE3       "打开该文档"
+    ID_FILE_MRU_FILE4       "打开该文档"
+    ID_FILE_MRU_FILE5       "打开该文档"
+    ID_FILE_MRU_FILE6       "打开该文档"
+    ID_FILE_MRU_FILE7       "打开该文档"
+    ID_FILE_MRU_FILE8       "打开该文档"
+    ID_FILE_MRU_FILE9       "打开该文档"
+    ID_FILE_MRU_FILE10      "打开该文档"
+    ID_FILE_MRU_FILE11      "打开该文档"
+    ID_FILE_MRU_FILE12      "打开该文档"
+    ID_FILE_MRU_FILE13      "打开该文档"
+    ID_FILE_MRU_FILE14      "打开该文档"
+    ID_FILE_MRU_FILE15      "打开该文档"
+    ID_FILE_MRU_FILE16      "打开该文档"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "切换到下一个窗格\n下一窗格"
+    ID_PREV_PANE            "切换回前一个窗格\n前一窗格"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "将活动的窗口分隔成窗格\n分隔"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "删除被选对象\n删除"
+    ID_EDIT_CLEAR_ALL       "全部删除\n全部删除"
+    ID_EDIT_COPY            "复制被选对象并将其置于剪贴板上\n复制"
+    ID_EDIT_CUT             "剪切被选对象并将其置于剪贴板上\n剪切"
+    ID_EDIT_FIND            "查找指定的正文\n查找"
+    ID_EDIT_PASTE           "插入剪贴板内容\n粘贴"
+    ID_EDIT_REPEAT          "重复上一步操作\n重复"
+    ID_EDIT_REPLACE         "用不同的正文替换指定的正文\n替换"
+    ID_EDIT_SELECT_ALL      "选择整个文档\n选择全部"
+    ID_EDIT_UNDO            "撤消最后一步操作\n撤消"
+    ID_EDIT_REDO            "重新执行先前已撤消的操作\n重新执行"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "改变窗口大小"
+    AFX_IDS_SCMOVE          "改变窗口位置"
+    AFX_IDS_SCMINIMIZE      "将窗口缩小成图标"
+    AFX_IDS_SCMAXIMIZE      "把窗口放大到最大尺寸"
+    AFX_IDS_SCNEXTWINDOW    "切换到下一个文档窗口"
+    AFX_IDS_SCPREVWINDOW    "切换到先前的文档窗口"
+    AFX_IDS_SCCLOSE         "关闭活动的窗口并提示保存所有文档"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "把窗口恢复到正常大小"
+    AFX_IDS_SCTASKLIST      "激活任务表"
+END
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\BurnTool.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
