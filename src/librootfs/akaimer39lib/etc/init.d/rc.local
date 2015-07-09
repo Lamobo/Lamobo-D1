@@ -11,6 +11,14 @@ ifconfig lo up
 /usr/bin/tcpsvd 0 21 ftpd -w /mnt &
 
 /usr/bin/telnetd
+
+mkdir -p /etc/dropbear
+if [ ! -f /etc/dropbear/dropbear_rsa_host_key ]; then
+    dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key
+fi
+dropbear -B
+
 ntpd -q -p time.windows.com
+
 /etc/init.d/monitor.sh &
 /etc/jffs2/service.sh &
