@@ -94,6 +94,11 @@ build_busybox()
     cd $DEV_ROOT/output/busybox/rootfs
     $RM linuxrc
     sudo $TAR -zxpf $DEV_ROOT/build/rootfs_prebuilt.tgz
+    sudo $MKDIR mnt
+    sudo $MKDIR proc
+    sudo $MKDIR sys
+    sudo $MKDIR tmp
+    sudo $MKDIR var
     $CHMOD 755 bin
     $CHMOD 755 etc
     $CHMOD 755 sbin
