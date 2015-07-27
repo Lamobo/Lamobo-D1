@@ -1,6 +1,5 @@
 #!/bin/sh
 
-insmod /root/otg-hs.ko
 mount /dev/mmcblk0 /mnt
 mount /mnt/local /usr/local
 

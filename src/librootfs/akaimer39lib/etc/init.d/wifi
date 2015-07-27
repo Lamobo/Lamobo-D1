@@ -6,11 +6,7 @@
 2>/dev/null killall -9 udhcpd
 2>/dev/null killall -9 hostapd
 rmmod 8188eu
-rmmod otg-hs
 
-/etc/init.d/change_wifi_mode.sh station
-
-insmod /root/otg-hs.ko
 insmod /root/8188eu.ko
 wpa_supplicant -B -iwlan0 -Dwext -c /etc/jffs2/wpa_supplicant.conf
 

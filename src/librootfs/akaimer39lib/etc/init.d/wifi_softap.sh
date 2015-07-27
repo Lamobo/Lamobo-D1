@@ -31,7 +31,6 @@ set_ssid_and_password()
 
 do_start () {
 	echo "start wifi soft ap......"
-	insmod /root/otg-hs.ko
 	insmod /root/8188eu.ko
 	set_ssid_and_password
 	hostapd /etc/jffs2/hostapd.conf -B

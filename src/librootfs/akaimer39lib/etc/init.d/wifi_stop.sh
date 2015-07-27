@@ -44,7 +44,6 @@ stop_softap ()
 stop_module ()
 {
 	rmmod 8188eu
-	rmmod otg-hs
 }
 
 
