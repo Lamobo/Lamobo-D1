@@ -1,0 +1,30 @@
+#!/bin/sh
+
+2>/dev/null killall -9 wpa_supplicant
+2>/dev/null killall -9 udhcpc
+2>/dev/null killall -9 finish_station.sh
+2>/dev/null killall -9 udhcpd
+2>/dev/null killall -9 hostapd
+rmmod 8188eu
+rmmod otg-hs
+
+/etc/init.d/change_wifi_mode.sh station
+
+insmod /root/otg-hs.ko
+insmod /root/8188eu.ko
+wpa_supplicant -B -iwlan0 -Dwext -c /etc/jffs2/wpa_supplicant.conf
+
+SSID=\"myoffice\"
+PSK=\"Y6PADNV2\"
+
+wpa_cli -iwlan0 add_network
+wpa_cli -iwlan0 set_network 0 ssid $SSID
+wpa_cli -iwlan0 set_network 0 key_mgmt WPA-PSK
+wpa_cli -iwlan0 set_network 0 psk $PSK
+
+wpa_cli -iwlan0 set_network 0 scan_ssid 1
+wpa_cli -iwlan0 enable_network 0
+wpa_cli -iwlan0 select_network 0
+                
+2>/dev/null killall -9 udhcpc
+udhcpc -i wlan0
