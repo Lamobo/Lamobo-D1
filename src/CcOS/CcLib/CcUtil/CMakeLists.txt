@@ -1,0 +1,5 @@
+add_subdirectory( CcNetwork/ )
+add_subdirectory( CcSql/ )
+add_subdirectory( CcGuiUtils/ )
+add_subdirectory( CcShell/ )
+add_subdirectory( CcFtp/ )

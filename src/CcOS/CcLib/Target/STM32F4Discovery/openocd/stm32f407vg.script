@@ -1,0 +1,36 @@
+################################################################################
+##
+## Copyright (C) 2012 Jorge Aparicio <jorge.aparicio.r@gmail.com>
+##
+## This file is part of bareCortexM.
+##
+## bareCortexM is free software: you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free
+## Software Foundation, either version 3 of the License, or (at your option)
+## any later version.
+##
+## bareCortexM is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+## more details.
+##
+## You should have received a copy of the GNU General Public License along
+## with bareCortexM. If not, see <http://www.gnu.org/licenses/>.
+##
+################################################################################
+
+set tdesc filename Target/STM32F4Discovery/openocd/workaround.xml
+set remote hardware-breakpoint-limit 6
+set remote hardware-watchpoint-limit 4
+target remote localhost:3333
+monitor arm semihosting enable
+monitor halt
+monitor poll
+
+monitor flash probe 0
+monitor flash protect 0 0 11 off
+monitor reset halt
+monitor flash erase_sector 0 0 11
+monitor flash write_image Debug/CcLib.elf
+monitor flash protect 0 0 11 on
+monitor soft_reset_halt
