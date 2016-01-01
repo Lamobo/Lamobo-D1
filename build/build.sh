@@ -119,6 +119,20 @@ clean_busybox()
     $RM $DEV_ROOT/src/librootfs/rootfs.tar.gz
 }
 
+build_CcOS()
+{
+    echo Building CcOS...
+    cd $DEV_ROOT/src/CcOS
+    ./build.sh
+    cp $DEV_ROOT/src/CcOS/bin/CcCLIApp $DEV_ROOT/output/local/bin
+}
+
+clean_CcOS()
+{
+    cd $DEV_ROOT/src/CcOS
+    ./clean.sh
+}
+
 build_rootfs()
 {
     echo Building rootfs...
@@ -276,7 +290,8 @@ build_all()
     build_busybox
     build_rootfs
     build_samples
-    build_node
+    build_CcOS
+    #build_node //deactivated because no need of it
     build_updater
     pack_basic
     pack_extra
@@ -289,6 +304,7 @@ clean_all()
     clean_busybox
     clean_rootfs
     clean_samples
+    clean_CcOS
     clean_node
     clean_updater
     cd $DEV_ROOT
