@@ -55,7 +55,7 @@ CcFile *CcFileSystem::getFile(CcString &path){
 
 bool CcFileSystem::mkdir(CcString Path){
   bool bRet = false;
-  if ((Path.at(0) == '/') || Path.at(1) == ':'){
+  if ((Path.at(0) == '/') || Path.length() >1 || Path.at(1) == ':'){
     bRet = m_FSList.at(0).FS->mkdir(Path);
   }
   else{

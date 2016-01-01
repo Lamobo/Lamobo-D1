@@ -28,7 +28,7 @@ public:
   virtual size_t write(char*, size_t size){
     return size;
   }
-  virtual bool open( uint16 flags = 0) = 0;
+  virtual bool open( uint16 flags ) = 0;
   virtual void setBackgroundLed( bool bState ) = 0;
   virtual void setCursor( uint16 x, uint16 y ) = 0;
   virtual void setAddress( uint16 x, uint16 y, uint16 xSize, uint16 ySize) = 0;

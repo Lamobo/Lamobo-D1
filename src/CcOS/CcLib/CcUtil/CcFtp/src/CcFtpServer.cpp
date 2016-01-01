@@ -27,7 +27,7 @@ CcFtpServer::CcFtpServer( uint16 Port ) :
 }
 
 CcFtpServer::CcFtpServer(CcStringList *Arg) :
-  m_Port(21)
+  m_Port(27521)
 {
   CC_UNUSED(Arg);
 }

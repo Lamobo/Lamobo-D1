@@ -49,7 +49,6 @@ CcString::CcString(char* cString, size_t uiLength){
     append(cArray);
   }
   else{
-    size_t temp = strlen(cString);
     append(cString);
   }
 }
@@ -389,10 +388,9 @@ bool CcString::operator>(CcString toCompare){
   return false;
 }
 
-// Assignmentoperator
-CcString& CcString::operator=(CcString rhs)
+CcString& CcString::operator=(CcString assign)
 {
   clear();
-  append((rhs));
+  append(assign);
   return(*this);
 }

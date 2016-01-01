@@ -2,7 +2,7 @@
 # Depending on Target, just the correct System Library will be loaded:
 ###################
 if(DEFINED TARGET_SYSTEM)
-  #message("${TARGET_SYSTEM}")
+  message(${TARGET_SYSTEM})
   set(TARGET_SYSTEM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Target/${TARGET_SYSTEM}" )
 else ()
   set(TARGET_SYSTEM_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Target/${CMAKE_SYSTEM_NAME}" )

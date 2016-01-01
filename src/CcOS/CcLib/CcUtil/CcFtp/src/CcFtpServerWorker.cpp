@@ -43,7 +43,6 @@ void CcFtpServerWorker::run(){
         parseCommand(recStr);
         recSize = m_Socket->read(recBuf, 1024);
       }
-      Kernel.delayMs(1);
     }
   }
 }
@@ -107,8 +106,6 @@ void CcFtpServerWorker::parseCommand(CcString &Command){
     break;
   case FTP_PASV:{
     m_Active = false;
-    m_Socket->write((char*)FTP_501, sizeof(FTP_501));
-    /**
     if ((m_DataSocket = Kernel.getSocket(eTCP)) != 0)
     {
       while(true != m_DataSocket->bind({ 127, 0, 0, 1 }, m_DataPortInc)){
@@ -125,7 +122,7 @@ void CcFtpServerWorker::parseCommand(CcString &Command){
       m_Socket->write(sRet.getCharString(), sRet.length());
       if (m_DataPortInc > 20000) m_DataPortInc = 12378;
       else m_DataPortInc++;
-    }*/
+    }
     break;
   }
   case FTP_LIST:
@@ -144,7 +141,6 @@ void CcFtpServerWorker::parseCommand(CcString &Command){
       for (size_t i = 0; i < slFiles.size(); i++){
         m_DataSocket->write(slFiles.at(i).getCharString(), slFiles.at(i).length());
       }
-      m_DataSocket->close();
       delete m_DataSocket;
       m_Socket->write((char*)FTP_226, sizeof(FTP_226));
     }
@@ -163,7 +159,6 @@ void CcFtpServerWorker::parseCommand(CcString &Command){
       for (size_t i = 0; i < slFiles.size(); i++){
         m_DataSocket->write(slFiles.at(i).getCharString(), slFiles.at(i).length());
       }
-      m_DataSocket->close();
       delete m_DataSocket;
       m_Socket->write((char*)"226 Transfer complete. \r\n", 24);
     }
@@ -235,7 +230,6 @@ void CcFtpServerWorker::parseCommand(CcString &Command){
           }
         }
         file.close();
-        m_DataSocket->close();
         delete m_DataSocket;
       }
     }
@@ -411,7 +405,6 @@ bool CcFtpServerWorker::acceptDataConnection(void){
   CcSocket *temp;
   if (m_Active != true){
     temp = m_DataSocket->accept();
-    m_DataSocket->close();
     delete m_DataSocket;
     m_DataSocket = temp;
   }

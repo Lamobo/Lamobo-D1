@@ -12,8 +12,6 @@
 #ifndef CcFtpTypes_H_
 #define CcFtpTypes_H_
 
-#include "CcBase.h"
-
 typedef enum{
   FTP_UNKNOWN = 0,
   FTP_ABOR,//		Abort an active file transfer.

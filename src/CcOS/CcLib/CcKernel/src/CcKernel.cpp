@@ -12,7 +12,6 @@
 
 #include "CcKernel.h"
 #include "CcString.h"
-#include "stdio.h"
 
 #include "TargetConfig.h"
 #include CC_TARGET_SYSTEM_INC

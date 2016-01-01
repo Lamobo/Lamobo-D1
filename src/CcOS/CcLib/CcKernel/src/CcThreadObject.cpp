@@ -20,6 +20,7 @@ CcThreadObject::CcThreadObject() :
 }
 
 CcThreadObject::~CcThreadObject() {
+  while (m_State != CCTHREAD_STOPPED) Kernel.delayMs(10);
 }
 
 void CcThreadObject::start( void ) {

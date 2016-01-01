@@ -17,7 +17,6 @@
 #include "CcCharArray.h"
 #include "CcStringList.h"
 #include "CcWorker.h"
-#include "CcFtpServerPasv.h"
 
 class CcFtpServerWorker : public CcWorker
 {

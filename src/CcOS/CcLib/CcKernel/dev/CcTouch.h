@@ -57,7 +57,7 @@ public:
   /**
    * @brief Init Touchpanel, must be implemented by DeviceClass
    */
-  virtual bool open(uint16 flags = 0) = 0;
+  virtual bool open(uint16 flags ) = 0;
   virtual void getTouchState(uint16 *x, uint16 *y) = 0;
   virtual size_t read(char* buffer, size_t size){
     CC_UNUSED(buffer);

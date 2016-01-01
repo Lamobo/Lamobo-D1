@@ -28,7 +28,7 @@ public:
   /**
    * @brief Constructor
    */
-  CcFtpServer( uint16 Port = 2121 );
+  CcFtpServer( uint16 Port = 27521 );
   CcFtpServer(CcStringList *Arg);
 
   /**
