@@ -1,4 +1,8 @@
-# Lamobo-D1 Development Environment
+# This is a Fork of the Lamobo-D1 Development Environment
+
+Target of this fork is to add CcOS for a Remote Control Interface to the device
+
+# Original Part of Environment:
 
 ## The Latest Build
 
