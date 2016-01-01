@@ -2643,9 +2643,7 @@ SQLITE_API int SQLITE_STDCALL sqlite3_set_authorizer(
 ** etc.) if applicable.)^  ^The 6th parameter to the authorizer callback
 ** is the name of the inner-most trigger or view that is responsible for
 ** the access attempt or NULL if this access attempt is directly from
-** top-level SQL code.
-*/
-/******************************************* 3rd ************ 4th ***********/
+** top-level SQL code.***************************************** 3rd ************ 4th ***********/
 #define SQLITE_CREATE_INDEX          1   /* Index Name      Table Name      */
 #define SQLITE_CREATE_TABLE          2   /* Table Name      NULL            */
 #define SQLITE_CREATE_TEMP_INDEX     3   /* Index Name      Table Name      */

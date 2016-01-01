@@ -12,4 +12,6 @@ file (GLOB HEADER_FILES
       "j*.h" )
       
 add_library( jpeg STATIC ${HEADER_FILES} ${SOURCE_FILES} )
-set_property( TARGET jpeg PROPERTY FOLDER "ThirdParty")
+set_property( TARGET jpeg PROPERTY FOLDER "CcLib/ThirdParty")
+
+target_include_directories( jpeg PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -18,10 +18,12 @@ set(CC_TARGET_SYSTEM_DIR ${TARGET_SYSTEM_DIR} PARENT_SCOPE)
 ###################
 # Add all CcLib Objects to build-List:
 ###################
-add_subdirectory(CcCore/)
-add_subdirectory(CcKernel/)
-add_subdirectory(CcGui/)
-add_subdirectory(CcUtil/)
+add_subdirectory( CcCore/ )
+add_subdirectory( CcKernel/ )
+add_subdirectory( CcGui/ )
+add_subdirectory( CcNetwork/ )
+add_subdirectory( CcSql/ )
+add_subdirectory( CcGuiUtils/ )
 
 ###################
 # Add thirdparty

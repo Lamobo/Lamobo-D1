@@ -1,21 +1,29 @@
 /**
-* @author     Andreas Dirmeier
-*
-* @copyright  Technische Software Entwicklung Plazotta (c) 2015
-*
-* @version    1.00
-*
-* @par        Language   
-*         C++ ANSI V3
-*
-* @par        History
-*         20.08.2015 / AD
-*           Module created
-*/
+ * @copyright  Andreas Dirmeier (C) 2015
+ *
+ * This file is part of CcOS.
+ *
+ * CcOS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * CcOS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with CcOS.  If not, see <http://www.gnu.org/licenses/>.
+ **/
 /**
-*   @file     HidDevice.h
-*   @brief    Access-class to a HID Device
-**************************************************************************/
+ * @author     Andreas Dirmeier
+ * @version    0.01
+ * @date       2015-09
+ * @par        Language   C++ ANSI V3
+ * @file     CcUSBHid.h
+ * @brief    Create Access to an USB-Hid-Device
+ */
 #pragma once
 
 #include "CcBase.h"
