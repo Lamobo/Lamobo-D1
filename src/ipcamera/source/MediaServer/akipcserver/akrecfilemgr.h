@@ -7,7 +7,7 @@ extern "C" {
 
 #include "headers.h"
 
-#define SIGN_FILE_NAME							".LMR_RecordManger_Sign"
+#define SIGN_FILE_NAME							".LMR_RecordManager_Sign"
 #define FILE_SUFFIX								".avi"
 #define FILE_NAME_DIF							"(New)"
 #define DIR_SEPARATOR							'/'

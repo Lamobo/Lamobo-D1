@@ -609,13 +609,13 @@ int start_record( int cycrecord )
 	T_S32 leng = atoi(recoder->length);
 	T_S32 time = atoi(recoder->time);
 	
-	if (leng <= 0)
-		leng = 3;
+	if (leng <= 0) //length in minutes
+		leng = 1;
 	
-	if (time <= 0)
+	if (time <= 0) //time recording in hours
 		time = 1;
 	
-	times = (time*3600)/(leng*60);
+	times = (time*3600)/(leng*60); //period in seconds
 	if (times <= 0)
 		times = 1;
 

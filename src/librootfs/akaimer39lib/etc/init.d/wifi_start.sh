@@ -30,19 +30,23 @@ case "$MODE" in
     station)
         if [ $# == 1 ] && [ $1 = "keypress" ]
         then #by key pressed
-            echo key Pressed station.
+            echo "key Pressed station."
             /etc/init.d/wifi_station.sh start 
+
         else # by initrd..
-            /etc/init.d/camera.sh start 
+			echo "Camera start from wifi_start.sh by initrd..."
+#            /etc/init.d/camera.sh start 
+
         fi
         ;;
     softap)
         if [ $# == 1 ] && [ $1 = "keypress" ]
         then
-            echo key pressed softap..
+            echo "key pressed softap.."
             /etc/init.d/wifi_softap.sh start
         fi
-        /etc/init.d/camera.sh restart 
+			echo "Camera restart from wifi_start.sh (softap)"
+#        /etc/init.d/camera.sh restart 
         ;;
     *)
         usage

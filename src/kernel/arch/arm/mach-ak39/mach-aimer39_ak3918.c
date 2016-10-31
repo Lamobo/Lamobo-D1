@@ -582,6 +582,7 @@ static struct akgpio_keys_platform_data gpio_keys_platform_data = {
 	&ak39_spi1_device,
 	&ak39_mmc_device,
 	&ak39_i2c_device,
+	&ak39_rtc_device,
 	&ak39_custom_gpio,
 	&ak39_usb_udc_device,
 	&ak39_usb_otg_hcd_device,
@@ -595,7 +596,6 @@ static struct akgpio_keys_platform_data gpio_keys_platform_data = {
 	&ak39_mac_device, 
 	&ak39_led_pdev,
 	&ak39_gpio_keys_device,
-	&ak39_rtc_device,
 	&ak39_crypto_device,
 };
 
@@ -656,7 +656,7 @@ static void __init ak3918_init_machine(void)
 }
 
 
-MACHINE_START(AK39XX, "Aimer39_AK3918_MB_V1.0.0")
+MACHINE_START(AK39XX, "AK3918_DIPOL_V0.0.1")
 /* Maintainer: */
 	.atag_offset = 0x100,
 	.fixup = NULL,

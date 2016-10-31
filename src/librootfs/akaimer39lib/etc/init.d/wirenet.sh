@@ -69,7 +69,8 @@ check_ip_and_start ()
 		sleep 1
 		status=`ifconfig eth0 | grep "inet addr:"`
 	done
-	/etc/init.d/camera.sh start
+	echo "start camera wirenet..."
+#	/etc/init.d/camera.sh start
 }
 
 start ()

@@ -17,8 +17,8 @@ if [ ! -f /etc/dropbear/dropbear_rsa_host_key ]; then
 fi
 dropbear -B
 
-ntpd -q -p time.windows.com
+#ntpd -q -p time.windows.com #what?!
 
 #/etc/init.d/wifi
-/etc/init.d/monitor.sh &
+#/etc/init.d/monitor.sh &
 /etc/jffs2/service.sh &
