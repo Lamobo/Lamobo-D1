@@ -41,7 +41,7 @@ static T_VOID camera_setbit(T_U16 reg, T_U8 bit, T_U8 value)
 {
     T_U8 tmp;
 
-    tmp = sccb_read_short(CAMERA_SCCB_ADDR, reg);
+    tmp = sccb_read_data(CAMERA_SCCB_ADDR, reg);
     if (value == 1)
     {    
         tmp |= 0x1 << bit;
@@ -51,7 +51,7 @@ static T_VOID camera_setbit(T_U16 reg, T_U8 bit, T_U8 value)
         tmp &= ~(0x1 << bit);
     }
     
-    sccb_write_word(CAMERA_SCCB_ADDR, reg, &tmp, 1);
+    sccb_write_data(CAMERA_SCCB_ADDR, reg, &tmp, 1);
 }
 #endif
 static T_U32 cam_tw9912_read_id(T_VOID)
@@ -62,7 +62,7 @@ static T_U32 cam_tw9912_read_id(T_VOID)
 
     sccb_init(GPIO_I2C_SCL, GPIO_I2C_SDA);        //init sccb first here!!
     
-    value = sccb_read_data(CAMERA_SCCB_ADDR, 0x0000);
+    value = sccb_read_data(CAMERA_SCCB_ADDR, 0x00);
     //id = value << 8;
     //value = sccb_read_short(CAMERA_SCCB_ADDR, 0x0002);
     id |= value;    
@@ -113,6 +113,7 @@ static T_BOOL camera_set_param(const T_U16 tabParameter[])
     return AK_TRUE;
 }
 
+#if 0
 static T_VOID read_camera_reg(const T_U16 tabParameter[])
 {
 	unsigned short data;
@@ -128,6 +129,7 @@ static T_VOID read_camera_reg(const T_U16 tabParameter[])
 		i += 2;
 	}
 }
+#endif
 
 static T_VOID camera_setup(const T_U16 tabParameter[])
 {
@@ -759,15 +761,15 @@ static T_CAMERA_TYPE cam_tw9912_get_type(T_VOID)
 
 static T_VOID cam_tw9912_set_sensor_param(T_U32 cmd, T_U32 data)
 {
-	T_U16 value;
+	T_U8 value;
 
-	value = (T_U16)data;
-	sccb_write_word(CAMERA_SCCB_ADDR, (T_U16)cmd, &value, 1);
+	value = (T_U8)data;
+	sccb_write_data(CAMERA_SCCB_ADDR, (T_U8)cmd, &value, 1);
 }
 
 static T_U16 cam_tw9912_get_sensor_param(T_U32 cmd)
 {
-	return sccb_read_word(CAMERA_SCCB_ADDR, (T_U16)cmd);
+	return sccb_read_data(CAMERA_SCCB_ADDR, (T_U8)cmd);
 }
 
 static T_CAMERA_FUNCTION_HANDLER tw9912_function_handler = 
@@ -1099,6 +1101,14 @@ static const struct v4l2_ctrl_config tw9912_ctrls[] = {
  * supported format list
  */
 static const struct aksensor_color_format tw9912_formats[] = {
+	
+	{
+		.code = V4L2_MBUS_FMT_YUYV8_2X8,
+		.colorspace = V4L2_COLORSPACE_SRGB,
+	},
+	
+	
+	/*
 	{
 		.code		= V4L2_MBUS_FMT_RGB555_2X8_PADHI_LE,
 		.colorspace = V4L2_COLORSPACE_SRGB,
@@ -1115,6 +1125,7 @@ static const struct aksensor_color_format tw9912_formats[] = {
 		.code		= V4L2_MBUS_FMT_RGB565_2X8_BE,
 		.colorspace = V4L2_COLORSPACE_SRGB,
 	},
+	 */
 };
 
 static const struct aksensor_win_size tw9912_win[] = {
