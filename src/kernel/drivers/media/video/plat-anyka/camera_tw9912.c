@@ -27,7 +27,7 @@
 #define CAM_EN_LEVEL            0    
 #define CAM_RESET_LEVEL         0
 
-#define CAMERA_SCCB_ADDR        0x88
+#define CAMERA_SCCB_ADDR        0x44
 #define CAMERA_TW9912_ID 		0x9912
 
 #define TW9912_CAMERA_MCLK      27
