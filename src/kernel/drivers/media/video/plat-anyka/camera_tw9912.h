@@ -44,7 +44,7 @@ static const T_U16 INIT_TAB[] =
      0x17 , 0x30  ,
      0x18 , 0x44  ,
      0x19 , 0x58  ,
-     0x1A , 0x00  ,
+    // 0x1A , 0x00  ,
    
      0x1C , 0x07  ,  
      0x1D , 0x7F  ,
@@ -164,7 +164,8 @@ static const T_U16 PREV_MODE_TAB[] =
 
 static const T_U16 RECORD_MODE_TAB[] = 
 {
-
+0x09, 0x00,
+0x0C, 0x64,
     END_FLAG, END_FLAG
 };
 

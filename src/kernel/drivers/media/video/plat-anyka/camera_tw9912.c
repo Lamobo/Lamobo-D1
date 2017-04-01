@@ -27,8 +27,8 @@
 #define CAM_EN_LEVEL            0    
 #define CAM_RESET_LEVEL         0
 
-#define CAMERA_SCCB_ADDR        0x44
-#define CAMERA_TW9912_ID 		0x9912
+#define CAMERA_SCCB_ADDR        0x88
+#define CAMERA_TW9912_ID 	0x60
 
 #define TW9912_CAMERA_MCLK      27
 
@@ -56,15 +56,15 @@ static T_VOID camera_setbit(T_U16 reg, T_U8 bit, T_U8 value)
 #endif
 static T_U32 cam_tw9912_read_id(T_VOID)
 {
-#if 0
+#if 1
     T_U8 value = 0x00;
     T_U32 id = 0;
 
     sccb_init(GPIO_I2C_SCL, GPIO_I2C_SDA);        //init sccb first here!!
     
-    value = sccb_read_short(CAMERA_SCCB_ADDR, 0x0001);
-    id = value << 8;
-    value = sccb_read_short(CAMERA_SCCB_ADDR, 0x0002);
+    value = sccb_read_data(CAMERA_SCCB_ADDR, 0x0000);
+    //id = value << 8;
+    //value = sccb_read_short(CAMERA_SCCB_ADDR, 0x0002);
     id |= value;    
 
     return id;
@@ -104,7 +104,7 @@ static T_BOOL camera_set_param(const T_U16 tabParameter[])
                     return AK_FALSE;
                 }
             }
-	    */
+*/	    
         }
         
         i += 2;
