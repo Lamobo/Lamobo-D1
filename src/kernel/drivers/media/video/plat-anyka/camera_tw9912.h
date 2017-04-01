@@ -110,7 +110,7 @@ static const T_U16 INIT_TAB[] =
      0xE8 , 0x0F  ,  // Y C V decoder mode
      0xE9 , 0x61  ,  // clock control deinterlacing mode 
     
-	DELAY_FLAG, 100,	//DELAY= 100
+	//DELAY_FLAG, 100,	//DELAY= 100
 
 
     END_FLAG, END_FLAG

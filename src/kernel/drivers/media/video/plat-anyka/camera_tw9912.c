@@ -77,7 +77,7 @@ static T_BOOL camera_set_param(const T_U16 tabParameter[])
 { 
     int i = 0;
     T_U8 temp_value;
-    T_U16 data;	
+   	
 
     while (1)
     {
@@ -91,13 +91,11 @@ static T_BOOL camera_set_param(const T_U16 tabParameter[])
         }
         else
         {
-        	data = tabParameter[i + 1];
-            sccb_write_word(CAMERA_SCCB_ADDR, tabParameter[i], &data, 1);
-
-            if ((tabParameter[i] != 0x0000) || (tabParameter[i] != 0x0022) 
-			|| (tabParameter[i] != 0x0100) || (tabParameter[i] != 0x0101))
+            sccb_write_data(CAMERA_SCCB_ADDR, tabParameter[i], (T_U8 *)(&tabParameter[i + 1]), 1);
+/*
+            if (((tabParameter[i] != 0xFF) || (tabParameter[i] != 0xFE) || (tabParameter[i] != 0xFD)))
             {                
-                temp_value = sccb_read_short(CAMERA_SCCB_ADDR, tabParameter[i]);
+                temp_value = sccb_read_data(CAMERA_SCCB_ADDR, tabParameter[i]);
                 if (temp_value != tabParameter[i + 1])
                 {
                     akprintf(C1, M_DRVSYS, "set parameter error!\n");
@@ -106,6 +104,7 @@ static T_BOOL camera_set_param(const T_U16 tabParameter[])
                     return AK_FALSE;
                 }
             }
+	    */
         }
         
         i += 2;
@@ -133,7 +132,7 @@ static T_VOID read_camera_reg(const T_U16 tabParameter[])
 static T_VOID camera_setup(const T_U16 tabParameter[])
 {
     int i = 0;
-    T_U16 data;	
+    	
 
     while (1)
     {
@@ -147,8 +146,8 @@ static T_VOID camera_setup(const T_U16 tabParameter[])
         }
         else
         {
-        	data = tabParameter[i + 1];
-            sccb_write_word(CAMERA_SCCB_ADDR, tabParameter[i], &data, 2);
+        //	data = tabParameter[i + 1];
+            sccb_write_data(CAMERA_SCCB_ADDR, tabParameter[i],(T_U8 *)&tabParameter[i+1], 1);
         }
         i += 2;
     }
