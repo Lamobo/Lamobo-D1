@@ -72,8 +72,7 @@ finish_station_connect()
 
 connet_wpa()
 {
-	echo "camera.sh stop from wifi_connect.sh (wpa)"
-#	/etc/init.d/camera.sh stop
+	/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	start_wifi_service
 	NET_ID=""
@@ -96,8 +95,7 @@ connet_wpa()
 
 connet_wep()
 {
-	echo "camera.sh stop from wifi_connect.sh (wep)"
-	#/etc/init.d/camera.sh stop
+	/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	start_wifi_service
 	NET_ID=""
@@ -120,8 +118,7 @@ connet_wep()
 
 connet_open()
 {
-	echo "camera.sh stop from wifi_connect.sh (connet_open)"
-	#/etc/init.d/camera.sh stop
+	/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	start_wifi_service
 	NET_ID=""
@@ -139,8 +136,7 @@ connet_open()
 
 connect_adhoc()
 {
-	echo "camera.sh stop from wifi_connect.sh (connect_adhoc)"
-	#/etc/init.d/camera.sh stop
+	/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	start_wifi_service
 	NET_ID=""

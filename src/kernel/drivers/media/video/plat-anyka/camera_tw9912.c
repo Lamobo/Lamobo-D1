@@ -30,7 +30,7 @@
 #define CAMERA_SCCB_ADDR        0x88
 #define CAMERA_TW9912_ID 	0x60
 
-#define TW9912_CAMERA_MCLK      27
+#define TW9912_CAMERA_MCLK      24
 
 static T_CAMERA_TYPE camera_tw9912_type = CAMERA_2M;
 static T_NIGHT_MODE night_mode = CAMERA_DAY_MODE;

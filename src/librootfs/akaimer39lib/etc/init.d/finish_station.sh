@@ -30,8 +30,7 @@ check_ip_and_start ()
 	 ifconfig eth0 down
 	 ifconfig eth0 up
 	fi
-	echo "Start camera.sh from finish station.."
-#	/etc/init.d/camera.sh start
+	/etc/init.d/camera.sh start
 	/etc/init.d/wifi_led.sh wps_led blink 480 480
 }
 check_finish_connect()
@@ -75,8 +74,7 @@ do
 	if [ "$stat" != "wpa_state=COMPLETED" ]
 	then
 		/etc/init.d/wifi_led.sh wps_led blink 250 250
-	echo "camera.sh stop from finish_station"
-#		/etc/init.d/camera.sh stop
+		/etc/init.d/camera.sh stop
 		check_finish_connect
 	fi
 

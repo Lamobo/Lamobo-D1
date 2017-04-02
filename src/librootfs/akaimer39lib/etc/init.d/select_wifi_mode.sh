@@ -29,8 +29,7 @@ check_wifi_mode()
 
 do_select_mode()
 {
-	echo "camera.sh stop from select_wifi_mode.sh"
-#	/etc/init.d/camera.sh stop
+	/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	/etc/init.d/change_wifi_mode.sh $1
 	/etc/init.d/wifi_start.sh
@@ -45,7 +44,7 @@ echo "$0 $@"
 /etc/init.d/is_wifi_mode.sh
 if [ "$?" -eq "0" ]
 then
-	echo "You are not in wifi mode!"
+	echo You are not in wifi mode!
 	exit 1
 fi
 

@@ -40,12 +40,12 @@ start ()
 	network=`pgrep hostapd`
 	if [ "$network" = "" ]
 	then
-#		echo "LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300"
+		echo "LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300"
 #		LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300 &
 		akipcserver &
 		exit 0
 	else
-#		echo "LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300 -S"	
+		echo "LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300 -S"	
 #		LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300 -S &
 		akipcserver &
 		exit 1
