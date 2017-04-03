@@ -472,7 +472,7 @@ static int aksensor_g_fmt(struct v4l2_subdev *sd,
 	mf->height	= priv->win.height;
 	mf->code	= priv->cfmt->code;
 	mf->colorspace	= priv->cfmt->colorspace;
-	mf->field		= V4L2_FIELD_INTERLACED_BT; 		//V4L2_FIELD_NONE								
+	mf->field		= V4L2_FIELD_NONE; 		//							
 
 	return 0;
 }

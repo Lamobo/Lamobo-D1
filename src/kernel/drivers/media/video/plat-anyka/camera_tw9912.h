@@ -21,11 +21,11 @@
 static const T_U16 INIT_TAB[] = 
 {
 
-	/*
+	
 	 0xFF , 0x00  ,  //; Page 00  
    
      0x02 , 0x40  ,
-     0x03 , 0x24  ,  // data group,pclk output, sync tri-state
+     0x03 , 0x20  ,  // data group,pclk output, sync tri-state
      0x04 , 0x00  ,
      0x05 , 0x12  ,  // Progressive BT.656, HSY&VSY Deinterlacer
      0x06 , 0x00  ,  // C & V ADC power down
@@ -114,7 +114,7 @@ static const T_U16 INIT_TAB[] =
     
 	//DELAY_FLAG, 100,	//DELAY= 100
 
-/*
+
 
 
 /*
@@ -222,7 +222,7 @@ static const T_U16 INIT_TAB[] =
 	0xE9, 0x61,
 	//{0xff, 0xff}
 */	
-
+/*
 	0xFF, 0x00,
     0x01, 0x78,
     0x02, 0x40,
@@ -324,7 +324,7 @@ static const T_U16 INIT_TAB[] =
     0xE7, 0x2A,
     0xE8, 0x0F,
     0xE9, 0x61,
-
+*/
 
     END_FLAG, END_FLAG
 };
