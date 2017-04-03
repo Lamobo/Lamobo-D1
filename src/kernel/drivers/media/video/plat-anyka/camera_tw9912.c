@@ -28,9 +28,9 @@
 #define CAM_RESET_LEVEL         0
 
 #define CAMERA_SCCB_ADDR        0x88
-#define CAMERA_TW9912_ID 	0x60
+#define CAMERA_TW9912_ID 		0x60
 
-#define TW9912_CAMERA_MCLK      24
+#define TW9912_CAMERA_MCLK      27
 
 static T_CAMERA_TYPE camera_tw9912_type = CAMERA_2M;
 static T_NIGHT_MODE night_mode = CAMERA_DAY_MODE;
@@ -76,7 +76,7 @@ static T_U32 cam_tw9912_read_id(T_VOID)
 static T_BOOL camera_set_param(const T_U16 tabParameter[])
 { 
     int i = 0;
-    T_U8 temp_value;
+    //T_U8 temp_value;
    	
 
     while (1)
@@ -1101,31 +1101,18 @@ static const struct v4l2_ctrl_config tw9912_ctrls[] = {
  * supported format list
  */
 static const struct aksensor_color_format tw9912_formats[] = {
-	
-	{
-		.code = V4L2_MBUS_FMT_YUYV8_2X8,
-		.colorspace = V4L2_COLORSPACE_SRGB,
-	},
-	
-	
 	/*
 	{
-		.code		= V4L2_MBUS_FMT_RGB555_2X8_PADHI_LE,
-		.colorspace = V4L2_COLORSPACE_SRGB,
+		.code = V4L2_MBUS_FMT_YUYV8_2X8,
+		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
+	*/
 	{
-		.code		= V4L2_MBUS_FMT_RGB555_2X8_PADHI_BE,
-		.colorspace = V4L2_COLORSPACE_SRGB,
+		.code = V4L2_MBUS_FMT_UYVY8_2X8,
+		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
-	{
-		.code		= V4L2_MBUS_FMT_RGB565_2X8_LE,
-		.colorspace = V4L2_COLORSPACE_SRGB,
-	},
-	{
-		.code		= V4L2_MBUS_FMT_RGB565_2X8_BE,
-		.colorspace = V4L2_COLORSPACE_SRGB,
-	},
-	 */
+	
+	
 };
 
 static const struct aksensor_win_size tw9912_win[] = {

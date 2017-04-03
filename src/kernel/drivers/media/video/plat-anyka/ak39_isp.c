@@ -10,7 +10,7 @@
 #include "ak39_isp.h"
 #include "isp_param.h"
 
-//#define ISP_DEBUG
+#define ISP_DEBUG
 #ifdef ISP_DEBUG
 #define isp_dbg(stuff...)		printk(KERN_INFO " ISP: " stuff)
 #else

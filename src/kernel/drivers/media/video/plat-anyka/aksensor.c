@@ -472,7 +472,7 @@ static int aksensor_g_fmt(struct v4l2_subdev *sd,
 	mf->height	= priv->win.height;
 	mf->code	= priv->cfmt->code;
 	mf->colorspace	= priv->cfmt->colorspace;
-	mf->field		= V4L2_FIELD_NONE;
+	mf->field		= V4L2_FIELD_INTERLACED_BT; 		//V4L2_FIELD_NONE								
 
 	return 0;
 }
@@ -679,7 +679,7 @@ static int aksensor_g_mbus_config(struct v4l2_subdev *sd,
 	cfg->flags = V4L2_MBUS_PCLK_SAMPLE_RISING | V4L2_MBUS_MASTER |
 		V4L2_MBUS_VSYNC_ACTIVE_HIGH | V4L2_MBUS_HSYNC_ACTIVE_HIGH |
 		V4L2_MBUS_DATA_ACTIVE_HIGH;
-	cfg->type = V4L2_MBUS_PARALLEL;
+	cfg->type =  V4L2_MBUS_PARALLEL;		//V4L2_MBUS_BT656?
 	cfg->flags = soc_camera_apply_board_flags(icl, cfg);
 	SENDBG("leave %s\n", __func__);
 

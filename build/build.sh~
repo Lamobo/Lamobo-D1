@@ -57,6 +57,8 @@ clean_kernel()
 {
     echo Cleaning kernel...
     $RM $DEV_ROOT/output/kernel
+    $RM $DEV_ROOT/output/zImage
+    $RM $DEV_ROOT/output/D1*
     cd $DEV_ROOT/src/kernel
     # restore kernel/lib/libakaec.a and kernel/lib/libfha.a
     git checkout lib
@@ -138,6 +140,8 @@ clean_rootfs()
     cd $DEV_ROOT/src/ipcamera
     $MAKE clean
     $RM $DEV_ROOT/src/ipcamera/rootfs/rootfs.tar.gz
+    $RM $DEV_ROOT/output/root*
+
 }
 
 build_samples()
@@ -267,17 +271,17 @@ EOF
 
 build_all()
 {
-    build_tools
+    #build_tools
     $MKDIR $DEV_ROOT/output/local/bin
     $MKDIR $DEV_ROOT/output/local/lib
     config_kernel
     build_kernel
-    config_busybox
-    build_busybox
-    build_rootfs
-    build_samples
-    build_node
-    build_updater
+    #config_busybox
+    #build_busybox
+    #build_rootfs
+    #build_samples
+    #build_node
+    #build_updater
     pack_basic
     pack_extra
 }
@@ -286,13 +290,13 @@ clean_all()
 {
     #clean_tools
     clean_kernel
-    clean_busybox
-    clean_rootfs
-   # clean_samples
-   # clean_node
-   # clean_updater
-    cd $DEV_ROOT
-    $RM $DEV_ROOT/output
+   # clean_busybox
+   # clean_rootfs
+    #clean_samples
+    #clean_node
+    #clean_updater
+    #cd $DEV_ROOT
+    #$RM $DEV_ROOT/output
     git status -s --ignored
 }
 

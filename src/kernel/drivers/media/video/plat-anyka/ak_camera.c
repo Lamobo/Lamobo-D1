@@ -1443,7 +1443,7 @@ static int ak_camera_set_bus_param(struct soc_camera_device *icd)
 	struct v4l2_subdev *sd = soc_camera_to_subdev(icd);
 	struct soc_camera_host *ici = to_soc_camera_host(icd->parent);
 	struct ak_camera_dev *pcdev = ici->priv;
-	struct v4l2_mbus_config cfg = {.type = V4L2_MBUS_PARALLEL,};	
+	struct v4l2_mbus_config cfg = {.type =  V4L2_MBUS_PARALLEL,};	//V4L2_MBUS_BT656
 	unsigned long common_flags;
 	int ret;
 
@@ -1525,7 +1525,7 @@ static void ak_camera_init_videobuf(struct videobuf_queue *q,
 
 	videobuf_queue_dma_contig_init(q, &ak_videobuf_ops, icd->parent,
 				&pcdev->lock, V4L2_BUF_TYPE_VIDEO_CAPTURE,
-				V4L2_FIELD_NONE,
+				V4L2_FIELD_INTERLACED_BT,						//V4L2_FIELD_NONE
 				sizeof(struct ak_buffer), icd, &icd->video_lock);
 
 	CAMDBG("leave %s\n", __func__);
