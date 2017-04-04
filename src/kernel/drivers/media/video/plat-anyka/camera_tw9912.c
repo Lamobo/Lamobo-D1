@@ -30,7 +30,7 @@
 #define CAMERA_SCCB_ADDR        0x88
 #define CAMERA_TW9912_ID 		0x60
 
-#define TW9912_CAMERA_MCLK      27
+#define TW9912_CAMERA_MCLK      54
 
 static T_CAMERA_TYPE camera_tw9912_type = CAMERA_2M;
 static T_NIGHT_MODE night_mode = CAMERA_DAY_MODE;
@@ -253,27 +253,12 @@ static T_VOID cam_tw9912_set_mode(T_CAMERA_MODE mode)
         break;
     case CAMERA_MODE_PREV:
         camera_setup(PREV_MODE_TAB);
-        
-        if (CAMERA_NIGHT_MODE == night_mode)
-        {
-            camera_setup(NIGHT_MODE_TAB);
-        }
         break;
     case CAMERA_MODE_REC:
         camera_setup(RECORD_MODE_TAB);
-
-        if (CAMERA_NIGHT_MODE == night_mode)
-        {
-            camera_setup(NIGHT_MODE_TAB);
-        }
         break;
     case CAMERA_MODE_720P:
         camera_setup(RECORD_720P_TAB);
-
-        if (CAMERA_NIGHT_MODE == night_mode)
-        {
-            camera_setup(NIGHT_MODE_TAB);
-        }
         break;
     default:
         s_tw9912_CurMode = CAMERA_MODE_VGA;
@@ -1101,14 +1086,14 @@ static const struct v4l2_ctrl_config tw9912_ctrls[] = {
  * supported format list
  */
 static const struct aksensor_color_format tw9912_formats[] = {
-	/*
+	
 	{
-		.code = V4L2_MBUS_FMT_YUYV8_2X8,
+		.code = V4L2_MBUS_FMT_YUYV8_2X8,		//0x2008
 		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
-	*/
+	
 	{
-		.code = V4L2_MBUS_FMT_UYVY8_2X8,
+		.code = V4L2_MBUS_FMT_VYUY8_2X8, 		//0x2007
 		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
 	

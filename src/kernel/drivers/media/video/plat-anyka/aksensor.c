@@ -24,13 +24,16 @@
 #include <mach/gpio.h>
 
 #define SENSOR_DEBUG
+
 #ifdef SENSOR_DEBUG
-#define sensor_dbg(fmt...) 			printk(KERN_INFO "Sensor: " fmt)
+#define sensor_dbg(fmt...) 			printk(KERN_INFO "aksensor: " fmt)
+#define SENDBG(fmt, args...) 		printk(KERN_INFO "aksensor: " fmt, ## args)
+
 #else
 #define sensor_dbg(fmt, args...) 	do{}while(0)
+#define SENDBG(fmt, args...) 		do{}while(0)
 #endif 
 
-#define SENDBG(fmt, args...) 		do{}while(0)
 
 static struct sensor_info *cur_sensor_info; 
 static const struct aksensor_color_format *cur_sensor_cfmts;
@@ -465,7 +468,10 @@ static int aksensor_g_fmt(struct v4l2_subdev *sd,
 		SENDBG("select VGA for first time\n");
 		ret = aksensor_get_params(client, V4L2_MBUS_FMT_YUYV8_2X8);
 		if (ret < 0)
+		{
+			SENDBG("%s: invalid sensor MBUS format!\n", __func__);		
 			return ret;
+		}
 	}
 
 	mf->width	= priv->win.width;
@@ -679,7 +685,7 @@ static int aksensor_g_mbus_config(struct v4l2_subdev *sd,
 	cfg->flags = V4L2_MBUS_PCLK_SAMPLE_RISING | V4L2_MBUS_MASTER |
 		V4L2_MBUS_VSYNC_ACTIVE_HIGH | V4L2_MBUS_HSYNC_ACTIVE_HIGH |
 		V4L2_MBUS_DATA_ACTIVE_HIGH;
-	cfg->type =  V4L2_MBUS_PARALLEL;		//V4L2_MBUS_BT656?
+	cfg->type =  V4L2_MBUS_BT656;		//V4L2_MBUS_PARALLEL?
 	cfg->flags = soc_camera_apply_board_flags(icl, cfg);
 	SENDBG("leave %s\n", __func__);
 

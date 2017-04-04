@@ -43,12 +43,14 @@
 
 #define CAMIF_DEBUG
 #ifdef CAMIF_DEBUG
-#define isp_dbg(fmt...)			printk(KERN_INFO " ISP: " fmt)
+#define isp_dbg(fmt...)			printk(KERN_INFO "ak_camera: " fmt)
+#define CAMDBG(fmt, args...)	printk(KERN_INFO "ak_camera: " fmt, ## args)
 #else
 #define isp_dbg(fmt, args...)	do{}while(0)
+#define CAMDBG(fmt, args...) 	do{}while(0)
 #endif 
 
-#define CAMDBG(fmt, args...)	do{}while(0)
+
 
 struct ak_buffer {
 	struct videobuf_buffer vb;
@@ -842,7 +844,7 @@ static int ak_camera_add_device(struct soc_camera_device *icd)
 	//get sensor clk and  power up the sensor
 	cis_sclk = v4l2_subdev_call(sd, core, init, 0);
 	if (cis_sclk <= 0) {
-		cis_sclk = 24;
+		cis_sclk = 54;
 	}
 	
 	//set cis_sclk, the sensor present working 24MHz
@@ -1196,12 +1198,12 @@ static int ak_camera_get_formats(struct soc_camera_device *icd, unsigned int idx
 	  *	FIXME1: We miss jpeg here.
 	  *  FIXME2: the output squence of YUV is actually UYVY.
 	  */
-	fmt = soc_mbus_get_fmtdesc(V4L2_MBUS_FMT_YUYV8_2X8);
+	fmt = soc_mbus_get_fmtdesc(V4L2_MBUS_FMT_YUYV8_2X8); //return pointer to struct v4l2_mbus_pixelcode enum in sensor driver
 	if (!fmt) {
-		dev_warn(dev, "unsupported format code #%u: %d\n", idx, code);
+		dev_warn(dev, "Unsupported pixel format code! #%u: %d!\n", idx, code);
 		return 0;
 	}
-	CAMDBG("get format %s code=%d from sensor\n", fmt->name, code);
+	CAMDBG("!!__!!_get format %s code=%d from sensor\n", fmt->name, code);
 	
 	/* Generic pass-through */
 	formats++;
@@ -1287,7 +1289,7 @@ static unsigned int isp_get_sensor_param(struct isp_struct *isp, struct isp_conf
 	struct isp_mode_info *mode_info;
 	int retval = 0, *parm_type;
 	
-	CAMDBG("entry %s\n", __func__);
+	CAMDBG("_!_entry %s\n", __func__);
 
 	parm_type = (int *)a->parm.raw_data;
 	switch(*parm_type) {
@@ -1443,7 +1445,7 @@ static int ak_camera_set_bus_param(struct soc_camera_device *icd)
 	struct v4l2_subdev *sd = soc_camera_to_subdev(icd);
 	struct soc_camera_host *ici = to_soc_camera_host(icd->parent);
 	struct ak_camera_dev *pcdev = ici->priv;
-	struct v4l2_mbus_config cfg = {.type =  V4L2_MBUS_PARALLEL,};	//V4L2_MBUS_BT656
+	struct v4l2_mbus_config cfg = {.type =  V4L2_MBUS_BT656,};	//V4L2_MBUS_PARALLEL
 	unsigned long common_flags;
 	int ret;
 
@@ -1666,9 +1668,9 @@ static int ak_camera_probe(struct platform_device *pdev)
 		pcdev->mclk = pcdev->pdata->mclk;
 	else {
 		dev_warn(&pdev->dev,
-			 "Platform mclk == 0! Please, fix your platform data. "
-			 "Using default 24MHz\n");
-		pcdev->mclk = 24;
+			 "Platform mclk == 0! Please, fix your platform data.\n"
+			 "Using default 54MHz;)\n");
+		pcdev->mclk = 54;
 	}
 
 	if (pcdev->pdata->rf_led.pin > 0) 
