@@ -1086,15 +1086,15 @@ static const struct v4l2_ctrl_config tw9912_ctrls[] = {
  * supported format list
  */
 static const struct aksensor_color_format tw9912_formats[] = {
-	
+	/*
 	{
 		.code = V4L2_MBUS_FMT_YUYV8_2X8,		//0x2008
-		.colorspace = V4L2_COLORSPACE_SRGB,
+		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
-	
+	*/
 	{
 		.code = V4L2_MBUS_FMT_VYUY8_2X8, 		//0x2007
-		.colorspace = V4L2_COLORSPACE_SRGB,
+		.colorspace = V4L2_COLORSPACE_JPEG,
 	},
 	
 	

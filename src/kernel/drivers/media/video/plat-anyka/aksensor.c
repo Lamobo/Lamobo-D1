@@ -685,7 +685,7 @@ static int aksensor_g_mbus_config(struct v4l2_subdev *sd,
 	cfg->flags = V4L2_MBUS_PCLK_SAMPLE_RISING | V4L2_MBUS_MASTER |
 		V4L2_MBUS_VSYNC_ACTIVE_HIGH | V4L2_MBUS_HSYNC_ACTIVE_HIGH |
 		V4L2_MBUS_DATA_ACTIVE_HIGH;
-	cfg->type =  V4L2_MBUS_BT656;		//V4L2_MBUS_PARALLEL?
+	cfg->type =  V4L2_MBUS_PARALLEL;		
 	cfg->flags = soc_camera_apply_board_flags(icl, cfg);
 	SENDBG("leave %s\n", __func__);
 
