@@ -844,7 +844,7 @@ static int ak_camera_add_device(struct soc_camera_device *icd)
 	//get sensor clk and  power up the sensor
 	cis_sclk = v4l2_subdev_call(sd, core, init, 0);
 	if (cis_sclk <= 0) {
-		cis_sclk = 54;
+		cis_sclk = 24;
 	}
 	
 	//set cis_sclk, the sensor present working 24MHz
@@ -1198,7 +1198,7 @@ static int ak_camera_get_formats(struct soc_camera_device *icd, unsigned int idx
 	  *	FIXME1: We miss jpeg here.
 	  *  FIXME2: the output squence of YUV is actually UYVY.
 	  */
-	fmt = soc_mbus_get_fmtdesc(V4L2_MBUS_FMT_YUYV8_2X8); //return pointer to struct v4l2_mbus_pixelcode enum in sensor driver
+	fmt = soc_mbus_get_fmtdesc(V4L2_MBUS_FMT_VYUY8_2X8); // V4L2_MBUS_FMT_YUYV8_2X8 return pointer to struct v4l2_mbus_pixelcode enum in sensor driver
 	if (!fmt) {
 		dev_warn(dev, "Unsupported pixel format code! #%u: %d!\n", idx, code);
 		return 0;
@@ -1669,8 +1669,8 @@ static int ak_camera_probe(struct platform_device *pdev)
 	else {
 		dev_warn(&pdev->dev,
 			 "Platform mclk == 0! Please, fix your platform data.\n"
-			 "Using default 54MHz;)\n");
-		pcdev->mclk = 54;
+			 "Using default 24MHz;)\n");
+		pcdev->mclk = 24;
 	}
 
 	if (pcdev->pdata->rf_led.pin > 0) 

@@ -466,7 +466,7 @@ static int aksensor_g_fmt(struct v4l2_subdev *sd,
 
 	if (!priv->cfmt) {
 		SENDBG("select VGA for first time\n");
-		ret = aksensor_get_params(client, V4L2_MBUS_FMT_YUYV8_2X8);
+		ret = aksensor_get_params(client, V4L2_MBUS_FMT_VYUY8_2X8);	//V4L2_MBUS_FMT_YUYV8_2X8
 		if (ret < 0)
 		{
 			SENDBG("%s: invalid sensor MBUS format!\n", __func__);		
