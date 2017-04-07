@@ -1198,7 +1198,7 @@ static int ak_camera_get_formats(struct soc_camera_device *icd, unsigned int idx
 	  *	FIXME1: We miss jpeg here.
 	  *  FIXME2: the output squence of YUV is actually UYVY.
 	  */
-	fmt = soc_mbus_get_fmtdesc(V4L2_MBUS_FMT_VYUY8_2X8); // V4L2_MBUS_FMT_YUYV8_2X8 return pointer to struct v4l2_mbus_pixelcode enum in sensor driver
+	fmt = soc_mbus_get_fmtdesc(V4L2_MBUS_FMT_YUYV8_2X8); // V4L2_MBUS_FMT_YUYV8_2X8 return pointer to struct v4l2_mbus_pixelcode enum in sensor driver
 	if (!fmt) {
 		dev_warn(dev, "Unsupported pixel format code! #%u: %d!\n", idx, code);
 		return 0;
@@ -1223,8 +1223,9 @@ static int ak_camera_get_formats(struct soc_camera_device *icd, unsigned int idx
 		
 		if ((pcdev->def_mode != ISP_RGB_VIDEO_OUT)
 			&& (pcdev->def_mode != ISP_RGB_OUT)) {
+			
 			pcdev->def_mode = ISP_YUV_VIDEO_BYPASS;
-			//pcdev->def_mode = ISP_YUV_BYPASS;
+			//pcdev->def_mode = ISP_YUV_VIDEO_OUT;
 		}
 		pcdev->isp.cur_mode = pcdev->def_mode;
 		update_cur_mode_class(&pcdev->isp);

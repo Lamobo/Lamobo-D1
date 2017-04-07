@@ -466,7 +466,7 @@ static int aksensor_g_fmt(struct v4l2_subdev *sd,
 
 	if (!priv->cfmt) {
 		SENDBG("select VGA for first time\n");
-		ret = aksensor_get_params(client, V4L2_MBUS_FMT_VYUY8_2X8);	//V4L2_MBUS_FMT_YUYV8_2X8
+		ret = aksensor_get_params(client, V4L2_MBUS_FMT_YUYV8_2X8);	//V4L2_MBUS_FMT_YUYV8_2X8
 		if (ret < 0)
 		{
 			SENDBG("%s: invalid sensor MBUS format!\n", __func__);		
@@ -682,7 +682,7 @@ static int aksensor_g_mbus_config(struct v4l2_subdev *sd,
 	struct soc_camera_link *icl = soc_camera_i2c_to_link(client);
 
 	SENDBG("entry %s\n", __func__);
-	cfg->flags = V4L2_MBUS_PCLK_SAMPLE_RISING | V4L2_MBUS_MASTER |
+	cfg->flags = V4L2_MBUS_PCLK_SAMPLE_FALLING | V4L2_MBUS_MASTER |
 		V4L2_MBUS_VSYNC_ACTIVE_HIGH | V4L2_MBUS_HSYNC_ACTIVE_HIGH |
 		V4L2_MBUS_DATA_ACTIVE_HIGH;
 	cfg->type =  V4L2_MBUS_PARALLEL;		

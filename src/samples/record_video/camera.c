@@ -687,8 +687,8 @@ int camera_open(demo_setting* Setting)
 	if (force_format) {
 		fmt.fmt.pix.width       = Setting->width;
 		fmt.fmt.pix.height      = Setting->height;
-		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_VYUY;	//change to tw9912 fmt
-		fmt.fmt.pix.field       = V4L2_FIELD_NONE; 		//V4L2_FIELD_INTERLACED
+		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;	//change to tw9912 fmt
+		fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 		//V4L2_FIELD_INTERLACED
 
 		if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
 				errno_exit("VIDIOC_S_FMT");
