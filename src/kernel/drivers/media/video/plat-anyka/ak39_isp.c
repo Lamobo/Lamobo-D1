@@ -1171,7 +1171,7 @@ int isp_set_crop(struct isp_struct *isp, struct v4l2_rect rect)
 
 	isp->isp_ctrltbl[0] &= (3 << DSMP_RTO_BIT);
 	if (1/*YUV_DATA*/) {	//align four byte when YUV data input
-		rect.left = ALIGN(rect.left, 4);
+		rect.left = ALIGN(rect.left, 2);
 	}
 	isp->isp_ctrltbl[0] |= (rect.top << ISP_WIN_HEIGHT_OFFSET) | rect.left;
 	isp->isp_ctrltbl[1] = (rect.height << ISP_WIN_HEIGHT_OFFSET) | rect.width;
