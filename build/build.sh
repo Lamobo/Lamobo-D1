@@ -276,9 +276,9 @@ build_all()
     #$MKDIR $DEV_ROOT/output/local/lib
     config_kernel
     build_kernel
-    #config_busybox
-    #build_busybox
-    #build_rootfs
+    config_busybox
+    build_busybox
+    build_rootfs
   # build_samples
     #build_node
     #build_updater
@@ -290,8 +290,8 @@ clean_all()
 {
     #clean_tools
     clean_kernel
-   # clean_busybox
-   # clean_rootfs
+    clean_busybox
+    clean_rootfs
     #clean_samples
     #clean_node
     #clean_updater

@@ -85,7 +85,7 @@
 
 #define UEVENT_BUFFER_SIZE      2048
 
-#define KEY_DEBUG(fmt...)	 //printf(fmt)
+#define KEY_DEBUG(fmt, args...)	 printf(fmt, ## args)
 
 static int old_key = -1;
 static struct timeval start_time;
@@ -160,7 +160,7 @@ int check_file(void)
     return ret;
 }
 
-/* create the socket to recevie the uevent */
+/* create the socket to receive the uevent */
 static int init_hotplug_sock(void)
 {
     struct sockaddr_nl snl;
@@ -309,6 +309,8 @@ static int __do_gpio_key_0(double period)
     }
     else if (period < WIFI_MODE)
     {
+		
+		/*
         int mode = system("/etc/init.d/mode.sh");
         //station = 1
         //softap  = 2
@@ -325,6 +327,11 @@ static int __do_gpio_key_0(double period)
         }
 
         sprintf(cmd,"%s","/etc/init.d/wifi_start.sh keypress");
+        * */
+        sprintf(cmd,"%s","/mnt/record_video -w 720 -h 576");
+        
+        
+        
     }
     else if (period > UPDATE_IMAGE)
     {

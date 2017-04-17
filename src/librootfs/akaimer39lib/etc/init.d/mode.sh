@@ -2,8 +2,8 @@
 
 inifile="/etc/jffs2/camera.ini"
 mode=`awk 'BEGIN {FS="="}/\[wireless\]/{a=1} a==1&&$1~/^running/{gsub(/\"/,"",$2);gsub(/\;.*/, "", $2);gsub(/^[[:blank:]]*/,"",$2);print $2}' $inifile`
-softap="softap"
-statsion="station"
+#softap="softap"
+#statsion="station"
 
 echo mode is  $mode
 
