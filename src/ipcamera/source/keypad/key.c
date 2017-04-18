@@ -300,8 +300,8 @@ static inline __s32 i2c_smbus_write_byte_data(int file, __u8 command,
 static int __do_gpio_key_0(double period)
 {
     char cmd[128];
-    int fd,ret;
-    int start;
+    int ret;
+    //int start;
 
     if (period < 0)
     {
@@ -332,13 +332,13 @@ static int __do_gpio_key_0(double period)
         if (!rec_value)
         {
 			rec_value = 1;
-			sprintf(cmd,"%s","/mnt/record_video -w 720 -h 576");
+			sprintf(cmd,"%s","/etc/init.d/camera.sh start");
 		}
         
         else if (rec_value == 1)
         {
 			rec_value = 0;
-			sprintf(cmd,"%s","killall record_video");
+			sprintf(cmd,"%s","/etc/init.d/camera.sh stop");
 		}
         
         

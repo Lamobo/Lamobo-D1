@@ -468,8 +468,8 @@ static void Settings_Initialize( demo_setting *main )
 	// this memset. Only need to set non-zero values
 	// below.
 	memset( main, 0, sizeof(demo_setting) );
-	main->width		= 1280;			//实际编码图像的宽度，能被4整除
-	main->height		= 720;			//实际编码图像的长度，能被2整除 
+	main->width		= 720;	//1280;			//实际编码图像的宽度，能被4整除
+	main->height		= 576; //720;			//实际编码图像的长度，能被2整除 
 	main->kbpsmode = 0;//默认静态， 动态设置为1
 	main->qpHdr		= 30;			//初始的QP的值
 	main->iqpHdr		= 30;			//初始的iQP的值
