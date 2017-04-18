@@ -88,6 +88,7 @@
 #define KEY_DEBUG(fmt, args...)	 printf(fmt, ## args)
 
 static int old_key = -1;
+static int rec_value = 0;
 static struct timeval start_time;
 
 /**
@@ -328,7 +329,17 @@ static int __do_gpio_key_0(double period)
 
         sprintf(cmd,"%s","/etc/init.d/wifi_start.sh keypress");
         * */
-        sprintf(cmd,"%s","/mnt/record_video -w 720 -h 576");
+        if (!rec_value)
+        {
+			rec_value = 1;
+			sprintf(cmd,"%s","/mnt/record_video -w 720 -h 576");
+		}
+        
+        else if (rec_value == 1)
+        {
+			rec_value = 0;
+			sprintf(cmd,"%s","killall record_video");
+		}
         
         
         
@@ -466,6 +477,8 @@ static int do_gpio_key_1(struct input_event *event){
     sleep(1);
     system("/etc/init.d/wifi_start.sh keypress &");
     return 0;//cause of 0x34 error, we just start wifi and return.
+    
+    
     if(event->value==0)
         return -1;
     fd = open("/dev/i2c-0",O_RDWR);
