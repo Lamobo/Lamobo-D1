@@ -21,8 +21,8 @@ set_ssid_and_password()
 	ssid=`awk 'BEGIN {FS="="}/\[softap\]/{a=1} a==1&&$1~/s_ssid/{gsub(/\"/,"",$2);gsub(/\;.*/, "", $2);gsub(/^[[:blank:]]*/,"",$2);print $2}' $inifile`
 	password=`awk 'BEGIN {FS="="}/\[softap\]/{a=1} a==1&&$1~/s_password/{gsub(/\"/,"",$2);gsub(/\;.*/, "", $2);gsub(/^[[:blank:]]*/,"",$2);print $2}' $inifile`
 
-    suffix=`ifconfig wlan0  |grep HWaddr | awk  '{print $5}' |awk -F ":" '{print $4$5$6}'`
-    ssid=${ssid}_${suffix}
+ #   suffix=`ifconfig wlan0  |grep HWaddr | awk  '{print $5}' |awk -F ":" '{print $4$5$6}'`
+  #  ssid=${ssid}_${suffix}
 
 	/etc/init.d/device_save.sh all "$ssid" $password
 	echo "ssid=$ssid password=$password"
