@@ -344,8 +344,16 @@ static const T_U16 SXGA_MODE_TAB[] =
 {
     END_FLAG, END_FLAG
 };
-static const T_U16 XGA_MODE_TAB[] = 
+static const T_U16 XGA_MODE_TAB[] = //1024x768
 {
+	 0xFF , 0x00,
+ 
+	 0x07, 0x33,	
+	 0x08, 0x12,	
+	 0x09, 0x00,
+	 0x0A, 0x10,
+	 0x0B, 0xFF, 
+	 
     END_FLAG, END_FLAG
 };
 static const T_U16 VGA_MODE_TAB[] = 

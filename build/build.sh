@@ -279,7 +279,7 @@ build_all()
     #config_busybox
     #build_busybox
     build_rootfs
-  # build_samples
+   build_samples
     #build_node
     #build_updater
     pack_basic
@@ -292,7 +292,7 @@ clean_all()
     #clean_kernel
     #clean_busybox
     clean_rootfs
-    #clean_samples
+    clean_samples
     #clean_node
     #clean_updater
     cd $DEV_ROOT
