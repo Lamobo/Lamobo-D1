@@ -476,7 +476,7 @@ T_pSTR MakeFileName()
         rec_count = iniparser_getint(ini, "recoder:count", 0);
     }
 	//make filename 
-		sprintf( astrFileName,"%06d%s",  rec_count, FILE_SUFFIZ );
+	sprintf( astrFileName,"%s%06d%s", OUR_FILE_PREFIX, rec_count, FILE_SUFFIZ );
 		logi( "Filename set to %s\n", astrFileName );
 
     rec_count++;
@@ -499,7 +499,7 @@ T_pSTR MakeFileName()
 
 
 	// plus the end bit, and 5 characters with the same name to be added. "_ 1 ~ 1024"
-	iPathLen = strlen( astrFileName ) + 6;
+	iPathLen = strlen(OUR_FILE_PREFIX) + strlen( astrFileName ) + 6;
 	strCompletePath = (T_pSTR)malloc( iPathLen );
 	if ( NULL == strCompletePath ) {
 		loge( "MakeFileName::out of memory!\n" );
