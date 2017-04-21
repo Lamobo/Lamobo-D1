@@ -8,8 +8,17 @@
 #include "Tool.h"
 #include "log.h"
 
+
+#define SIGN_FILE_NAME							".LMR_RecordManager_Sign"
+#define FILE_SUFFIZ								".avi"
+#define DIR_SEPARATOR							'/'
+#define REC_PATH								"/mnt/"
+#define OUR_FILE_PREFIX							"REC_NVD_"
+#define INI_RECORDER                            "/etc/jffs2/camera.ini"
+
+
 /**
-* @brief   judge the file or dir exists?
+* @brief   judge the file or dir exists?"/mnt"
 * 
 * @author hankejia
 * @date 2012-07-05
@@ -445,3 +454,82 @@ signed long long  GetDiskFreeSize( T_pSTR pstrRecPath )
 	return (signed long long)(disk_statfs.f_bavail) * (signed long long)(disk_statfs.f_bsize) >> 20;
 }
 
+int rec_count = 0;
+T_pSTR MakeFileName()
+{
+	T_CHR astrFileName[30];
+	T_pSTR strCompletePath = NULL;
+	T_pSTR strAdd = NULL;
+	T_S32 iPathLen = 0, iIndex = 0;
+	//struct tm *tnow = GetCurTime();
+
+	bzero( astrFileName, sizeof( astrFileName ) );
+	/*
+	if ( tnow == NULL ) {
+		loge( "can't get current time, make file name will exit!\n" );
+		return NULL;
+	}
+	*/
+    dictionary * ini = iniparser_load(INI_RECORDER);
+
+    if(ini){
+        rec_count = iniparser_getint(ini, "recoder:count", 0);
+    }
+	//make filename 
+		sprintf( astrFileName,"%06d%s",  rec_count, FILE_SUFFIZ );
+		logi( "Filename set to %s\n", astrFileName );
+
+    rec_count++;
+    if(rec_count > 999999)
+        rec_count = 1;
+    if(ini){
+        char cct[16];
+        sprintf(cct,"%d", rec_count);
+        //write new count to dictionary
+        iniparser_set(ini,"recoder:count",cct);
+        FILE *fp = fopen(INI_RECORDER, "w");
+        if(fp){
+			//write new count to ini file
+            iniparser_dump_ini(ini, fp);
+            fclose(fp);
+        }
+        // Free all memory associated to an ini dictionary
+        iniparser_freedict(ini);
+    }
+
+
+	// plus the end bit, and 5 characters with the same name to be added. "_ 1 ~ 1024"
+	iPathLen = strlen( astrFileName ) + 6;
+	strCompletePath = (T_pSTR)malloc( iPathLen );
+	if ( NULL == strCompletePath ) {
+		loge( "MakeFileName::out of memory!\n" );
+		return (char*)NULL;
+	}
+
+	bzero( strCompletePath, iPathLen );
+
+	//strcpy( strCompletePath, REC_PATH );
+	strcat( strCompletePath, astrFileName );
+
+	//if file Exists
+	strAdd = strrchr( strCompletePath, '.' );
+	while (IsExists(strCompletePath)) {
+		++iIndex;
+		//delete all after '.' (extention)
+		bzero( strAdd, strlen( strAdd ) );
+		//+aditional counter to filename
+		sprintf( strAdd, "_%d", (int)iIndex );
+		//add extention
+		strcat( strCompletePath, FILE_SUFFIZ );
+		
+		if ( iIndex > 1024 ) {
+			logi( "the dir is file full!\n" );
+			break;
+		}
+	}
+	/* ??don't need
+	memset(g_filename, 0x00, 1024);
+	memcpy(g_filename, strCompletePath, strlen(strCompletePath));
+	*/
+	return strCompletePath;
+}

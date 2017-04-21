@@ -20,7 +20,7 @@ LOCAL_MODULE := record_video
 
 PREFIX := arm-none-linux-gnueabi-
 
-LOCAL_SHARED_LIBRARIES := akuio akmedialib akaudiocodec akaudiofilter akstreamenclib asound
+LOCAL_SHARED_LIBRARIES := iniparser akuio akmedialib akaudiocodec akaudiofilter akstreamenclib asound
 
 LOCAL_C_INCLUDES := ../../librootfs/akmedialib/include/akmedialib \
                     ../../librootfs/akmedialib/include \

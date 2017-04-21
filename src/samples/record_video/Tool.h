@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include "headers.h"
+#include "iniparser.h"
 
 /**
 * @brief   judge the file or dir exists?
@@ -140,6 +141,9 @@ T_U32 ColorConvert_RgbToYuv(T_U32 color888);
 T_S64 GetDiskSize( T_pSTR pstrRecPath );
 
 signed long long GetDiskFreeSize( T_pSTR pstrRecPath );
+
+
+T_pSTR MakeFileName();
 
 
 #ifdef __cplusplus

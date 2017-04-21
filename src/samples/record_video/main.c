@@ -23,14 +23,16 @@
 #include "SDcard.h"
 #include "Tool.h"
 
-#define FILE_NAME_LEN 12
+#define FILE_NAME_LEN 1024
 #define MAX_WIDTH	1280
 #define MAX_HEIGHT	720
 int g_exit = 0;
 int g_width = 0;
 int g_height = 0;
 
-const char* avi_fname_1 = "test.avi";
+static char avi_fname_1[FILE_NAME_LEN];
+
+//const char* avi_fname_1 = "test.avi";
 const char* avi_fname_2 = "test_2.avi";
 
 const char* mp4_fname_1 = "test.mp4";
@@ -439,15 +441,17 @@ int main( int argc, char **argv )
 	//mux_open
 	T_MUX_INPUT mux_input1;
 	T_MUX_INPUT mux_input2;
-	char filename[FILE_NAME_LEN];
 	memset(&mux_input1, 0, sizeof(T_MUX_INPUT));
 	memset(&mux_input2, 0, sizeof(T_MUX_INPUT));	
+	
+	char filename[FILE_NAME_LEN];
 	memset(filename, 0, FILE_NAME_LEN);
 	
 	mux_initPara(&mux_input1, ext_gSettings, 0);
 	
 	if( ext_gSettings->filetype == 0)
-		memcpy(filename, avi_fname_1, strlen(avi_fname_1));
+		filename = MakeFileName();
+		//memcpy(filename, avi_fname_1, strlen(avi_fname_1));
 	else
 		memcpy(filename, mp4_fname_1, strlen(mp4_fname_1));
 	
