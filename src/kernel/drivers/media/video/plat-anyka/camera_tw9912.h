@@ -30,10 +30,10 @@ static const T_U16 INIT_TAB[] =
      0x05 , 0x1A ,  // Progressive BT.656, HSY&VSY Deinterlacer, HSO no invert
      //0x06 , 0x00  ,  // C & V ADC power down
     
-	 0x07, 0x22,	
-	 0x08, 0x11,	
+	 0x07, 0x26,
+	 0x08, 0x12,	
 	 0x09, 0x40,
-	 0x0A, 0x10,
+	 0x0A, 0xFF,
 	 0x0B, 0xD0,
      
      
@@ -78,8 +78,8 @@ static const T_U16 INIT_TAB[] =
      0x35 , 0x00  ,
      0x36 , 0xE2  ,  //De-interlacer control
      
-     0x37 , 0x2D ,  //De-interlacer delay control
-     0x38 , 0x51  ,  //De-interlacer sync control
+     0x37 , 0x28 ,  //De-interlacer delay control
+     0x38 , 0xAF  ,  //De-interlacer sync control
     
      0xC0 , 0x01  ,  //ADC clock select oscillator clock
  /*
@@ -118,10 +118,7 @@ static const T_U16 INIT_TAB[] =
      0xE8 , 0x0F  ,  // Y C V decoder mode
      0xE9 , 0x4F  ,  // clock control deinterlacing mode 0x61 default
     
-	//DELAY_FLAG, 100,	//DELAY= 100
-
-
-
+	
 
 /*
 0xFF, 0x00,//Page 0		
@@ -344,16 +341,8 @@ static const T_U16 SXGA_MODE_TAB[] =
 {
     END_FLAG, END_FLAG
 };
-static const T_U16 XGA_MODE_TAB[] = //1024x768
+static const T_U16 XGA_MODE_TAB[] = 
 {
-	 0xFF , 0x00,
- 
-	 0x07, 0x33,	
-	 0x08, 0x12,	
-	 0x09, 0x00,
-	 0x0A, 0x10,
-	 0x0B, 0xFF, 
-	 
     END_FLAG, END_FLAG
 };
 static const T_U16 VGA_MODE_TAB[] = 
