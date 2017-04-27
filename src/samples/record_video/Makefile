@@ -29,6 +29,8 @@ LOCAL_C_INCLUDES := ../../librootfs/akmedialib/include/akmedialib \
 
 LOCAL_LDFLAGS := -L../../librootfs/akmedialib/usr/lib \
                  -L../../librootfs/akuiolib/usr/lib \
-                 -L../../librootfs/alsalib/usr/lib
+                 -L../../librootfs/alsalib/usr/lib \
+                 -L./
+				
 
 include exec_rules.mk

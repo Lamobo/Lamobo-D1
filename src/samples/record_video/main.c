@@ -30,7 +30,7 @@ int g_exit = 0;
 int g_width = 0;
 int g_height = 0;
 
-static char avi_fname_1[FILE_NAME_LEN];
+T_pSTR avi_fname_1;
 
 //const char* avi_fname_1 = "test.avi";
 const char* avi_fname_2 = "test_2.avi";
@@ -450,8 +450,10 @@ int main( int argc, char **argv )
 	mux_initPara(&mux_input1, ext_gSettings, 0);
 	
 	if( ext_gSettings->filetype == 0)
-		filename = MakeFileName();			//	Get avi filename___________
-		//memcpy(filename, avi_fname_1, strlen(avi_fname_1));
+	{
+		avi_fname_1 = MakeFileName();			//	Get avi filename___________
+		memcpy(filename, avi_fname_1, strlen(avi_fname_1));
+	}
 	else
 		memcpy(filename, mp4_fname_1, strlen(mp4_fname_1));
 	

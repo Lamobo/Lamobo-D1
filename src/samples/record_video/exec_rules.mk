@@ -40,7 +40,7 @@ TARGET		:= $(BUILD_DIR)/$(LOCAL_MODULE)
 all: checkdirs $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $^
+		$(LD) $^ $(LDFLAGS) -o $@ 
 
 ifdef USE_CPP
 $(OBJSC): $(BUILD_DIR)/%.o: %.c
