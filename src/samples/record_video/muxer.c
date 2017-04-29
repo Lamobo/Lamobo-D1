@@ -203,30 +203,30 @@ int mux_open(T_REC_CHAN chan, T_MUX_INPUT *mux_input, char *filename)
 		goto err;
 	}
 	
-/*
+
 	if (AK_NULL != mux_input->rec_path)
 	{
-		bzero(strFile, sizeof(strFile));
-		sprintf(strFile, "%s%sindex", mux_input->rec_path, filename);
-		muxMgr[chan].index_fd = open(strFile, O_RDWR | O_CREAT | O_TRUNC); //create avi file index 
+		//bzero(strFile, sizeof(strFile));
+		//sprintf(strFile, "%s%sindex", mux_input->rec_path, filename);
+		muxMgr[chan].index_fd = open("/mnt/index", O_RDWR | O_CREAT | O_TRUNC); //create avi file index 
 	}
 	else
 	{
-		bzero(strFile, sizeof(strFile));
-		sprintf(strFile, "%sindex", filename);
-		muxMgr[chan].index_fd = open(strFile, O_RDWR | O_CREAT | O_TRUNC); //create avi file index 
+		//bzero(strFile, sizeof(strFile));
+		//sprintf(strFile, "%sindex", filename);
+		muxMgr[chan].index_fd = open("/mnt/index", O_RDWR | O_CREAT | O_TRUNC); //create avi file index 
 	}
 	if (muxMgr[chan].index_fd <= 0) {
 		printf("Open Index File Failure\n");
 		goto err;
 	}
-*/
+
 	if (mux_input->m_eVideoType == MEDIALIB_VIDEO_MJPEG)
 		wrBuf = 6<<20;
 	else
 		wrBuf = 2<<20;
 	muxMgr[chan].pfile1 = ak_rec_cb_load(muxMgr[chan].fd, AK_FALSE, wrBuf, 16 * 1024);
-	//muxMgr[chan].pfile2 = ak_rec_cb_load(muxMgr[chan].index_fd, AK_FALSE, 1*1024*1024, 16 * 1024);
+	muxMgr[chan].pfile2 = ak_rec_cb_load(muxMgr[chan].index_fd, AK_FALSE, 1*1024*1024, 16 * 1024);
 	if (muxMgr[chan].pfile1 == AK_NULL) {
 		printf("Open AsynWrite Failure\n");
 		goto err;
@@ -401,11 +401,11 @@ int mux_close(T_REC_CHAN chan)
 	close(muxMgr[chan].fd);
 	muxMgr[chan].pfile1 = NULL;
 	muxMgr[chan].fd = -1;
-	/*
+	
 	ak_rec_cb_unload(muxMgr[chan].pfile2);
 	fsync(muxMgr[chan].index_fd);
 	close(muxMgr[chan].index_fd);
-	*/
+	
 	//remove(strFile);
 	muxMgr[chan].pfile2 = NULL;
 	muxMgr[chan].index_fd = -1;

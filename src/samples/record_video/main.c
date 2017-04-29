@@ -275,12 +275,12 @@ static void video_proc(demo_setting* ext_gSettings)
 #if 1
 		timestamp = ++num * 1000 / DV_FPS;
 #else
-		timestamp = mux_getToltalTime(eCHAN_UNI) + 33;
+		timestamp = mux_getToltalTime(eCHAN_UNI	) + 33;
 #endif
 		
 	}while(t1 <= times && !g_exit);
 	g_exit = 1;
-	printf("video thread eixt \n");
+	printf("video thread exit \n");
 	printf("insert frame: %lu/%lu\n", insert_num, num);
 }
 
@@ -502,7 +502,7 @@ int main( int argc, char **argv )
 	}
 	
 	camera_start();	
-	
+	system("/etc/init.d/wifi_led.sh wps_led on");
 	//handle video encode and mux
 	video_proc(ext_gSettings);
 	
@@ -516,6 +516,7 @@ int main( int argc, char **argv )
 	camera_close();
 	encode_close(eCHAN_UNI);
 	mux_close(eCHAN_UNI);
+	system("/etc/init.d/wifi_led.sh wps_led off");
 	//close second channel
 	if (ext_gSettings->mode == 2)
 	{
@@ -526,7 +527,7 @@ int main( int argc, char **argv )
 	encode_destroy();
 	akuio_pmem_fini();
 	CloseListenSD();
-
+	
 	printf("Recorder Process Exit\n");
 
 	return 0;	

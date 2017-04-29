@@ -308,7 +308,7 @@ static int __do_gpio_key_0(double period)
         perror("Error period");
         return -1;
     }
-    else if (period < WIFI_MODE)
+    else /*if (period < WIFI_MODE)*/
     {
 		
 		/*
@@ -332,18 +332,19 @@ static int __do_gpio_key_0(double period)
         if (!rec_value)
         {
 			rec_value = 1;
-			sprintf(cmd,"%s","/etc/init.d/camera.sh start");
+			sprintf(cmd,"%s","/usr/bin/record_video -p /mnt/ -w 720 -h 576");
 		}
         
         else if (rec_value == 1)
         {
 			rec_value = 0;
-			sprintf(cmd,"%s","/etc/init.d/camera.sh stop");
+			sprintf(cmd,"%s","killall -9 record_video");
 		}
         
         
         
     }
+    /*
     else if (period > UPDATE_IMAGE)
     {
         ret = check_file();
@@ -376,11 +377,12 @@ static int __do_gpio_key_0(double period)
                 break;
         }
     }
+    
     else
     {
         sprintf(cmd, "%s ", WIFI_WPS_MODE);
     }
-
+	*/
     system(cmd);
     return 0;
 }

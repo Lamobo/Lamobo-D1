@@ -33,13 +33,13 @@ usage()
 
 light_on_led()
 {
-	echo 0 > ${led}/brightness
+	echo 1 > ${led}/brightness
 }
 
 light_off_led()
 {
 	echo 0 > ${led}/brightness
-	echo 1 > ${led}/brightness
+	#echo 1 > ${led}/brightness
 }
 
 blink_led()
