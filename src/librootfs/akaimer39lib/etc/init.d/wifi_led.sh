@@ -18,7 +18,7 @@ mode=$2
 brightness=$3
 delay_off=$3
 delay_on=$4
-default_br=1
+default_br=0
 default_blk=100
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin
 

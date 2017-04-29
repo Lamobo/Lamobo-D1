@@ -44,7 +44,7 @@ do_start () {
 	      ifconfig eth0 down
 	      ifconfig eth0 up
 	 fi
-	/etc/init.d/wifi_led.sh wps_led on
+#	/etc/init.d/wifi_led.sh wps_led on
 }
 
 do_stop () {

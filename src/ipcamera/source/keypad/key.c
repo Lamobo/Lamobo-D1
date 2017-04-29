@@ -332,13 +332,13 @@ static int __do_gpio_key_0(double period)
         if (!rec_value)
         {
 			rec_value = 1;
-			sprintf(cmd,"%s","/usr/bin/record_video -p /mnt/ -w 720 -h 576");
+			sprintf(cmd,"%s","/etc/init.d/camera.sh start");
 		}
         
         else if (rec_value == 1)
         {
 			rec_value = 0;
-			sprintf(cmd,"%s","killall -9 record_video");
+			sprintf(cmd,"%s","/etc/init.d/camera.sh stop");
 		}
         
         

@@ -516,7 +516,7 @@ int main( int argc, char **argv )
 	camera_close();
 	encode_close(eCHAN_UNI);
 	mux_close(eCHAN_UNI);
-	system("/etc/init.d/wifi_led.sh wps_led off");
+	
 	//close second channel
 	if (ext_gSettings->mode == 2)
 	{
@@ -527,7 +527,7 @@ int main( int argc, char **argv )
 	encode_destroy();
 	akuio_pmem_fini();
 	CloseListenSD();
-	
+	system("/etc/init.d/wifi_led.sh wps_led off");
 	printf("Recorder Process Exit\n");
 
 	return 0;	

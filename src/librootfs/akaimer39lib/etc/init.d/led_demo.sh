@@ -46,28 +46,28 @@ do
 		if [ "$led" != "eth0" ]
 		then
 			led=eth0
-			/etc/init.d/wifi_led.sh rec on
+	#		/etc/init.d/wifi_led.sh rec on
 		fi
 		;;
 	softap)
 		if [ "$led" != "softap" ]
 		then
 			led=softap
-			/etc/init.d/wifi_led.sh rec on
+#			/etc/init.d/wifi_led.sh rec on
 		fi
 		;;
 	station)
 		if [ "$led" != "station" ]
 		then
 			led=station
-			/etc/init.d/wifi_led.sh rec on
+	#		/etc/init.d/wifi_led.sh rec on
 		fi
 		;;
 	none)
 		if [ "$led" != "off" ]
 		then
 			led=off
-			/etc/init.d/wifi_led.sh rec off
+#			/etc/init.d/wifi_led.sh rec off
 		fi
 		;;
 	*)

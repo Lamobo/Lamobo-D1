@@ -31,7 +31,7 @@ usage()
 
 start_wifi_service()
 {
-	/etc/init.d/wifi_led.sh wps_led blink 250 250
+#	/etc/init.d/wifi_led.sh wps_led blink 250 250
 	/etc/init.d/change_wifi_mode.sh station
 	insmod /root/8188eu.ko
 	wpa_supplicant -B -iwlan0 -Dwext -c /etc/jffs2/wpa_supplicant.conf
