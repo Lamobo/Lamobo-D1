@@ -34,6 +34,7 @@ usage()
 light_on_led()
 {
 	echo 1 > ${led}/brightness
+	
 }
 
 light_off_led()

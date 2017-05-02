@@ -331,12 +331,14 @@ static int __do_gpio_key_0(double period)
         * */
         if (!rec_value)
         {
+			
 			rec_value = 1;
 			sprintf(cmd,"%s","/etc/init.d/camera.sh start");
 		}
         
         else if (rec_value == 1)
         {
+			
 			rec_value = 0;
 			sprintf(cmd,"%s","/etc/init.d/camera.sh stop");
 		}
@@ -475,7 +477,7 @@ static int do_gpio_key_1(struct input_event *event){
     //
 
     printf("code:%d,value:%d\n",event->code,event->value); 
-    system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
+    //system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
     sleep(1);
     system("/etc/init.d/wifi_start.sh keypress &");
     return 0;//cause of 0x34 error, we just start wifi and return.
@@ -540,7 +542,7 @@ static int do_gpio_key_1(struct input_event *event){
         }
         else{
             printf("Write 0x%04x to 0x%02x[0x%02x] successfully\n", end, i2c_addr, start);
-            system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
+            //system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
             sleep(2);
             system("/etc/init.d/wifi_start.sh keypress &");
         }
@@ -555,7 +557,7 @@ static int do_gpio_key_1(struct input_event *event){
         else{
             printf("Write 0x%04x to 0x%02x[0x%02x] successfully\n", end, i2c_addr, start);
             system("killall -9 finish_station.sh hostapd udhcpd wpa_supplicant udhcpc");
-            system("/etc/init.d/wifi_led.sh wps_led off");
+           // system("/etc/init.d/wifi_led.sh wps_led off");
             printf("[##]wifi_led off\n");
         }
     }

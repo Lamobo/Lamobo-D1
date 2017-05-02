@@ -32,7 +32,7 @@ config_kernel()
     echo Configuring kernel...
     cd $DEV_ROOT/src/kernel
     $MKDIR $DEV_ROOT/output/kernel
-    $MAKE O=$DEV_ROOT/output/kernel aimer39_ak3918_D1_defconfig
+    $MAKE O=$DEV_ROOT/output/kernel aimer39_ak3918_Dipol_defconfig
     #$MAKE O=$DEV_ROOT/output/kernel menuconfig
 }
 
@@ -274,7 +274,7 @@ build_all()
     #build_tools
    # $MKDIR $DEV_ROOT/output/local/bin
     #$MKDIR $DEV_ROOT/output/local/lib
-   # config_kernel
+    #config_kernel
     #build_kernel
     #config_busybox
     #build_busybox

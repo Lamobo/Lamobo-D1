@@ -41,7 +41,7 @@
 #include "ak39_isp.h"
 
 
-#define CAMIF_DEBUG
+//#define CAMIF_DEBUG
 #ifdef CAMIF_DEBUG
 #define isp_dbg(fmt...)			printk(KERN_INFO "ak_camera: " fmt)
 #define CAMDBG(fmt, args...)	printk(KERN_INFO "ak_camera: " fmt, ## args)

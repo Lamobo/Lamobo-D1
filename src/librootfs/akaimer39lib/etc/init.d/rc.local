@@ -22,3 +22,4 @@ dropbear -B
 #/etc/init.d/wifi
 #/etc/init.d/monitor.sh &
 /etc/jffs2/service.sh &
+

@@ -23,7 +23,7 @@ usage()
 
 stop_led()
 {
-	/etc/init.d/wifi_led.sh wps_led off
+	#/etc/init.d/wifi_led.sh wps_led off
 }
 
 stop_station()
