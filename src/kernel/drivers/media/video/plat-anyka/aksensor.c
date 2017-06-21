@@ -23,7 +23,7 @@
 #include <plat-anyka/aksensor.h>
 #include <mach/gpio.h>
 
-//#define SENSOR_DEBUG
+#define SENSOR_DEBUG
 
 #ifdef SENSOR_DEBUG
 #define sensor_dbg(fmt...) 			printk(KERN_INFO "aksensor: " fmt)

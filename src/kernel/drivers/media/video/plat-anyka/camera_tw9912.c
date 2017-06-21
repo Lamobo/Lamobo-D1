@@ -56,7 +56,7 @@ static T_VOID camera_setbit(T_U16 reg, T_U8 bit, T_U8 value)
 #endif
 static T_U32 cam_tw9912_read_id(T_VOID)
 {
-#if 1
+#if 0
     T_U8 value = 0x00;
     T_U32 id = 0;
 
