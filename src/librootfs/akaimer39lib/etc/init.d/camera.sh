@@ -39,7 +39,7 @@ stop()
 start ()
 {
 	echo "start camera service......"
-	/usr/bin/record_video -p /mnt/ -w 960 -h 720 &
+	/usr/bin/record_video -p /mnt/ -w 960 -h 720 -t 86400 &
 	exit 0
 	#network=`pgrep hostapd`
 	#if [ "$network" = "" ]
