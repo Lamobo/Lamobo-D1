@@ -26,6 +26,8 @@
 #define FILE_NAME_LEN 1024
 #define MAX_WIDTH	1280
 #define MAX_HEIGHT	720
+
+//#define USE_OSD 		//uncomment for use OSD
 int g_exit = 0;
 int g_width = 0;
 int g_height = 0;
@@ -254,7 +256,7 @@ static void video_proc(demo_setting* ext_gSettings)
 			encode_frame(NULL, NULL, NULL, NULL, &frameLenB, pbuf+offset, &pencbuf2, &iframe2, ext_gSettings->vbr);
 #endif		
 			// Write 2nd Channel Data
-			mux_addVideo(eCHAN_DUAL, pencbuf2, frameLenB, timestamp, iframe2);
+			mux_addVideo(eCHAN_DUAL, pencbuf2, frameLenB, timestamp, iframe2); //-use osd
 		}
 		// Single Channle Mode
 		else {
@@ -267,7 +269,7 @@ static void video_proc(demo_setting* ext_gSettings)
 			printf("mux_addVideo err \n");
 			break;
 		}
-		
+	
 		if (!ext_gSettings->bhasAudio)
 		{
 			ts = timestamp;

@@ -27,7 +27,7 @@
 #define FONT_DATA_START_IDX    (4)
 #define BUFF_NUM 	4
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
-
+//#define USE_OSD 					//uncomment for use OSD
 struct tagRECORD_VIDEO_FONT_CTRL {
 	T_U8 *y;
 	T_U8 *u;
@@ -687,7 +687,7 @@ int camera_open(demo_setting* Setting)
 	if (force_format) {
 		fmt.fmt.pix.width       = Setting->width;
 		fmt.fmt.pix.height      = Setting->height;
-		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;	//change to tw9912 fmt
+		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;	
 		fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 		//V4L2_FIELD_INTERLACED
 
 		if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
@@ -705,7 +705,7 @@ int camera_open(demo_setting* Setting)
 	//isp_set_rgb_filter();
 
 	printf("mode is %ld\n", Setting->mode );
-
+#ifdef USE_OSD
 	SetOsd();
 	Take_out_osd(2);
 	pthread_attr_t attr;
@@ -717,6 +717,11 @@ int camera_open(demo_setting* Setting)
 		//return -1;	
 	}
 	pthread_attr_destroy(&attr);
+#else 
+	Take_out_osd(1);
+	Take_out_osd(2);
+#endif	
+
 	if (Setting->mode == 1)
 	{
 		//Zoom(Setting->x1, Setting->y1, Setting->width2, Setting->height2, Setting->times);

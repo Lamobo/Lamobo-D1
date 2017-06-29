@@ -15,10 +15,9 @@
 #include "camera_tw9912.h"
 
 #else 
-//#include "akdefine.h" //no such
+
 #include "cam_com_sensor.h"
 #include "camera_tw9912.h" 
-//#include "Gpio_config.h" //no such
 
 #endif
 

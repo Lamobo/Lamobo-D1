@@ -21,13 +21,13 @@
 static const T_U16 INIT_TAB[] = 
 {
 
-/*
+
 	 0xFF , 0x00  ,  //; Page 00  
    
      //0x02 , 0x40  ,
-     0x03 , 0x21  ,  // data group,pclk output, sync tri-state
-     0x04 , 0x00  ,
-     0x05 , 0x12 ,  // Progressive BT.656, HSY&VSY Deinterlacer, HSO no invert
+     0x03 , 0x26  ,  // data group,pclk output, sync tri-state
+    
+     0x05 , 0x1A ,  //0x1A- Progressive BT.656, HSY&VSY Deinterlacer, HSO no invert
      //0x06 , 0x00  ,  // C & V ADC power down
     
 	 0x07, 0x26,
@@ -56,8 +56,8 @@ static const T_U16 INIT_TAB[] =
      0xE6 , 0x00  ,
      0xE7 , 0x2A  ,
      0xE8 , 0x0F  ,  // Y C V decoder mode
-     0xE9 , 0x61  ,  // clock control deinterlacing mode 0x61 default
- */
+     0xE9 , 0x4F ,  // 4f clock control deinterlacing mode 0x43 default
+   
     END_FLAG, END_FLAG
 };
 
