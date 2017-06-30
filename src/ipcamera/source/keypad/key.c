@@ -299,8 +299,8 @@ static inline __s32 i2c_smbus_write_byte_data(int file, __u8 command,
  * */
 static int __do_gpio_key_0(double period)
 {
-    char cmd[128];
-    int ret;
+    //char cmd[128];
+   // int ret;
     //int start;
 
     if (period < 0)
@@ -329,22 +329,29 @@ static int __do_gpio_key_0(double period)
 
         sprintf(cmd,"%s","/etc/init.d/wifi_start.sh keypress");
         * */
-        if (!rec_value)
+        
+        if (!rec_value || system("pgrep record_video") == 1) //if process record not found
         {
+			if (access("/dev/mmcblk0", R_OK) < 0)
+			{
+				printf("Insert SD card!\n");
+			}
 			
-			rec_value = 1;
-			sprintf(cmd,"%s","/etc/init.d/camera.sh start");
+			else
+			{
+				rec_value = 1;
+				system("/etc/init.d/camera.sh start");
+				
+			}
 		}
         
-        else if (rec_value == 1)
+        else 
         {
-			
 			rec_value = 0;
-			sprintf(cmd,"%s","/etc/init.d/camera.sh stop");
+			system("/etc/init.d/camera.sh stop");
+			
 		}
-        
-        
-        
+    
     }
     /*
     else if (period > UPDATE_IMAGE)
@@ -385,7 +392,7 @@ static int __do_gpio_key_0(double period)
         sprintf(cmd, "%s ", WIFI_WPS_MODE);
     }
 	*/
-    system(cmd);
+    //system(cmd);
     return 0;
 }
 

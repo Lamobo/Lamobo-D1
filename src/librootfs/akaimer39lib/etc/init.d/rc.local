@@ -18,7 +18,7 @@ fi
 dropbear -B
 
 #ntpd -q -p time.windows.com #what?!
-
+date 0101000017 --utc
 #/etc/init.d/wifi
 #/etc/init.d/monitor.sh &
 /etc/jffs2/service.sh &
