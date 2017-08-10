@@ -21,10 +21,6 @@ usage()
 	exit 3
 }
 
-stop_led()
-{
-	#/etc/init.d/wifi_led.sh wps_led off
-}
 
 stop_station()
 {
@@ -53,18 +49,15 @@ stop_module ()
 
 case "$MODE" in
 	all)
-		stop_led
 		stop_station
 		stop_softap
 		stop_module	
 		;;
 	station)
-		stop_led
 		stop_station
 		stop_module	
 		;;
 	softap)
-		stop_led
 		stop_softap	
 		stop_module	
 		;;
