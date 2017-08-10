@@ -36,8 +36,8 @@ do_start () {
 	hostapd /etc/jffs2/hostapd.conf -B
 	test -f /var/run/udhcpd.pid && rm -f /var/run/udhcpd.pid
 	test -f /var/run/dhcpd.pid && rm -f /var/run/dhcpd.pid
-	ifconfig wlan0 192.168.0.1 #for busybox
-	route add default gw 192.168.0.1 #
+	ifconfig wlan0 192.168.0.110 #for busybox
+	route add default gw 192.168.0.110 #
 	udhcpd /etc/udhcpd.conf #for busybox
 	if [  -d "/sys/class/net/eth0" ]
     then
