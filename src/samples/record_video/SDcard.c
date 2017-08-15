@@ -150,7 +150,7 @@ static void * ListenSD( void * this )
 		
 	}
 
-	umount_sd();
+	//umount_sd();
 
 	return AK_NULL;
 }
