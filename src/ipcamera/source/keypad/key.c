@@ -51,6 +51,10 @@
 #define SELECT_WIFI_MODE	"/etc/init.d/select_wifi_mode.sh"
 #define WIRELESS_SWITCH		"/etc/init.d/select_wifi_mode.sh"
 #define WIRENET_SWITCH 		"/etc/init.d/select_wire_mode.sh"
+#define WIFI_ON		 		"/etc/init.d/wifi_softap.sh start"
+#define WIFI_OFF 			"/etc/init.d/wifi_softap.sh stop"
+#define WIFI_STATUS			"ifconfig wlan0 | grep UP"
+
 #define RECOVER_MODE		"/etc/init.d/wifi_recover.sh"
 #define WIFI_WPS_MODE		"/etc/init.d/wifi_wps.sh"
 #define UPDATE_IMAGE_MODE	"/etc/init.d/update.sh /mnt/zImage"
@@ -80,7 +84,7 @@
 #define K_S_J_IMAGE		(KERNEL_ZIMAGE|SQSH_ZIMAGE|JFFS_ZIMAGE)
 
 
-#define WIFI_MODE			3
+#define WIFI_MODE			1
 #define UPDATE_IMAGE		10
 
 #define UEVENT_BUFFER_SIZE      2048
@@ -90,6 +94,7 @@
 static int old_key = -1;
 static int rec_value = 0;
 static struct timeval start_time;
+
 
 /**
  * *  @brief       diff timeval
@@ -308,8 +313,10 @@ static int __do_gpio_key_0(double period)
         perror("Error period");
         return -1;
     }
-    else /*if (period < WIFI_MODE)*/
+    else /* if (period < WIFI_MODE)*/
     {
+		// start record
+		
 		
 		/*
         int mode = system("/etc/init.d/mode.sh");
@@ -353,6 +360,7 @@ static int __do_gpio_key_0(double period)
 		}
     
     }
+
     /*
     else if (period > UPDATE_IMAGE)
     {
@@ -670,7 +678,7 @@ int main (int argc, char **argv)
     struct input_event evt;
     evt.value = 1;
 
-    do_gpio_key_1(&evt);//shut down wifi module power..
+   // do_gpio_key_1(&evt);//shut down wifi module power..
 
     while (1) 
     {

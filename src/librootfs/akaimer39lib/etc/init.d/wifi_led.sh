@@ -24,10 +24,10 @@ PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin
 
 usage()
 {
-	echo "Usage: $0 led_device mode(on|off|blink)"
-	echo "Light on led: $0 wifi_wps on"
-	echo "Light off led: $0 wifi_wps off"
-	echo "Flash led in 200ms: $0 wifi_wps blink 100 100"
+	echo "Usage: $0 wps_led mode(on|off|blink)"
+	echo "Light on led: $0 wps_led on"
+	echo "Light off led: $0 wps_led off"
+	echo "Flash led in 200ms: $0 wps_led blink 100 100"
 	exit 3
 }
 

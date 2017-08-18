@@ -3811,7 +3811,11 @@ int isp_apply_mode(struct isp_struct *isp)
 			REG32(isp->base + ISP_FMT_CHK) = (width * 2 | (height << 14));
 			REG32(isp->base + ISP_IMG_PARA) = 0x80001000;
 			REG32(isp->base + ISP_IRQ_STATUS) = 0x000017ff;
+#ifdef CONFIG_SENSOR_TW9912
 			REG32(isp->base + ISP_PERI_PARA) = 0x08030cf5; 		//don't merge field - 0x000304d5//default 104c5
+#else
+			REG32(isp->base + ISP_PERI_PARA) = 0x000104c5; 
+#endif			
 			break;
 
 		case ISP_YUV_MERGER_OUT:

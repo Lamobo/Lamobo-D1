@@ -55,11 +55,11 @@ case "$MODE" in
 		;;
 	station)
 		stop_station
-		stop_module	
+#		stop_module	
 		;;
 	softap)
 		stop_softap	
-		stop_module	
+#11		stop_module	
 		;;
 	*)
 		usage

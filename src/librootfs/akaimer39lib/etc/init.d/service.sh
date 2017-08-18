@@ -35,8 +35,9 @@ start_service ()
 	key &
 	echo "start boa service......"
 	boa
-	echo "start net service......"
-	/etc/init.d/net_demo.sh &
+	echo "start wifi check service......"
+#	/etc/init.d/net_demo.sh &
+        /etc/init.d/wifi_check.sh
 }
 
 restart_service ()
