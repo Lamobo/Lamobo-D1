@@ -51,6 +51,9 @@ build_kernel()
     $MAKE -j$NCPU KSRC=$DEV_ROOT/output/kernel modules
     $MAKE -j$NCPU KSRC=$DEV_ROOT/output/kernel strip
     $CP 8188eu.ko $DEV_ROOT/src/librootfs/akwifilib/root
+    $CP $DEV_ROOT/output/kernel/drivers/usb/gadget/plat-anyka/udc.ko $DEV_ROOT/src/librootfs/akwifilib/root
+    $CP $DEV_ROOT/output/kernel/drivers/usb/gadget/g_mass_storage.ko $DEV_ROOT/src/librootfs/akwifilib/root
+    $CP $DEV_ROOT/output/kernel/drivers/usb/host/plat-anyka/otg-hs.ko $DEV_ROOT/src/librootfs/akwifilib/root
 }
 
 clean_kernel()
@@ -274,8 +277,8 @@ build_all()
     #build_tools
     #$MKDIR $DEV_ROOT/output/local/bin
     #$MKDIR $DEV_ROOT/output/local/lib
-    #config_kernel
-    #build_kernel
+    config_kernel
+    build_kernel
     #config_busybox
     #build_busybox
     build_rootfs
@@ -289,7 +292,7 @@ build_all()
 clean_all()
 {
     #clean_tools
-    #clean_kernel
+    clean_kernel
     #clean_busybox
     clean_rootfs
     #clean_samples
