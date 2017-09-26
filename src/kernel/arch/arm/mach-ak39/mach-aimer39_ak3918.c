@@ -656,7 +656,7 @@ static void __init ak3918_init_machine(void)
 }
 
 
-MACHINE_START(AK39XX, "AK3918_DIPOL_V0.0.1")
+MACHINE_START(AK39XX, "AK3918_DIPOL_V0.0.2")
 /* Maintainer: */
 	.atag_offset = 0x100,
 	.fixup = NULL,
