@@ -10,7 +10,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-gpio.h>
 
-#include <plat-anyka/wifi.h>
+//#include <plat-anyka/wifi.h>
 #include <plat-anyka/otg-hshcd.h>
 #include <plat-anyka/ak_camera.h>
 #include <plat-anyka/aksensor.h>
@@ -562,14 +562,14 @@ static struct gpio_keys_button gpio_keys_button[] = {
 		.code			= KEY_2,
 		.type			= EV_KEY,
 		.gpio			= AK_GPIO_55,
-		.active_low		= 1,
+		.active_low		= 0,
 		.wakeup			= 0,
 		.debounce_interval	= 30, /* ms */
 		.desc			= "usbdir",
-		.pullup			= AK_PULLUP_ENABLE,
-		.pulldown		= -1,
+		.pullup			= -1,
+		.pulldown		= AK_PULLDOWN_ENABLE,
 		.dir			= AK_GPIO_DIR_INPUT,
-		.int_pol		= AK_GPIO_INT_LOWLEVEL,
+		.int_pol		= AK_GPIO_INT_HIGHLEVEL,
 	},
 	
 };
