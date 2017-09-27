@@ -4,8 +4,8 @@
 #include <mach/gpio.h>
 #include <linux/delay.h>
 #include <linux/spinlock.h>
-#include <plat/gpio_keys.h>
-
+//#include <plat/gpio_keys.h>
+#include <plat-anyka/gpio_keys.h>
 #define poweroff_enable 	1
 #define poweroff_disable 	0
 
@@ -71,10 +71,10 @@ int ak_bat_read_voltage(struct ak_bat_mach_info *info);
 
 #ifdef CONFIG_STARTUP_CHECK_VOLTAGE
 void ak_mach_check_bat_vol(struct ak_bat_mach_info *batinfo,
-	struct ak_gpio_keys_button *pwr_gpio, int len);
+	struct gpio_keys_button *pwr_gpio, int len);
 #else
 static inline void ak_mach_check_bat_vol(struct ak_bat_mach_info *batinfo,
-	struct ak_gpio_keys_button *pwr_gpio, int len)
+	struct gpio_keys_button *pwr_gpio, int len)
 {
 }
 #endif

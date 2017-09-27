@@ -255,8 +255,8 @@ struct ak_crypto_plat_data akcrypto_pdata = {
 	.encrypt_mode = CRYPTO_MULTI_GROUP_MODE,
 };
 
-
-/* akwifi platform data */
+/*
+// akwifi platform data 
 struct akwifi_platform_data akwifi_pdata = {
 	.gpio_init = ak_gpio_set,
 	.gpio_on = {
@@ -286,7 +286,7 @@ struct platform_device anyka_wifi_device = {
 		.platform_data = &akwifi_pdata,
 	},
 };
-
+*/
 
 /**
  * @brief: usb bus device  platform data
@@ -338,7 +338,7 @@ static struct ak_mac_data ak39_mac_pdata = {
 		.int_pol	= -1,
 	},
 	.phy_rst_gpio = {
-		.pin		= AK_GPIO_53,
+		.pin		= -1,
 		.pulldown	= -1,
 		.pullup		= AK_PULLUP_DISABLE,
 		.value		= AK_GPIO_OUT_LOW,
@@ -545,19 +545,33 @@ static struct gpio_keys_button gpio_keys_button[] = {
 		.dir			= AK_GPIO_DIR_INPUT,
 		.int_pol		= AK_GPIO_INT_LOWLEVEL,
 	},
-	{
+/*	{
 		.code			= KEY_1,
 		.type			= EV_KEY,
 		.gpio			= AK_GPIO_62,
 		.active_low		= 1,
 		.wakeup			= 0,
-		.debounce_interval	= 30, /* ms */
+		.debounce_interval	= 30, // ms 
 		.desc			= "wifi",
 		.pullup			= AK_PULLUP_ENABLE,
 		.pulldown		= -1,
 		.dir			= AK_GPIO_DIR_INPUT,
 		.int_pol		= AK_GPIO_INT_LOWLEVEL,
+	}, */
+	{
+		.code			= KEY_2,
+		.type			= EV_KEY,
+		.gpio			= AK_GPIO_55,
+		.active_low		= 1,
+		.wakeup			= 0,
+		.debounce_interval	= 30, /* ms */
+		.desc			= "usbdir",
+		.pullup			= AK_PULLUP_ENABLE,
+		.pulldown		= -1,
+		.dir			= AK_GPIO_DIR_INPUT,
+		.int_pol		= AK_GPIO_INT_LOWLEVEL,
 	},
+	
 };
 
 static struct akgpio_keys_platform_data gpio_keys_platform_data = {
@@ -586,7 +600,7 @@ static struct akgpio_keys_platform_data gpio_keys_platform_data = {
 	&ak39_custom_gpio,
 	&ak39_usb_udc_device,
 	&ak39_usb_otg_hcd_device,
-	&anyka_wifi_device,
+	//&anyka_wifi_device,
 	&soc_camera_interface,
 	&ak39_camera_interface,	
 	&ak39_ion_device,

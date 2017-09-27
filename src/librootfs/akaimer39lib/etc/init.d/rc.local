@@ -16,6 +16,7 @@ if [ ! -f /etc/dropbear/dropbear_rsa_host_key ]; then
     dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key
 fi
 dropbear -B
+insmod /root/otg-hs.ko
 insmod /root/8188eu.ko
 #ntpd -q -p time.windows.com #what?!
 date 0101000017 --utc
