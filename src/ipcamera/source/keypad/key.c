@@ -61,15 +61,9 @@
 #define SDP1_DEV_NAME       "/dev/mmcblk0p1"
 #define SD_DEV_NAME         "/dev/mmcblk0"
 
-#if 0
-#define MOUNT_SDP1			"/bin/mount -rw /dev/mmcblk0p1 /mnt"
-#define MOUNT_SD			"/bin/mount -rw /dev/mmcblk0 /mnt" 
-#define UMOUNT_SD			"/bin/umount /mnt"
-#else
 #define MOUNT_SDP1			"mount -rw /dev/mmcblk0p1 /mnt" 
 #define MOUNT_SD			"mount -rw /dev/mmcblk0 /mnt" 
 #define UMOUNT_SD			"umount /mnt"
-#endif
 
 #define KERNEL_ZIMAGE_FILE			"/mnt/zImage"
 #define SQSH_ZIMAGE_FILE			"/mnt/root.sqsh4"
@@ -480,8 +474,6 @@ static int do_gpio_key_0(struct input_event *event)
 }
 
 
-
-
 static int do_gpio_key_1(struct input_event *event){
     printf("key_1 pressed.\n");
     int fd,ret;
@@ -581,6 +573,26 @@ static int do_gpio_key_1(struct input_event *event){
     return 0;
 
 }
+
+
+
+/**
+ * *  @brief       do_gpio_key_direction
+ * *  @author      A_T
+ * *  @date        28/09/17
+ * *  @param[in]   struct input_event *event, int key event count
+ * *  @return      0 on success
+ * */
+static int do_gpio_key_direction(struct input_event *event){
+	printf("usb direction changed\n");
+	
+	
+	return 0;
+}
+
+
+
+
 /**
  * *  @brief       do_key
  * *  @author      gao wangsheng
@@ -613,14 +625,6 @@ static int do_key(struct input_event *key_event, int key_cnt)
         printf("%s handler event:", __func__);
         switch(event->code)
         {
-            case KEY_UP:
-                printf(" KEY_UP\n");
-                ret = do_adkey_wireless(event);
-                break;
-            case KEY_DOWN:
-                printf(" KEY_DOWN\n");
-                ret = do_adkey_wirenet(event);
-                break;
             case KEY_0:
                 printf(" KEY_0\n");
                 ret = do_gpio_key_0(event);
@@ -629,6 +633,18 @@ static int do_key(struct input_event *key_event, int key_cnt)
                 printf(" KEY_1\n");
                 ret = do_gpio_key_1(event);
                 break;
+             case KEY_DIRECTION:
+                printf(" KEY_DIRECTION\n");
+                ret = do_gpio_key_direction(event);
+                break; 
+             case KEY_UP:
+                printf(" KEY_UP\n");
+                ret = do_adkey_wireless(event);
+                break;
+            case KEY_DOWN:
+                printf(" KEY_DOWN\n");
+                ret = do_adkey_wirenet(event);
+                break;              
             default:
                 printf("%s %s: Error key code!\n", __FILE__, __func__);
                 ret = -1;

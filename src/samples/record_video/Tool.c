@@ -12,7 +12,7 @@
 #define FILE_SUFFIZ								".avi"
 #define DIR_SEPARATOR							'/'
 #define REC_PATH								"/mnt/"
-#define OUR_FILE_PREFIX							"REC_NVD_"
+#define OUR_FILE_PREFIX							"REC_"
 #define INI_RECORDER                            "/etc/jffs2/camera.ini"
 
 

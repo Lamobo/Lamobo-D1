@@ -559,13 +559,13 @@ static struct gpio_keys_button gpio_keys_button[] = {
 		.int_pol		= AK_GPIO_INT_LOWLEVEL,
 	}, */
 	{
-		.code			= KEY_2,
+		.code			= KEY_DIRECTION,
 		.type			= EV_KEY,
 		.gpio			= AK_GPIO_55,
 		.active_low		= 0,
 		.wakeup			= 0,
 		.debounce_interval	= 30, /* ms */
-		.desc			= "usbdir",
+		.desc			= "usb_direction",
 		.pullup			= -1,
 		.pulldown		= AK_PULLDOWN_ENABLE,
 		.dir			= AK_GPIO_DIR_INPUT,

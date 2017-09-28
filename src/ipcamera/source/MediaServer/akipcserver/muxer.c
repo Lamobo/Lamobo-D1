@@ -15,7 +15,7 @@
 #include "video_process.h"
 #include "Tool.h"
 #include "AkRecordManager.h"
-#include "led.h"
+//#include "led.h"
 #include "SDcard.h"
 
 
@@ -429,6 +429,13 @@ int Get_Resolution(char *Res, int *width, int *height)
 		parse.real_width2 = 720;
 		parse.real_height2 = 576;
 	}
+	else if( !strcmp(Res, "tw"))
+	{
+		*width = 960;
+		*height = 720;
+		parse.real_width2 = 960;
+		parse.real_height2 = 720;
+	}	
 	else
 	{
 		printf(" no support Resolution \n ");
@@ -723,7 +730,7 @@ int start_record( int cycrecord )
 	}
 	
 	pthread_attr_destroy(&SchedAttr);
-	setled_record_start(video_index-1);
+	//setled_record_start(video_index-1);
 	
 	return 0;
 }
@@ -826,7 +833,7 @@ static T_pVOID thread_enc( T_pVOID user )
 				
 				CloseRecordManager();
 				Recordflag = 0;
-				setled_record_stop(RecordIndex);
+				//setled_record_stop(RecordIndex);
 				CloseListenSD();
 				break;
 			}
