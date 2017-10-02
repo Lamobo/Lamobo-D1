@@ -255,7 +255,7 @@ void Init_photograph( void )
 	IniSetting_destroy();
 	int width, height, real_width, real_height;
 	
-	if( 2 == index_file )
+	if( index_file == 2 )
 	{
 		width = parse.width2;
 		height = parse.height2;

@@ -269,7 +269,7 @@ int Set_Zoom(int z)
 		stepheight = 60;
 	}
 	#endif
-	#if 0
+	#if 1
 	else if(parse.width == 640 && channel == 1 )
 	{
 		width = 640;
@@ -382,7 +382,7 @@ static int Zoom(int x, int y, int width, int heigth, int outw, int outh, int cha
 	CLEAR(parm);
 	parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	
-	struct isp_zoom_info *zoom = (struct isp_zoom_info *) parm.parm.raw_data;
+	struct isp_zoom_info *zoom = (void *) parm.parm.raw_data;
 	zoom->type = ISP_PARM_ZOOM;
 	zoom->channel = channel;
 	zoom->cut_xpos = x;

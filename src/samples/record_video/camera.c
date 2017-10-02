@@ -194,7 +194,7 @@ int Zoom(int x, int y, int width, int heigth, int outw, int outh)
 {
 	struct v4l2_streamparm parm;
 
-	printf("zoom x=%d,y=%d, sw=%d, sh=%d, dw = %d, dh = %d\n", x, y, width, heigth, outw, outh);
+	printf("Zoom x=%d,y=%d, sw=%d, sh=%d, dw = %d, dh = %d\n", x, y, width, heigth, outw, outh);
 	CLEAR(parm);
 	parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	
@@ -688,8 +688,8 @@ int camera_open(demo_setting* Setting)
 		fmt.fmt.pix.width       = Setting->width;
 		fmt.fmt.pix.height      = Setting->height;
 		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;	
-		fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 		//V4L2_FIELD_INTERLACED
-
+		fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED; 		
+ 
 		if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
 				errno_exit("VIDIOC_S_FMT");
 		else

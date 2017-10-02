@@ -64,7 +64,7 @@ static void startFTPSrv()
 static void appExit()
 {
 	printf("##appExit\n");
-	//if (bHasAudio)
+	if (bHasAudio)
 	{
 		audio_stop();
 		audio_close();
@@ -83,7 +83,7 @@ static void appExit()
 
 	encode_destroy();
 	akuio_pmem_fini();
-	//setled_off();
+	setled_off();
 	PTZControlDeinit();
 	printf("akuio_pmem_fini\n");
 	
@@ -167,7 +167,7 @@ int main( int argc, char **argv )
 	//...do your job
 
 	//close the led
-	//setled_off();
+	setled_off();
 	//init dma memory
 	akuio_pmem_init();
 	encode_init();
@@ -225,7 +225,7 @@ int main( int argc, char **argv )
 
 	printf("mux_open ok\n");
 
-	//if (ext_gSettings->bhasAudio)
+	if (ext_gSettings->bhasAudio)
 	{
 		T_AUDIO_INPUT audioInput;
 		audioInput.enc_type = (AUDIO_ENCODE_TYPE_CC)ext_gSettings->audioType;
@@ -317,6 +317,10 @@ int main( int argc, char **argv )
 		{
 			vm[0] = VIDEO_MODE_720P;
 		}
+		if(ext_gSettings->width == 960)
+		{
+			vm[0] = VIDEO_MODE_DVC;
+		}
 		else if(ext_gSettings->width == 640)
 		{
 			vm[0] = VIDEO_MODE_VGA;
@@ -349,11 +353,15 @@ int main( int argc, char **argv )
 
 	vsIndex = 1;
 	
-	if(parse.format2 == 0)//h264
+	if(parse.format2 == 0)//264
 	{
 		if(parse.width2 == 1280)
 		{
 			vm[1] = VIDEO_MODE_720P;
+		}
+		if(parse.width2 == 960)
+		{
+			vm[1] = VIDEO_MODE_DVC;
 		}
 		else if(parse.width2 == 640)
 		{
@@ -468,8 +476,8 @@ static void Settings_Initialize( demo_setting *main )
 	// this memset. Only need to set non-zero values
 	// below.
 	memset( main, 0, sizeof(demo_setting) );
-	main->width		= 	960;			//实际编码图像的宽度，能被4整除
-	main->height	=	720;			//实际编码图像的长度，能被2整除 
+	main->width		= 1280;			//实际编码图像的宽度，能被4整除
+	main->height		= 720;			//实际编码图像的长度，能被2整除 
 	main->kbpsmode = 0;//默认静态， 动态设置为1
 	main->qpHdr		= 30;			//初始的QP的值
 	main->iqpHdr		= 30;			//初始的iQP的值
