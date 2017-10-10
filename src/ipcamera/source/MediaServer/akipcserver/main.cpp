@@ -88,7 +88,7 @@ static void appExit()
 	printf("akuio_pmem_fini\n");
 	
     record_rename_file();
-
+	system("/etc/init.d/wifi_led.sh wps_led off");
 }
 static void sigprocess(int sig)
 {
@@ -450,7 +450,7 @@ int main( int argc, char **argv )
 	ncsp.nSubFps = parse.fps2;
 	//start net command server
 	startNetCtlServer(&ncsp);
-
+	system("/etc/init.d/wifi_led.sh wps_led on");
     printf("[##]start record...\n");
     auto_record_file();
     printf("[##]auto_record_file() called..\n");

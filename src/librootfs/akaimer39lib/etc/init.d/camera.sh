@@ -25,21 +25,29 @@ usage()
 stop()
 {
 	echo "stop camera service......"
-	#killall akipcserver
-	killall -2 record_video
-	
-	pid=`pgrep record_video`
+	killall akipcserver
+	#killall -2 record_video
+	pid=`pgrep akipcserver`
 	while [ "$pid" != "" ]
 	do         
-	    sleep 0.5        
-		pid=`pgrep record_video`
-   done
+		sleep 0.5        
+		pid=`pgrep akipcserver`
+	done	
+	
+	
+	#pid=`pgrep record_video`
+	#while [ "$pid" != "" ]
+	#do         
+	#    sleep 0.5        
+	#	pid=`pgrep record_video`
+  # done
 }
 
 start ()
 {
 	echo "start camera service......"
-	/usr/bin/record_video -p /mnt/ -w 960 -h 720 -t 86400 &
+#	/usr/bin/record_video -p /mnt/ -w 960 -h 720 -t 86400 &
+	akipcserver &
 	exit 0
 	#network=`pgrep hostapd`
 	#if [ "$network" = "" ]
