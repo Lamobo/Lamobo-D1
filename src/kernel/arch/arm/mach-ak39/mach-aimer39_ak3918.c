@@ -476,6 +476,18 @@ static struct ak_led_data leds[] = {
 		.int_pol	= -1,
 		}
 	},
+	{
+	.name		= "red_led",
+	.def_trigger	= "none",
+	.gpio		= {
+		.pin		= AK_GPIO_53,
+		.pulldown	= -1,
+		.pullup 	= AK_PULLUP_DISABLE,
+		.value		= AK_GPIO_OUT_HIGH,
+		.dir		= AK_GPIO_DIR_OUTPUT,
+		.int_pol	= -1,
+		}
+	},
 };
 
 static struct ak_led_pdata led_pdata = {
@@ -545,7 +557,8 @@ static struct gpio_keys_button gpio_keys_button[] = {
 		.dir			= AK_GPIO_DIR_INPUT,
 		.int_pol		= AK_GPIO_INT_LOWLEVEL,
 	},
-/*	{
+	/*
+	{
 		.code			= KEY_1,
 		.type			= EV_KEY,
 		.gpio			= AK_GPIO_62,
@@ -557,7 +570,8 @@ static struct gpio_keys_button gpio_keys_button[] = {
 		.pulldown		= -1,
 		.dir			= AK_GPIO_DIR_INPUT,
 		.int_pol		= AK_GPIO_INT_LOWLEVEL,
-	}, */
+	}, 
+	* */
 	{
 		.code			= KEY_DIRECTION,
 		.type			= EV_KEY,
@@ -591,8 +605,8 @@ static struct akgpio_keys_platform_data gpio_keys_platform_data = {
 	&akfha_char_device,
 	&ak39_uart0_device,
 	&ak39_uart1_device,
-	&ak39_motor0_device,
-	&ak39_motor1_device,
+	//&ak39_motor0_device,
+	//&ak39_motor1_device,
 	&ak39_spi1_device,
 	&ak39_mmc_device,
 	&ak39_i2c_device,
@@ -607,7 +621,7 @@ static struct akgpio_keys_platform_data gpio_keys_platform_data = {
 	&ak39_pcm_device,
 	&ak39_codec_device,
 	&ak39_mmx_device,
-	&ak39_mac_device, 
+	//&ak39_mac_device, 
 	&ak39_led_pdev,
 	&ak39_gpio_keys_device,
 	&ak39_crypto_device,

@@ -147,7 +147,7 @@ T_MUX_INPUT mux_input;
 int main( int argc, char **argv )
 {
 	//int ret = 0;
-	PTZControlInit();
+	//PTZControlInit(); no motor support on board
 	demo_setting * ext_gSettings = NULL;
 	
 	// Allocate the "global" settings
@@ -167,7 +167,7 @@ int main( int argc, char **argv )
 	//...do your job
 
 	//close the led
-	setled_off();
+	//setled_off(); //not ness
 	//init dma memory
 	akuio_pmem_init();
 	encode_init();
