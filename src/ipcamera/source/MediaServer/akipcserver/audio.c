@@ -105,7 +105,7 @@ static T_pVOID thread_readAD( T_pVOID user )
 			//voerrunflag = 1;
 			continue;
 		}
-		#if 0
+#if 0
 		if( 1 == voerrunflag )
 		{
 			voerrunflag = 0;
@@ -116,7 +116,8 @@ static T_pVOID thread_readAD( T_pVOID user )
 			bytenum += time*bytems;
 			printf("add overrun time %d num %d\n", time, time*bytems);
 		}
-		#endif
+#endif
+
 #ifdef AUDIO_TEST_FILE
 		write( fid, pdata, gaudio.nOnceBufSize );
 #endif

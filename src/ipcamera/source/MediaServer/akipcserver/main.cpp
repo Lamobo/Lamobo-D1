@@ -225,7 +225,7 @@ int main( int argc, char **argv )
 
 	printf("mux_open ok\n");
 
-	if (ext_gSettings->bhasAudio)
+	if (bHasAudio)
 	{
 		T_AUDIO_INPUT audioInput;
 		audioInput.enc_type = (AUDIO_ENCODE_TYPE_CC)ext_gSettings->audioType;
@@ -245,7 +245,7 @@ int main( int argc, char **argv )
 	//PTZControlInit();
 	//start video process
 	video_process_start();
-	InitMotionDetect();
+	//InitMotionDetect();
 	DemuxForLiveSetCallBack();
 	TaskScheduler* scheduler = BasicTaskScheduler::createNew();
 	env = BasicUsageEnvironment::createNew(*scheduler);
