@@ -27,7 +27,6 @@
 #define MAX_WIDTH	1280
 #define MAX_HEIGHT	720
 
-//#define USE_OSD 		//uncomment for use OSD
 int g_exit = 0;
 int g_width = 0;
 int g_height = 0;

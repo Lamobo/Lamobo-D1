@@ -1001,7 +1001,7 @@ static T_S32 SetMicIn( alsa_handle_t * handle )
 		return 1;
 	}
 	
-	return SetCtrlVal( handle, CAPTURE_ROUTE_NAME, SOURCE_MIC, 0 );
+	return SetCtrlVal( handle, CAPTURE_ROUTE_NAME, SIGNAL_SRC_MUTE, 0 );
 }
 
 

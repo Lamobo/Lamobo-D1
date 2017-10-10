@@ -671,7 +671,7 @@ static int create_osd_picture2(void *pcdev, int size)
     time(&ta);
     static int sec=-1, min=-1, hour=-1;
     struct tm * tt = localtime( &ta );
-	if(5 != g_time )
+	if( g_time != 5)
 	{
 		draw(2, 10, g_size2, timefont2, osd2_buff);
 		draw(5, 10, g_size2, timefont2, osd2_buff);
@@ -782,7 +782,7 @@ static int create_osd_picture(void *pcdev, int size)
     time(&ta);
     static int sec=-1, min=-1, hour=-1;
     struct tm * tt = localtime( &ta );
-	if(5 != g_time )
+	if( g_time != 5 ) 
 	{
 		draw(2, 10, g_size, timefont, osd_buff);
 		draw(5, 10, g_size, timefont, osd_buff);
