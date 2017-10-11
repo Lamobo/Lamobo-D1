@@ -496,7 +496,7 @@ static T_pSTR MakeFileName()
 
 	if ( g_bIsCyc ) {
 		sprintf( astrFileName,"%s%06d%s%s", OUR_FILE_PREFIX, rec_count,
-			 FILE_SUFFIZ, FILE_NAME_DIF );
+			 FILE_NAME_DIF, FILE_SUFFIZ );
 	}else {
 		sprintf( astrFileName,"%s%06d%s", "DV_", rec_count, FILE_SUFFIZ );
 	}

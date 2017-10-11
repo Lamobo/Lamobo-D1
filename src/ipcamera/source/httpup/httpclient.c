@@ -167,7 +167,7 @@ int HttpDownload(char* url, char* filename)
 	//exit(1);
   }
 
-  sprintf(request, "GET /%s HTTP/1.1\r\nAccept: */*\r\nAccept-Language: zh-cn\r\n\
+  sprintf(request, "GET /%s HTTP/1.1\r\nAccept: */*\r\nAccept-Language: en\r\n\
 User-Agent: Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)\r\n\
 Host: %s:%d\r\nConnection: Close\r\n\r\n", host_file, host_addr, portnumber);
   printf("%s", request);/*准备request，将要发送给主机*/

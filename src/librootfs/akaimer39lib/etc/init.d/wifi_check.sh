@@ -4,6 +4,7 @@
 #
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin   
 status=""
+echo "start wifi check service......"
 while true
 do
 

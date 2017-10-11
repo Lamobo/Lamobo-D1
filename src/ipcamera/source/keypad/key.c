@@ -713,13 +713,7 @@ int main (int argc, char **argv)
             rd = read(gpio_fd, key_event, sizeof(struct input_event) * sizeof(key_event));
             do_key(key_event, rd);
         }
-#if 0
-        if (FD_ISSET(ad_fd, &tempfds))
-        {
-            rd = read(ad_fd, key_event, sizeof(struct input_event) * sizeof(key_event));
-            do_key(key_event, rd);
-        }
-#endif
+
     }
 
     pthread_cancel(pth);

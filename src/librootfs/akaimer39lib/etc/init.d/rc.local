@@ -23,4 +23,5 @@ date 0101000017 --utc
 #/etc/init.d/wifi
 #/etc/init.d/monitor.sh &
 /etc/jffs2/service.sh &
+/etc/init.d/wifi_check.sh
 
