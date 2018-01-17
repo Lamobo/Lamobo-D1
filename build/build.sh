@@ -259,7 +259,7 @@ pack_extra()
 {
     echo Packing TFCard...
     cd $DEV_ROOT/output
-    cat >local/readme.txt << EOF
+    cat > ../local/readme.txt << EOF
 Readme: D1 Extra Program
 ========================
 
@@ -269,7 +269,7 @@ To install these programs, just put bin folder to TFCard.
 To use these programs, just login to D1 termimal, and invoke them.
 EOF
     $RM D1_Extra_$REV_ID.zip
-    $ZIP D1_Extra_$REV_ID.zip local
+    $ZIP D1_Extra_$REV_ID.zip ../local
 }
 
 build_all()
