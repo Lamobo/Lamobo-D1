@@ -259,8 +259,8 @@ CONFIG_ASIC_FREQ_VALUE=90000000
 #
 # Power management
 #
-#CONFIG_AK39_PM is not set
-#CONFIG_AK39_PWM_TIMER is not set
+# CONFIG_AK39_PM is not set
+#CONFIG_AK39_PWM_TIMER=y
 CONFIG_PLAT_ANYKA=y
 
 #
