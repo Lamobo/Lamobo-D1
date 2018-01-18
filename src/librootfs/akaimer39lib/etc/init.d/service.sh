@@ -34,7 +34,9 @@ start_service ()
 	echo "start key service......"
 	key &
 	echo "start boa service......"
-	boa
+	boa &
+	echo "stop getty on SAK1....."
+	pkill -19 -f "/sbin/getty -L ttySAK1 115200 vt100"
 	
 }
 
