@@ -4,7 +4,7 @@
 # Provides:         connect to PC udisk 
 #
 
-
+MOUNT_PATH="/mnt"
 
 
 usage()
@@ -18,7 +18,7 @@ start ()
 {
 	echo "start connecting PC udisk......"
 	sync
-	umount /mnt
+	umount $MOUNT_PATH
 	
 	rmmod 8188eu
 	sleep 1
@@ -49,12 +49,20 @@ stop ()
 
 	rmmod g_mass_storage
 	rmmod udc
-
-	dev=`ls /dev | grep mmc`
-	if [ "$dev" != "" ]
-	then
-		dev=`ls /dev/$dev`
-		mount $dev /mnt
+	
+	insmod /root/otg-hs.ko
+	sleep 1
+	insmod /root/8188eu.ko
+	
+	cnt=$(ls /dev | grep mmc | wc -l)	
+	
+	if [[ $cnt -ge 2 ]]; then
+		echo "mount mmcblk0p1"
+		mount -t auto /dev/mmcblk0p1 $MOUNT_PATH
+		elif [[ $cnt -eq 1 ]]; then
+		echo "mount mmcblk0"
+		mount -t auto  /dev/mmcblk0 $MOUNT_PATH
+		
 	fi
 }
 
