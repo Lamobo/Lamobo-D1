@@ -1,5 +1,5 @@
 LOCAL_SRC_FILES := 	key.c 
-
+export PATH := /home/user/videorec/compiler/arm-2009q3/bin:$(PATH)
 
 LOCAL_MODULE := key
 
