@@ -1,24 +1,38 @@
 #ifndef TPOLL__H
 #define TPOLL__H
 
-typedef unsigned short u16;
-typedef unsigned char u8;
-enum  rx_cmd {
-	STARTMSG =			'[',
-	//------commands--------//
-	CMD_BEGIN_RECORD = 	'B',
-	CMD_END_RECORD = 	'E',
-	CMD_CLK_ADJUST	= 	'A',
-	CMD_WIFI_MODE	= 	'W',
-	CMD_DEVICE_MODE	= 	'D',
+//typedef unsigned short u16;
+//typedef unsigned char u8;
+enum {
+	STARTMSG 	=			'[',
+
+	//--commands from MCU-----//
+	CMD_START_RECORD 	= 	'R',
+	CMD_STOP_RECORD 	= 	'S',
+	CMD_CLK_ADJUST		= 	'A',
+	CMD_USB_HOST_MODE	= 	'H',
+	CMD_USB_DEVICE_MODE	= 	'D',
+	//--commands to MCU------//
+	REC_READY			=	'!',
+	REC_ERROR			= 	'E',
+	REC_NO_SDCARD		= 	'N',
+	REC_NO_CAMERA		= 	'C',
+	
 	//----------------------//
-	STOPMSG = 			']',
+	STOPMSG 	= 			']',
+};
+
+enum sig_flag {
+	IDLE = 0U,
+	MSG_USR1,
+	CHILD_EXIT,
+	START,
+	LAST_MSG,
 };
 
 
 
-
-u16 crctbl[256] = {
+uint16_t crctbl[256] = {
     0x0000,0x1021,0x2042,0x3063,0x4084,0x50a5,0x60c6,0x70e7,
     0x8108,0x9129,0xa14a,0xb16b,0xc18c,0xd1ad,0xe1ce,0xf1ef,
     0x1231,0x0210,0x3273,0x2252,0x52b5,0x4294,0x72f7,0x62d6,
@@ -52,8 +66,10 @@ u16 crctbl[256] = {
     0xef1f,0xff3e,0xcf5d,0xdf7c,0xaf9b,0xbfba,0x8fd9,0x9ff8,
     0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0};
 
-
+void sig_hdl(int signal);
 static void tpoll_exit(int sig);
-static u16 gencrc(u8 *bfr, size_t len);
+static uint16_t gencrc(uint8_t *bfr, size_t len);
 static int rxdata_processing (serial_t* s);
+static int send_responce (uint8_t cmd);
+static void tpoll_exit(int sigexit);
 #endif
