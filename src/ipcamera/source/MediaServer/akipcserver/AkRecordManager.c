@@ -17,7 +17,7 @@
 #define FILE_SUFFIZ								".avi"
 #define FILE_NAME_DIF							"(New)"
 #define DIR_SEPARATOR							'/'
-#define OUR_FILE_PREFIX							"REC_DV_"
+#define OUR_FILE_PREFIX							"REC_TVD_"
 #define INI_RECORDER                            "/etc/jffs2/camera.ini"
 
 static const T_U32 MAX_FILE_PATH_LEN			= 1024UL;
@@ -465,8 +465,9 @@ int ChangFileName( void )
 {
 	char filename[1024];
 	memset(filename, 0x00, 1024);
-	strncpy(filename, g_filename, strlen(g_filename)-5);
-	printf(" filename %s \n", filename);
+	strncpy(filename, g_filename, strlen(g_filename)-9);
+	strcat(filename, FILE_SUFFIZ);
+	printf("filename %s \n", filename);
 	rename(g_filename, filename);
 	return 0;
 }
@@ -475,7 +476,7 @@ int rec_count = 0;
 
 static T_pSTR MakeFileName()
 {
-	T_CHR astrFileName[30];
+	T_CHR astrFileName[64];
 	T_pSTR strCompletePath = NULL;
 	T_pSTR strAdd = NULL;
 	T_S32 iPathLen = 0, iIndex = 0;
@@ -493,14 +494,15 @@ static T_pSTR MakeFileName()
     if(ini){
         rec_count = iniparser_getint(ini, "recoder:count", 0);
     }
-
+/*
+ *    ////////////    make filename without timestamp------- 
 	if ( g_bIsCyc ) {
 		sprintf( astrFileName,"%s%06d%s%s", OUR_FILE_PREFIX, rec_count,
 			 FILE_NAME_DIF, FILE_SUFFIZ );
 	}else {
 		sprintf( astrFileName,"%s%06d%s", "DV_", rec_count, FILE_SUFFIZ );
 	}
-
+*/
     rec_count++;
     if(rec_count > 999999)
         rec_count = 1;
@@ -516,16 +518,17 @@ static T_pSTR MakeFileName()
         iniparser_freedict(ini);
     }
 
-    /*      
+   ////////////    make filename with timestamp------- 
 	if ( g_bIsCyc ) {
-		sprintf( astrFileName,"%s%4d%02d%02d%02d%02d%02d%s%s", OUR_FILE_PREFIX,
+		sprintf( astrFileName,"%s%4d_%02d_%02d_%02d%02d%02d%s%s", OUR_FILE_PREFIX,
 			1900 + tnow->tm_year, tnow->tm_mon + 1, tnow->tm_mday, tnow->tm_hour, 
-			tnow->tm_min, tnow->tm_sec, FILE_SUFFIZ, FILE_NAME_DIF );
+			tnow->tm_min, tnow->tm_sec, FILE_NAME_DIF, FILE_SUFFIZ );
 	}else {
 		sprintf( astrFileName,"%s%02d%02d%02d%s", "DV_", tnow->tm_hour, tnow->tm_min,
 			tnow->tm_sec, FILE_SUFFIZ );
 	}
-    */
+    ///////////-------------------------------------
+	
 	//加上结束位，和5个同名情况下要增加的字符."_1~1024"
 	iPathLen = strlen( g_RecPath ) + strlen( astrFileName ) + 6;
 	strCompletePath = (T_pSTR)malloc( iPathLen );

@@ -19,51 +19,32 @@
 #include "uart.h"
 #include "tpoll.h"
 
+#define REC_PATH	"/mnt/akipcserver"//"/usr/bin/akipcserver"
+#define REC_NAME	"akipcserver"
 //int err;
-
+extern const char * const sys_siglist[];
 serial_t* tty;
 //char dev[]={"/dev/ttyUSB0"};
 char dev[]={"/dev/ttySAK1"}; //for production
 int baud = 115200;
 uint8_t rxdata[BUFF_SIZE];
 //u8 crct[]={"123"};
+
 pid_t pid = -1;
 volatile sig_atomic_t sig = IDLE;
 
-
-
 int main(void) {
-bool B_mode_wifi = true;
-struct tm 		str_time;
-struct timeval 	now;
-
-//signals regictration
-struct sigaction act;
-memset (&act, 0, sizeof(act));
-act.sa_handler = &sig_hdl;
-sigset_t   set; 
-sigemptyset(&set);
-sigaddset(&set, SIGUSR1);
-sigaddset(&set, SIGCHLD);
-act.sa_mask = set;	//blocked sig
-
-if (sigaction(SIGUSR1, &act, NULL) < 0) {
-	perror ("sigaction init USR1");
+//
+atexit(tpoll_exit);
+if (sig_init() < 0) {
 	exit(EXIT_FAILURE);
 }
-if (sigaction(SIGCHLD, &act, NULL) < 0) {
-	perror ("sigaction init child_terminated");
-	exit(EXIT_FAILURE);
-}
-
-
 //create serial device connection
 tty = serial_create();
 if(serial_connect(tty, dev, baud) < 0){
 	perror("serial connect");
-	tpoll_exit(-1);
+	exit(EXIT_FAILURE);
 }
-
 
 for(;;){
 	usleep(200000);
@@ -71,84 +52,7 @@ for(;;){
 	if(serial_available(tty)) {
 		if((cnt = rxdata_processing(tty)) > 0) {
 			//processing cmd_code
-			//printf("command %c\n", rxdata[2]);
-			switch (rxdata[2]) {
-			int i;
-			case CMD_START_RECORD:
-					if (access("/dev/mmcblk0", R_OK) == 0) {
-						pid = fork();	//create new process
-						if (pid != 0) {	//parent proc
-							printf("child pid = %d\n", pid);					
-						}
-						else if (!pid) { //child proc
-							serial_close(tty);
-							serial_destroy(tty);
-							if(execl("/usr/bin/akipcserver","akipcserver", NULL) < 0) {
-								perror("child exec err");
-								tpoll_exit(-4);
-							}
-						}
-						else if (pid < 0) {
-							perror ("fork process failed");
-							send_responce (REC_ERROR);
-						}
-							
-					else {
-						printf("no SD card!\n");
-						send_responce (REC_NO_SDCARD);
-					}
-
-					}
-
-			break;
-			
-			case CMD_STOP_RECORD:
-				//system("/etc/init.d/camera.sh stop");
-				printf("stop record\n");
-			break;
-	
-			case CMD_CLK_ADJUST:
-				if (cnt == 0x0C){
-				i = 3;
-				str_time.tm_year = 	(int) rxdata[i];
-				str_time.tm_mon = 	(int) rxdata[++i];
-				str_time.tm_mday = 	(int) rxdata[++i];
-				str_time.tm_hour = 	(int) rxdata[++i];
-				str_time.tm_min = 	(int) rxdata[++i];
-				str_time.tm_sec =	(int) rxdata[++i];
-				str_time.tm_isdst = -1;
-				//printf("%s\n", asctime(&str_time));
-				now.tv_usec = 0;
-				now.tv_sec = mktime(&str_time);
-				
-					if(settimeofday(&now, NULL) == 0) {
-						printf("settimeofday() successful.\n");
-					}
-					else {
-						perror("settimeofday() failed");
-						//exit(EXIT_FAILURE);
-					}
-				}
-				else printf("packet size for time incorrect.\n");
-			break;
-			
-			case CMD_USB_HOST_MODE:
-				if(B_mode_wifi == false) {
-					system("/etc/init.d/udisk.sh stop");
-					B_mode_wifi = true;
-				}
-			break;
-			
-			case CMD_USB_DEVICE_MODE:
-				if(B_mode_wifi == true) {
-					system("/etc/init.d/udisk.sh stop");
-					B_mode_wifi = false;
-				}
-			break;			
-			
-			default:
-			break;
-			} //end switch
+			cmd_code_processing (rxdata); 
 		} // end if processing
 		else {								//error processing rxdata
 			printf("clear rx buffer\n");
@@ -158,41 +62,13 @@ for(;;){
 
 	//signal received?
 	if(sig != IDLE)	{
-		int state_val = 0;
-		switch (sig){
-							
-		case CHILD_EXIT:
-			wait(&state_val);
-			if (WIFEXITED(state_val))
-				printf("Child exited with code %d\n", WEXITSTATUS(state_val));
-			else if (WIFSIGNALED(state_val))
-				printf("Child exited by signal %d\n", WTERMSIG(state_val));
-			else printf("Child terminated abnormally\n");
-			pid = -1;
-		break;
-		
-		case MSG_USR1:
-			printf("message 1 received\n");
-		break;
-		
-		default:
-		break;
-		}
+		signal_processing(sig); 
 		sig = IDLE;
 	}
-
-
-
 } //end for
 
 	
 printf("exit from main loop\n");
-if(pid != -1){
-kill(pid,SIGTERM);
-wait(NULL);
-}
-serial_close(tty);
-serial_destroy(tty);
 exit(EXIT_SUCCESS);
 } 
 
@@ -212,6 +88,10 @@ void sig_hdl(int signal)
 			sig = CHILD_EXIT;
 		break;
 		
+		case SIGINT:
+			sig = KEY_INT;
+		break;
+				
 		default:
 		break;
 	}
@@ -230,7 +110,7 @@ static int rxdata_processing (serial_t* s)
 	for(i = 0; i < BUFF_SIZE && serial_available(tty); i++){
 			rxdata[i] = serial_get(s);
 	}
-	printf("%c %c bytes cnt=%d\n", rxdata[0], rxdata[i-1], i);
+	//printf("%c %c bytes cnt=%d\n", rxdata[0], rxdata[i-1], i);
 	
 	//analyze received data
 	if((rxdata[0] != STARTMSG) || (rxdata[i-1] != STOPMSG)) {
@@ -255,6 +135,103 @@ static int rxdata_processing (serial_t* s)
 return (i-1);
 }
 
+/**
+ * Processing & analyze received command
+ * 
+ * 
+ * @param *data - pointer to rxdata buffer.
+ *
+ */
+static void cmd_code_processing (uint8_t* data) 
+{
+	bool B_mode_wifi = true;
+	struct tm 		str_time;
+	struct timeval 	now;
+	struct sigaction act_chd;
+	
+	printf("command %c\n", *(data+2));
+	switch (*(data+2)) {
+	int i;
+	case CMD_START_RECORD:
+			printf("%s: start record\n", __func__);
+			if(pid == -1) {
+				if (access("/dev/mmcblk0", R_OK) == 0) {
+					pid = fork();	//create new process
+					if (pid != 0) {	//parent proc
+						printf("child pid = %d\n", pid);					
+					}
+					else if (!pid) { //child proc
+						memset (&act_chd, 0, sizeof(act_chd));
+						act_chd.sa_handler = SIG_IGN;
+						if (sigaction(SIGINT, &act_chd, NULL) < 0) 
+							perror ("failed sigaction block SIGINT");
+						serial_close(tty);
+						serial_destroy(tty);
+							
+						if(execl(REC_PATH, REC_NAME, NULL) < 0) {
+							perror("child exec err");
+							exit(EXIT_FAILURE);
+						}
+					}
+					else if (pid < 0) {
+						perror ("fork process failed");
+						send_responce (REC_ERROR);
+					}
+				}
+				else {
+					printf("no SD card!\n");
+					send_responce (REC_NO_SDCARD);
+				}
+			}
+	
+	break;
+	
+	case CMD_STOP_RECORD:
+		if(pid != -1) {
+			printf("%s: stop record\n", __func__);
+			kill(pid, SIGTERM);
+		}
+	break;
+	
+	case CMD_CLK_ADJUST:
+		if (*(data+1) == 0x0C){ 		//if packet size less or more: error
+			i = 3;
+			str_time.tm_year = 	(int) rxdata[i];
+			str_time.tm_mon = 	(int) rxdata[++i];
+			str_time.tm_mday = 	(int) rxdata[++i];
+			str_time.tm_hour = 	(int) rxdata[++i];
+			str_time.tm_min = 	(int) rxdata[++i];
+			str_time.tm_sec =	(int) rxdata[++i];
+			str_time.tm_isdst = -1;
+			//printf("%s\n", asctime(&str_time));
+			now.tv_usec = 0;
+			now.tv_sec = mktime(&str_time);
+			if(settimeofday(&now, NULL) != 0) {
+				perror("settimeofday() failed\n");
+			}
+		}
+		else printf("packet size for adjust time incorrect.\n");
+	break;
+	
+	case CMD_USB_HOST_MODE:
+		if(B_mode_wifi == false) {
+			system("/etc/init.d/udisk.sh stop");
+			B_mode_wifi = true;
+		}
+	break;
+	
+	case CMD_USB_DEVICE_MODE:
+		if(B_mode_wifi == true) {
+			system("/etc/init.d/udisk.sh stop");
+			B_mode_wifi = false;
+		}
+	break;			
+	
+	default:
+	break;
+	} //end switch
+	
+}
 
 /**
  * Generate  CRC-16/XMODEM
@@ -297,19 +274,84 @@ static int send_responce (uint8_t cmd)
 		serial_put(tty, txbuf[j]);
 return (j-1);
 }
+/**
+ * Signals initialization
+ * @return sigexit - signal to send parent process
+ */
+static int sig_init (void) 
+{
+	//signals registration
+	int ret = 0;
+	struct sigaction act;
+	memset (&act, 0, sizeof(act));
+	act.sa_handler = &sig_hdl;
+	sigset_t   set; 
+	sigemptyset(&set);
+	sigaddset(&set, SIGUSR1);
+	sigaddset(&set, SIGCHLD);
+	sigaddset(&set, SIGINT);
+	act.sa_mask = set;	//blocked sig
+	
+	if (sigaction(SIGUSR1, &act, NULL) < 0) {
+		perror ("sigaction init USR1");
+		ret += -1;
+	}
+	if (sigaction(SIGCHLD, &act, NULL) < 0) {
+		perror ("sigaction init SIGCHLD");
+		ret += -1;
+	}
+	if (sigaction(SIGINT, &act, NULL) < 0) {
+		perror ("sigaction init SIGINT");
+		ret += -1;
+	}
+	return ret;
+}
+
+/**
+ * Signals processing
+ * @param signal - value to process 
+ */
+static void signal_processing (sig_atomic_t signal) 
+{
+	int state_val = 0;
+	switch (signal){
+	case CHILD_EXIT:
+		wait(&state_val);
+		if (WIFEXITED(state_val))
+			printf("Child exited with code %d\n", WEXITSTATUS(state_val));
+		else if (WIFSIGNALED(state_val))
+			printf("Child exited by %s signal\n", sys_siglist[WTERMSIG(state_val)]);
+		else printf("Child terminated abnormally\n");
+		pid = -1;
+	break;
+	
+	case MSG_USR1:
+		printf("%s: signal SIGUSR1 received\n", __func__);
+	break;
+	
+	case KEY_INT:
+		printf("%s: signal SIGINT received\n", __func__);
+		exit(EXIT_SUCCESS);
+	break;
+	
+	default:
+	break;
+	}
+}
 
 /**
  * Exit from the func
- * @param sigexit - signal to send parent process
+ * 
  */
-static void tpoll_exit(int sigexit)
+static void tpoll_exit(void)
 {
-if(pid != -1){
-kill(pid,SIGTERM);
-wait(NULL);
-}
-serial_close(tty);
-serial_destroy(tty);
-exit(sigexit);
+	printf("%s\n", __func__);
+	if(pid != -1){		//if child process work, kill him
+		kill(pid,SIGTERM);
+		wait(NULL);
+	}
+	serial_close(tty);
+	serial_destroy(tty);
+	
 }
 

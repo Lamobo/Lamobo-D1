@@ -26,6 +26,7 @@ enum sig_flag {
 	IDLE = 0U,
 	MSG_USR1,
 	CHILD_EXIT,
+	KEY_INT,
 	START,
 	LAST_MSG,
 };
@@ -67,9 +68,11 @@ uint16_t crctbl[256] = {
     0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0};
 
 void sig_hdl(int signal);
-static void tpoll_exit(int sig);
 static uint16_t gencrc(uint8_t *bfr, size_t len);
 static int rxdata_processing (serial_t* s);
+static void cmd_code_processing (uint8_t* data);
 static int send_responce (uint8_t cmd);
-static void tpoll_exit(int sigexit);
+static int sig_init (void);
+static void signal_processing (sig_atomic_t signal);
+static void tpoll_exit(void);
 #endif

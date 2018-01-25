@@ -92,6 +92,7 @@ static void appExit()
 }
 static void sigprocess(int sig)
 {
+	/*
 	int ii = 0;
 	void *tracePtrs[16];
 	int count = backtrace(tracePtrs, 16);
@@ -102,20 +103,35 @@ static void sigprocess(int sig)
 	fflush(stderr);
 	printf("##signal %d caught\n", sig);
 	fflush(stdout);
-	
-	if(sig == SIGINT || sig == SIGSEGV || sig == SIGTERM)
+	*/
+	if(sig == SIGSEGV )
 	{
-		appExit();	
+		//appExit();
+		exit(sig);	
 	}
+	else if(sig == SIGTERM)
+		exit(EXIT_SUCCESS);
 
-	exit(1);
+	//exit(1);
 }
 
 static int sig_init(void)
 {
-	signal(SIGSEGV, sigprocess);
-	signal(SIGINT, sigprocess);
-	signal(SIGTERM, sigprocess);
+	struct sigaction act;
+	memset (&act, 0, sizeof(act));
+	act.sa_handler = &sigprocess;
+	sigset_t   set; 
+	sigemptyset(&set);
+	sigaddset(&set, SIGSEGV);
+	sigaddset(&set, SIGTERM);
+	act.sa_mask = set;	//blocked sig
+	
+	if (sigaction(SIGSEGV, &act, NULL) < 0) {
+		perror ("sigaction init USR1");
+	}
+	if (sigaction(SIGTERM, &act, NULL) < 0) {
+		perror ("sigaction init SIGCHLD");
+	}
 	return 0;
 }
 
@@ -263,7 +279,7 @@ int main( int argc, char **argv )
 	if (rtspServer == NULL) 
 	{
 		*env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";
-		appExit();
+		//appExit();
 		exit(1);
 	}
 
@@ -458,7 +474,7 @@ int main( int argc, char **argv )
 	//at last,start rtsp loop
 	env->taskScheduler().doEventLoop(); // does not return
 
-	return 0;
+	exit (EXIT_SUCCESS);
 }
 
 

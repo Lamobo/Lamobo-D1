@@ -1,7 +1,7 @@
 LIVE555_DIR = ../aklivelib
 LIBROOT_DIR = ../../../../librootfs
 USE_CPP := 1
-
+export PATH := /home/user/videorec/compiler/arm-2009q3/bin:$(PATH)
 LOCAL_SRC_CFILES := \
 		log.c \
 		encode.c \
