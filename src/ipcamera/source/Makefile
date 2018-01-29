@@ -6,6 +6,8 @@ dir_y += cgic
 dir_y += keypad
 dir_y += MediaServer
 dir_y += httpup
+dir_y += thread_poll
+
 all:
 	@for i in $(dir_y); \
 	do \

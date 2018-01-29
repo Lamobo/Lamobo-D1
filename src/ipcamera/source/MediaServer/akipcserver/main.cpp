@@ -86,12 +86,20 @@ static void appExit()
 	setled_off();
 	PTZControlDeinit();
 	printf("akuio_pmem_fini\n");
+	record_rename_file();
 	
-    record_rename_file();
-	system("/etc/init.d/wifi_led.sh wps_led off");
+    union sigval usr_value;
+	usr_value.sival_int = 0;	//rec stop
+	pid_t ppid = getppid();
+	if (ppid > 0) {
+		if(sigqueue(getppid(), SIGUSR1, usr_value)) //send signal USR1 with value=0
+			perror("sigqueue");
+	}
+	//system("/etc/init.d/wifi_led.sh wps_led off");
 }
 static void sigprocess(int sig)
 {
+	char sigmsg[100];
 	/*
 	int ii = 0;
 	void *tracePtrs[16];
@@ -106,13 +114,12 @@ static void sigprocess(int sig)
 	*/
 	if(sig == SIGSEGV )
 	{
-		//appExit();
+		snprintf(sigmsg,100,"##signal %d caught##\n", sig);
+		write(1, sigmsg, strlen(sigmsg)+1);
 		exit(sig);	
 	}
 	else if(sig == SIGTERM)
 		exit(EXIT_SUCCESS);
-
-	//exit(1);
 }
 
 static int sig_init(void)
@@ -130,7 +137,7 @@ static int sig_init(void)
 		perror ("sigaction init USR1");
 	}
 	if (sigaction(SIGTERM, &act, NULL) < 0) {
-		perror ("sigaction init SIGCHLD");
+		perror ("sigaction init SIGTERM");
 	}
 	return 0;
 }
@@ -466,8 +473,8 @@ int main( int argc, char **argv )
 	ncsp.nSubFps = parse.fps2;
 	//start net command server
 	startNetCtlServer(&ncsp);
-	system("/etc/init.d/wifi_led.sh wps_led on");
-    printf("[##]start record...\n");
+	//system("/etc/init.d/wifi_led.sh wps_led on");
+    //printf("[##]start record...\n");
     auto_record_file();
     printf("[##]auto_record_file() called..\n");
 

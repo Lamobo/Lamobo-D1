@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <sys/statfs.h>
 #include <sys/stat.h>
+#include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -730,6 +731,15 @@ int start_record( int cycrecord )
 	
 	pthread_attr_destroy(&SchedAttr);
 	setled_record_start(video_index-1);
+
+//SEND SIGNAL TO PARENT PROCESS
+	union sigval usr_value;
+	usr_value.sival_int = 1;	//rec start
+	pid_t ppid = getppid();
+	if (ppid > 0) {
+		if(sigqueue(getppid(), SIGUSR1, usr_value)) //send signal USR1 with value=1
+			perror("sigqueue");
+	}
 	
 	return 0;
 }

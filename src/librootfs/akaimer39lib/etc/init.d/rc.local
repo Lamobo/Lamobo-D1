@@ -1,7 +1,7 @@
 #!/bin/sh
 
-mount /dev/mmcblk0p1 /mnt
-mount /mnt/local /usr/local
+#mount /dev/mmcblk0p1 /mnt
+#mount /mnt/local /usr/local
 
 echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-0/new_device
 #hwclock -s
@@ -23,6 +23,6 @@ date 0101000017 --utc
 #/etc/init.d/wifi
 #/etc/init.d/monitor.sh &
 
-/etc/jffs2/service.sh &
-
+/etc/jffs2/service.sh 
+/usr/bin/tpoll & # start polling
 
