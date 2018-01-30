@@ -31,7 +31,7 @@ char dev[]={"/dev/ttySAK1"}; //for production
 int baud = 115200;
 uint8_t rxdata[BUFF_SIZE];
 pid_t pid = -1;
-volatile sig_atomic_t sig = IDLE;
+volatile sig_atomic_t sig = S_IDLE;
 siginfo_t s_inf;
 
 
@@ -63,9 +63,9 @@ for(;;){
 	} //end serial available
 
 	
-	if(sig != IDLE)	{						 //signal received?
+	if(sig != S_IDLE)	{						 //signal received?
 		signal_processing(sig); 
-		sig = IDLE;
+		sig = S_IDLE;
 	}
 } //end for
 
@@ -88,14 +88,18 @@ void sig_hdl(int signal, siginfo_t* s_inf, void* ucontext)
 		case SIGUSR1:
 			if(s_inf->si_code == SI_QUEUE) {
 			switch(s_inf->si_int) {
-				case 1: 
-					sig = RECORDER_RUN;
-				break;
-				
 				case 0:
-					sig = RECORDER_STOP;
+					sig = S_RECORDER_STOP;
+				break;
+							
+				case 1: 
+					sig = S_RECORDER_RUN;
 				break;
 				
+				case 2:
+					sig = S_CAMERA_ERROR;
+				break;	
+			
 				default:
 				break;
 			}
@@ -103,25 +107,24 @@ void sig_hdl(int signal, siginfo_t* s_inf, void* ucontext)
 		break;
 		
 		case SIGCHLD:
-			if(s_inf->si_errno != 0) {
-				snprintf(sigmsg,TXT_BUF, "Child exited error: %d, %s\n", s_inf->si_errno, strerror(s_inf->si_errno));
-				sig = CHILD_EXIT;
-				break;
+			if(!s_inf->si_errno) {
+				if	(s_inf->si_code == CLD_EXITED) //if child exit 
+					snprintf(sigmsg, TXT_BUF, "Exit with code = %d\n", s_inf->si_status);
+				else {
+					snprintf(sigmsg, TXT_BUF, "Child exited with signal %d (%s)\n", s_inf->si_code, 
+					(s_inf->si_code == CLD_KILLED) ? "CLD_KILLED":
+					(s_inf->si_code == CLD_DUMPED) ? "CLD_DUMPED": "other");
+				}
 			}
-		
-			if	(s_inf->si_code == CLD_EXITED)
-				snprintf(sigmsg,TXT_BUF,"Exit with code = %d\n", s_inf->si_status);
 			else {
-				snprintf(sigmsg,TXT_BUF,"Child exited with signal %d (%s)\n", s_inf->si_code, 
-				(s_inf->si_code == CLD_KILLED) ? "CLD_KILLED":
-				(s_inf->si_code == CLD_DUMPED) ? "CLD_DUMPED": "other");
+				snprintf(sigmsg,TXT_BUF, "Child exited error: %d, %s\n", s_inf->si_errno, strerror(s_inf->si_errno));
 			}
 			write(1, sigmsg, strlen(sigmsg)+1);
-			sig = CHILD_EXIT;
+			sig = S_CHILD_EXIT;
 		break;
 		
 		case SIGINT:
-			sig = KEY_INT;
+			sig = S_KEY_INT;
 		break;
 				
 		default:
@@ -186,7 +189,7 @@ static void cmd_code_processing (uint8_t* data)
 	int i;
 	case CMD_START_RECORD:
 			//printf("%s: start record\n", __func__);
-			if(pid == -1) {
+			if(pid == -1) {			//if does not have child
 				if (access("/dev/mmcblk0", R_OK) == 0) {
 					pid = fork();	//create new process
 					if (pid != 0) {	//parent proc
@@ -195,24 +198,24 @@ static void cmd_code_processing (uint8_t* data)
 					else if (!pid) { //child proc: close all file desc & ignore SIGINT
 						memset (&act_chd, 0, sizeof(act_chd));
 						act_chd.sa_handler = SIG_IGN;
-						if (sigaction(SIGINT, &act_chd, NULL) < 0) 
+						if (sigaction(SIGINT, &act_chd, NULL) < 0) 	//block SIGINT on child
 							perror ("failed sigaction block SIGINT");
 						serial_close(tty);
 						serial_destroy(tty);
 							
-						if(execl(REC_PATH, REC_NAME, NULL) < 0) {
+						if(execl(REC_PATH, REC_NAME, NULL) < 0) { //execute recorder on child proc
 							perror("child exec err");
 							exit(EXIT_FAILURE);
 						}
 					}
 					else if (pid < 0) {
 						perror ("fork process failed");
-						send_response (REC_ERROR);
+						send_response (CMD_REC_ERROR);
 					}
 				}
 				else {
 					printf("no SD card!\n");
-					send_response (REC_NO_SDCARD);
+					send_response (CMD_REC_NOSDCARD);
 				}
 			}
 	
@@ -351,7 +354,7 @@ static void signal_processing (sig_atomic_t signal)
 	
 	//int state_val = 0;
 	switch (signal){
-	case CHILD_EXIT:
+	case S_CHILD_EXIT:
 		/*wait(&state_val);
 		if (WIFEXITED(state_val))
 			printf("Child exited with code %d\n", WEXITSTATUS(state_val));
@@ -363,17 +366,22 @@ static void signal_processing (sig_atomic_t signal)
 		pid = -1;
 	break;
 	
-	case RECORDER_RUN:
+	case S_RECORDER_RUN:
 		printf("Received msg: RECORDER RUN!\n");
 		send_response (CMD_START_RECORD); 
 	break;
 	
-	case RECORDER_STOP:
+	case S_RECORDER_STOP:
 		printf("Received msg: RECORDER STOP!\n");
 		send_response (CMD_STOP_RECORD);
 	break;
 	
-	case KEY_INT:
+	case S_CAMERA_ERROR:
+		printf("Received msg: CAMERA ERROR!\n");
+		send_response (CMD_REC_CAM_ERROR);
+	break;
+	
+	case S_KEY_INT:
 		printf("%s: signal SIGINT received\n", __func__);
 		exit(EXIT_SUCCESS);
 	break;
@@ -381,6 +389,7 @@ static void signal_processing (sig_atomic_t signal)
 	default:
 	break;
 	}
+	
 }
 
 /**
@@ -391,7 +400,7 @@ static void tpoll_exit(void)
 {
 	printf("--%s--\n", __func__);
 	if(pid != -1){		//if child process work, kill his
-		kill(pid,SIGTERM);
+		kill(pid, SIGTERM);
 		wait(NULL);
 	}
 	serial_close(tty);

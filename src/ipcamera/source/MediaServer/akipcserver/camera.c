@@ -1774,11 +1774,13 @@ int camera_open(unsigned long width, unsigned long height)
     if (-1 == stat(dev_name, &st)) {
         fprintf(stderr, "Cannot identify '%s': %d, %s\n",
                  dev_name, errno, strerror(errno));
+                 SendSig_ToParent (SIGUSR1, 2); //camerr
         exit(EXIT_FAILURE);
     }
 
     if (!S_ISCHR(st.st_mode)) {
         fprintf(stderr, "%s is no device\n", dev_name);
+        SendSig_ToParent (SIGUSR1, 2); //camerr
         exit(EXIT_FAILURE);
     }
 
@@ -1786,6 +1788,7 @@ int camera_open(unsigned long width, unsigned long height)
     if (-1 == fd) {
         fprintf(stderr, "Cannot open '%s': %d, %s\n",
                  dev_name, errno, strerror(errno));
+        SendSig_ToParent (SIGUSR1, 2); //camerr
         exit(EXIT_FAILURE);
     }
 
@@ -1800,6 +1803,7 @@ int camera_open(unsigned long width, unsigned long height)
 		if (EINVAL == errno) {
 			fprintf(stderr, "%s is no V4L2 device\n",
 					 dev_name);
+			SendSig_ToParent (SIGUSR1, 2); //camerr
 			exit(EXIT_FAILURE);
 		} else {
 			errno_exit("VIDIOC_QUERYCAP");

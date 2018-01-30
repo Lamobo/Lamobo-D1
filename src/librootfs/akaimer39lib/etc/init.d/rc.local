@@ -24,5 +24,5 @@ date 0101000017 --utc
 #/etc/init.d/monitor.sh &
 
 /etc/jffs2/service.sh 
-/usr/bin/tpoll & # start polling
+/usr/bin/tpolld & # start polling
 

@@ -4,6 +4,7 @@
 #include <sys/statfs.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #include "Tool.h"
 #include "log.h"
@@ -450,4 +451,24 @@ T_S64 GetDiskSize( T_pSTR pstrRecPath )
 	return 0;
 	//return (signed long long)(((signed long long)(T_U32)(disk_statfs.f_bavail)) * ((signed long long)(T_U32)(disk_statfs.f_bsize)));
 }
-
+/**
+* @brief   send signal to parent proc
+*
+* @author amartol
+* @date 2018-01-30
+* @param signo - signal to send
+* @param sig_val - value signal 
+* @retval 0 if success, otherwise -1
+**/ 
+T_S32 SendSig_ToParent ( T_S32 signo, T_S32 sig_val )
+{
+	union sigval usr_value;
+	usr_value.sival_int = sig_val;	
+	pid_t ppid = getppid();
+	if ( ppid > 0 ) {
+		if(sigqueue(getppid(), signo, usr_value))
+			loge( "%s: sigqueue error == %s\n", __func__, strerror(errno) );
+		  	return -1;
+	}
+	return 0;
+}

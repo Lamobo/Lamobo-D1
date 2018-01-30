@@ -3,7 +3,7 @@
 
 //typedef unsigned short u16;
 //typedef unsigned char u8;
-enum {
+enum msg{
 	STARTMSG 	=			'[',
 
 	//--commands from MCU-----//
@@ -13,22 +13,21 @@ enum {
 	CMD_USB_HOST_MODE	= 	'H',
 	CMD_USB_DEVICE_MODE	= 	'D',
 	//--commands to MCU------//
-	REC_READY			=	'!',
-	REC_ERROR			= 	'E',
-	REC_NO_SDCARD		= 	'N',
-	REC_NO_CAMERA		= 	'C',
+	CMD_REC_ERROR		= 	'E',
+	CMD_REC_NOSDCARD	= 	'N',
+	CMD_REC_CAM_ERROR	= 	'C',
 	
 	//----------------------//
 	STOPMSG 	= 			']',
 };
 
 enum sig_flag {
-	IDLE = 0U,
-	//MSG_USR1,
-	CHILD_EXIT,
-	KEY_INT,
-	RECORDER_RUN,
-	RECORDER_STOP,
+	S_IDLE = 0U,
+	S_CHILD_EXIT,
+	S_KEY_INT,
+	S_RECORDER_RUN,
+	S_RECORDER_STOP,
+	S_CAMERA_ERROR,
 	///////////////
 	LAST_MSG,
 };

@@ -88,13 +88,8 @@ static void appExit()
 	printf("akuio_pmem_fini\n");
 	record_rename_file();
 	
-    union sigval usr_value;
-	usr_value.sival_int = 0;	//rec stop
-	pid_t ppid = getppid();
-	if (ppid > 0) {
-		if(sigqueue(getppid(), SIGUSR1, usr_value)) //send signal USR1 with value=0
-			perror("sigqueue");
-	}
+	SendSig_ToParent(SIGUSR1, 0);	//rec stop
+    
 	//system("/etc/init.d/wifi_led.sh wps_led off");
 }
 static void sigprocess(int sig)
@@ -112,13 +107,13 @@ static void sigprocess(int sig)
 	printf("##signal %d caught\n", sig);
 	fflush(stdout);
 	*/
-	if(sig == SIGSEGV )
+	if( sig == SIGSEGV )
 	{
 		snprintf(sigmsg,100,"##signal %d caught##\n", sig);
 		write(1, sigmsg, strlen(sigmsg)+1);
 		exit(sig);	
 	}
-	else if(sig == SIGTERM)
+	else if( sig == SIGTERM )
 		exit(EXIT_SUCCESS);
 }
 
