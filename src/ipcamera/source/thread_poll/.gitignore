@@ -1,2 +1,4 @@
 # Ignore generated files
 BUILD_tpolld_EXEC/
+html/
+latex/

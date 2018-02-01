@@ -1,4 +1,9 @@
+/**
+	\file 
+	\brief Serial operation header
+	\author gist.github.com/ryankurte/8143058
 
+*/ 
 #ifndef SERIAL_H
 #define SERIAL_H
 

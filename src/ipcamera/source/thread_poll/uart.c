@@ -1,4 +1,9 @@
-// https://gist.github.com/ryankurte/8143058
+/**
+  \file 
+	\brief Serial operation 
+	\author gist.github.com/ryankurte/8143058
+
+*/ 
 #include "uart.h"
 
 #include <sys/types.h>
@@ -16,17 +21,19 @@
 
 /**
  * @struct Serial device structure.
+ * 
  * Encapsulates a serial connection.
  */
 struct serial_s {
-    int fd;                  //>! Connection file descriptor.
-    int state;               //>! Signifies connection state.
-    int running;             //>! Signifies thread state.
+    int fd;                  ///< Connection file descriptor.
+    int state;               ///< Signifies connection state.
+    int running;             ///< Signifies thread state.
 
-    char rxbuff[BUFF_SIZE];  //>! Buffer for RX data.
-    int start, end;          //>! Pointers to start and end of buffer.
+    char rxbuff[BUFF_SIZE];  ///< Buffer for RX data.
+    int start;          	///< Pointers to start of buffer.
+    int end;          		///< Pointers to end of buffer.
 
-    pthread_t rx_thread;     //>! Listening thread.
+    pthread_t rx_thread;     ///< Listening thread.
 };
 
 // ---------------        Internal Functions        ---------------
@@ -34,7 +41,8 @@ struct serial_s {
 static int serial_resolve_baud(int baud);
 
 /**
- * Recieve data.
+ * @brief Recieve data.
+ * 
  * Retrieves data from the serial device.
  * @param s - serial structure.
  * @param data - pointer to a buffer to read data into.
@@ -45,6 +53,7 @@ static int serial_recieve(serial_t* obj, uint8_t data[], int maxLength);
 
 /**
  * @brief Serial Listener Thread.
+ * 
  * This blocks waiting for data to be recieved from the serial device,
  * and calls the serial_callback method with appropriate context when
  * data is recieved.
@@ -55,6 +64,7 @@ static void *serial_data_listener(void *param);
 
 /**
  * @brief Start the serial threads.
+ * 
  * This spawns the listening and transmitting threads
  * if they are not already running.
  * @param s - serial structure.
@@ -63,14 +73,15 @@ static void *serial_data_listener(void *param);
 static int serial_start(serial_t* s);
 
 /**
- * Stop serial listener thread.
+ * @brief Stop serial listener thread.
  * @param s - serial structure.
  * @return 0;
  */
 static int serial_stop(serial_t* s);
 
 /**
- * Callback to handle recieved data.
+ * @brief Callback to handle recieved data.
+ * 
  * Puts recieved data into the rx buffer.
  * @param s - serial structure.
  * @param data - data to be stored.

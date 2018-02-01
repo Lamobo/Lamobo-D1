@@ -1,9 +1,12 @@
-/*
- * poll serial data from ttySAK1 port /analyzing / execute scripts
- * 
- * @by amartol
- * 
- */
+/**
+ * \file 
+	\brief Poll serial data
+	
+	poll serial data from ttySAK1 port /analyzing / execute scripts
+	\author amartol
+	\version 1.0
+	\date Feb 2018
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -19,22 +22,29 @@
 #include "uart.h"
 #include "tpoll.h"
 
-#define REC_PATH	"/mnt/akipcserver"//"/usr/bin/akipcserver"
-#define REC_NAME	"akipcserver"
-#define TXT_BUF	100
+#define REC_PATH	"/mnt/akipcserver"/*"/usr/bin/akipcserver"*/ ///< Path to recorder
+#define REC_NAME	"akipcserver"								 ///< Recorder name
+#define TXT_BUF	100												///< Buffer for text messages
+
 
 //extern const char * const sys_siglist[];
 
-serial_t* tty;
+serial_t* tty;												///< Pointer to serial structure
 //char dev[]={"/dev/ttyUSB0"};
-char dev[]={"/dev/ttySAK1"}; //for production
-int baud = 115200;
-uint8_t rxdata[BUFF_SIZE];
-pid_t pid = -1;
-volatile sig_atomic_t sig = S_IDLE;
-siginfo_t s_inf;
+char dev[]={"/dev/ttySAK1"}; 								///< Name of serial device
+int baud = 115200;											///< Default baudrate
+uint8_t rxdata[BUFF_SIZE];									///< Buffer for received data
+pid_t pid = -1;												///< Pid child process
+volatile sig_atomic_t sig = S_IDLE;							///< Signal flag
+siginfo_t s_inf;											///< Structure for handle info of received signal 
 
-
+/**
+ * @brief Main loop
+ * \retval 0 if ok, else return 1
+ * 
+ * 
+ * 
+*/
 int main(void) {
 //
 atexit(tpoll_exit);
@@ -75,7 +85,7 @@ exit(EXIT_SUCCESS);
 } 
 
 /**
- * signal handler
+ * @brief Signal handler
  * @param signal - received signal
  * @param *s_inf - pointer to struct with information about signal
  * @param *ucontext - pointer to  ucontext_t struct contains signal context infos
@@ -133,9 +143,7 @@ void sig_hdl(int signal, siginfo_t* s_inf, void* ucontext)
 }
 
 /**
- * Processing & analyze received bytes
- * 
- * 
+ * @brief Processing & analyze received bytes
  * @param *s - pointer to serial structure.
  * @return received bytes
  */
@@ -171,7 +179,7 @@ return (i-1);
 }
 
 /**
- * Processing & analyze received command
+ * @brief Processing & analyze received command
  * 
  * 
  * @param *data - pointer to rxdata buffer.
@@ -269,7 +277,8 @@ static void cmd_code_processing (uint8_t* data)
 }
 
 /**
- * Generate  CRC-16/XMODEM
+ * @brief Generate  CRC-16/XMODEM
+ * 
  * poly=0x1021, initial value=0x0000
  * @param *bfr - pointer to input data buffer.
  * @param len - bytes qty 
@@ -285,12 +294,11 @@ uint16_t crc = 0x0;
 
 
 /**
- * Send responce to MCU
+ * @brief Send responce to MCU
  * @param cmd - command to transmit.
- * @return transmitted bytes 
+ * @return quantity of transmitted bytes 
  */
- 
-static int send_response (uint8_t cmd) 
+ static int send_response (uint8_t cmd) 
 {
 	uint8_t txbuf[32];
 	uint16_t crc;
@@ -310,9 +318,11 @@ static int send_response (uint8_t cmd)
 		serial_put(tty, txbuf[j]);
 return (j-1);
 }
+
 /**
- * Signals initialization
- * @return sigexit - signal to send parent process
+ * @brief Signals initialization
+ * @retval 0 if init success,
+ * @retval < 0  if error signal init
  */
 static int sig_init (void) 
 {
@@ -332,21 +342,21 @@ static int sig_init (void)
 	
 	if (sigaction(SIGUSR1, &act, NULL) < 0) {
 		perror ("sigaction init USR1");
-		ret += -1;
+		ret --;
 	}
 	if (sigaction(SIGCHLD, &act, NULL) < 0) {
 		perror ("sigaction init SIGCHLD");
-		ret += -1;
+		ret --;
 	}
 	if (sigaction(SIGINT, &act, NULL) < 0) {
 		perror ("sigaction init SIGINT");
-		ret += -1;
+		ret --;
 	}
 	return ret;
 }
 
 /**
- * Signals processing
+ * @brief Signals processing
  * @param signal - value to process 
  */
 static void signal_processing (sig_atomic_t signal) 
@@ -393,7 +403,7 @@ static void signal_processing (sig_atomic_t signal)
 }
 
 /**
- * Exit from the func
+ * @brief Exit from the func
  * 
  */
 static void tpoll_exit(void)

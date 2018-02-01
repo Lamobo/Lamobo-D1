@@ -1,13 +1,23 @@
+/**
+ * \file 
+	\brief Poll serial data header
+	\author amartol
+	\version 1.0
+	\date Feb 2018
+*/
 #ifndef TPOLL__H
 #define TPOLL__H
 
 //typedef unsigned short u16;
 //typedef unsigned char u8;
+/**
+ * \enum msg - Messages for send and receive
+ * */
 enum msg{
-	STARTMSG 	=			'[',
+	STARTMSG 	=			'[', ///< Start packet message
 
 	//--commands from MCU-----//
-	CMD_START_RECORD 	= 	'R',
+	CMD_START_RECORD 	= 	'R', 
 	CMD_STOP_RECORD 	= 	'S',
 	CMD_CLK_ADJUST		= 	'A',
 	CMD_USB_HOST_MODE	= 	'H',
@@ -20,7 +30,9 @@ enum msg{
 	//----------------------//
 	STOPMSG 	= 			']',
 };
-
+/**
+ * \enum sig_flag - Flags for signal handler
+ * */
 enum sig_flag {
 	S_IDLE = 0U,
 	S_CHILD_EXIT,
@@ -32,9 +44,11 @@ enum sig_flag {
 	LAST_MSG,
 };
 
-
-
-uint16_t crctbl[256] = {
+/**
+ *  Table for calculate CRC16	
+ * 
+ * */
+uint16_t crctbl[256] = {											
     0x0000,0x1021,0x2042,0x3063,0x4084,0x50a5,0x60c6,0x70e7,
     0x8108,0x9129,0xa14a,0xb16b,0xc18c,0xd1ad,0xe1ce,0xf1ef,
     0x1231,0x0210,0x3273,0x2252,0x52b5,0x4294,0x72f7,0x62d6,
@@ -68,12 +82,58 @@ uint16_t crctbl[256] = {
     0xef1f,0xff3e,0xcf5d,0xdf7c,0xaf9b,0xbfba,0x8fd9,0x9ff8,
     0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0};
 
+
+/**
+ * @brief Signal handler
+ * @param signal - received signal
+ * @param *s_inf - pointer to struct with information about signal
+ * @param *ucontext - pointer to  ucontext_t struct contains signal context infos
+ */
 void sig_hdl(int signal, siginfo_t* s_inf, void *ucontext);
+
+/**
+ * @brief Generate  CRC-16/XMODEM
+ * 
+ * poly=0x1021, initial value=0x0000
+ * @param *bfr - pointer to input data buffer.
+ * @param len - bytes qty 
+ * @return calculated value
+ */
 static uint16_t gencrc(uint8_t *bfr, size_t len);
+
+
+/**
+ * @brief Processing & analyze received bytes
+ * @param *s - pointer to serial structure.
+ * @return received bytes
+ */
 static int rxdata_processing (serial_t* s);
+
+
 static void cmd_code_processing (uint8_t* data);
+
+/**
+ * @brief Send responce to MCU
+ * @param cmd - command to transmit.
+ * @return transmitted bytes 
+ */
 static int send_response (uint8_t cmd);
+
+/**
+ * @brief Signals initialization
+ * @return sigexit - signal to send parent process
+ */
 static int sig_init (void);
+
+/**
+ * @brief Signals processing
+ * @param signal - value to process 
+ */
 static void signal_processing (sig_atomic_t signal);
+
+/**
+ * @brief Exit from the func
+ * 
+ */
 static void tpoll_exit(void);
 #endif
