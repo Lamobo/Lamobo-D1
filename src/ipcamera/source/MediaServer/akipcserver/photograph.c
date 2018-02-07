@@ -5,6 +5,7 @@
 
 #include "video_stream_lib.h"
 #include "muxer.h"
+#include "camera.h"
 #include "cgi_anyka.h"
 #include "Tool.h"
 #include "akuio.h"
@@ -41,9 +42,11 @@ static T_pSTR MakeFileName( )
 	//assert( handle );
 	
 	//strTime = GetCurTimeStr();
+	/*
 	memset(name, 0x00, 20);
 	sprintf( name, "/mnt/DC%4d%02d%02d/", 1900 + tnow->tm_year, tnow->tm_mon + 1, tnow->tm_mday );
 	CompleteCreateDirectory(name);
+	* */
 	memset(file, 0x00, 20);
 	sprintf(file, "DC%02d%02d%02d", tnow->tm_hour, tnow->tm_min, tnow->tm_sec);
 	{
@@ -138,10 +141,9 @@ static T_pVOID open_encode(int width, int height, int real_width, int real_heigh
 	temp = akuio_vaddr2paddr(outbuf) & 7;
 	//编码buffer 起始地址必须8字节对齐
 	encbuf = ((T_U8 *)outbuf) + ((8-temp)&7);
-
 	
 	open_input.encFlag = VIDEO_DRV_MJPEG;
-	open_input.encMJPEGPar.frameType = ENC_YUV420_PLANAR;//JPEGENC_YUV420_PLANAR;
+	open_input.encMJPEGPar.frameType = ENC_YUV420_PLANAR;	//JPEGENC_YUV420_PLANAR;
 	open_input.encMJPEGPar.format = ENC_THUMB_JPEG;
 	open_input.encMJPEGPar.thumbWidth = 0;
 	open_input.encMJPEGPar.thumbHeight = 0;
@@ -177,6 +179,7 @@ static void *photograph_thread(void *param)
 			continue;
 		
 		Condition_Unlock( g_conMangerPh );
+		/*
 		if(sd_mount == 0)
 		{
 			if (access(SDDEV, R_OK) < 0)
@@ -191,7 +194,7 @@ static void *photograph_thread(void *param)
 			}
 			//mount_falg =1;
 		}
-
+		*/
 		
 		DiskFreeSize( "/mnt", &bavail, &bsize);
 		DiskSize = (T_S64)(T_U32)(bavail) * (T_S64)(T_U32)(bsize);
@@ -255,14 +258,14 @@ void Init_photograph( void )
 	IniSetting_destroy();
 	int width, height, real_width, real_height;
 	
-	if( index_file == 2 )
+	if( index_file == 2 )	//stream #2
 	{
 		width = parse.width2;
 		height = parse.height2;
 		real_width = parse.real_width2;
 		real_height = parse.real_height2;
 	}
-	else 
+	else 					//stream #1
 	{
 		width = parse.width;
 		real_width = parse.width;
@@ -282,6 +285,11 @@ void Init_photograph( void )
 	}
 
 	pthread_create( &g_phid, NULL, photograph_thread, NULL);
+	
+	void* *pbuf;
+	long size;
+	unsigned long ts;
+	camera_getframe((void**)&pbuf, &size, &ts); //get empty frame from camera
 	
 }
 

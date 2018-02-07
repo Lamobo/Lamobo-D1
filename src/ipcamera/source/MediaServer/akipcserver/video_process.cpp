@@ -564,7 +564,7 @@ static unsigned get_nal_offset(void* pbuf, unsigned nlen)
 	return (i == nlen - 4) ? 0 : i;
 }
 
-int pic = 0;
+int pic = 0; 					///< If pic = 1 - get photo
 extern T_MUX_INPUT mux_input;
 static void* video_thread_entry(void* param)
 {

@@ -150,6 +150,21 @@ static void getDeviceID(char* strDeviceID)
 	fclose(f);
 	f = NULL;
 }
+
+static void get_photo(void) 
+{
+	void* *pbuf;
+	long size;
+	unsigned long ts;
+
+	while(1) {
+		if (camera_getframe((void**)&pbuf, &size, &ts) == 1)
+			break;
+	}
+	photograph(pbuf, size);
+	camera_usebufok(pbuf);
+}
+
 /**
 * @brief  main
 * 
@@ -184,16 +199,16 @@ int main( int argc, char **argv )
 	//printf("video type = %d \n", ext_gSettings->video_types);
 	//...do your job
 
-	//close the led
-	//setled_off(); //not ness
+
 	//init dma memory
 	akuio_pmem_init();
 	encode_init();
 	printf("encode_init ok\n");
+	
 	//open camera
 	camera_open(ext_gSettings->width, ext_gSettings->height);
 	printf("camera_open ok\n");
-
+	
 	//encode_open
 	T_ENC_INPUT encInput;
 	encInput.width = ext_gSettings->width;			//实际编码图像的宽度，能被4整除
@@ -208,6 +223,14 @@ int main( int argc, char **argv )
 	encInput.video_tytes = ext_gSettings->video_types;
 	encode_open(&encInput);
 	printf("encode_open ok\n");
+	
+	Init_photograph();
+
+	for(int i=0;i<3;i++) {
+		
+	get_photo();
+		sleep(1);
+	}
 
 	//set mux
 	mux_input.rec_path = ext_gSettings->rec_path;
@@ -259,7 +282,7 @@ int main( int argc, char **argv )
 	//start ftp server
 	//startFTPSrv();
 
-	Init_photograph();
+	
 	//PTZControlInit();
 	//start video process
 	video_process_start();
