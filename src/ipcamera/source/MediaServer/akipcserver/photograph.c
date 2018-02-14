@@ -289,7 +289,7 @@ void Init_photograph( void )
 	void* *pbuf;
 	long size;
 	unsigned long ts;
-	camera_getframe((void**)&pbuf, &size, &ts); //get empty frame from camera
+	//camera_getframe((void**)&pbuf, &size, &ts); //get empty frame from camera
 	
 }
 
@@ -319,7 +319,6 @@ int photograph( void *pbuf, int size)
 	}
 
 	VideoStream_Enc_Reset();
-	
 	return 0;
 }
 

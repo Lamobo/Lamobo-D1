@@ -169,6 +169,14 @@ int serial_connect(serial_t* s, char device[], int baud)
     }
     //Retrieve settings.
     tcgetattr(s->fd, &oldtio);
+    
+    oldtio.c_cflag = (CS8 | CREAD) & ~PARENB; /* 8N1 */
+	//info.c_iflag |= IXON | IXOFF;
+   oldtio.c_iflag &= ~(IXON | IXOFF | IXANY);
+	// info.c_lflag &= ~ICANON & ~ISIG;
+   oldtio.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+   oldtio.c_oflag &= ~OPOST;
+    
     //Set baud rate.
     cfsetspeed(&oldtio, speed);
     //Flush cache.

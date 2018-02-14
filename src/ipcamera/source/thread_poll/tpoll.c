@@ -21,6 +21,9 @@
 #include <sys/wait.h>
 #include "uart.h"
 #include "tpoll.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include "IPCameraCommand.h"
 
 #define REC_PATH	"/mnt/akipcserver"/*"/usr/bin/akipcserver"*/ ///< Path to recorder
 #define REC_NAME	"akipcserver"								 ///< Recorder name
@@ -37,7 +40,7 @@ uint8_t rxdata[BUFF_SIZE];									///< Buffer for received data
 pid_t pid = -1;												///< Pid child process
 volatile sig_atomic_t sig = S_IDLE;							///< Signal flag
 siginfo_t s_inf;											///< Structure for handle info of received signal 
-
+int sock;													///<Socket descriptor
 /**
  * @brief Main loop
  * \retval 0 if ok, else return 1
@@ -48,6 +51,31 @@ siginfo_t s_inf;											///< Structure for handle info of received signal
 int main(void) {
 //
 atexit(tpoll_exit);
+
+
+if( system("pgrep akipcserver") == 0 ) {
+	//create socket to send cmd to akipcserver
+	struct sockaddr_in addr;
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if(sock < 0)
+	{
+		perror("socket");
+		exit(1);
+	}
+	
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(TCPLISTENPORT); 
+	addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	
+	if(connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+	{
+		perror("connect");
+		exit(2);
+	}
+}
+
+
+
 if (sig_init() < 0) {
 	exit(EXIT_FAILURE);
 }
@@ -67,7 +95,7 @@ for(;;){
 			cmd_code_processing (rxdata); 
 		} // end if processing
 		else {								//error processing rxdata
-			printf("clear rx buffer\n");
+			fprintf(stdout,"clear rx buffer\n");
 			serial_clear(tty);
 		}	
 	} //end serial available
@@ -80,7 +108,7 @@ for(;;){
 } //end for
 
 	
-printf("exit from main loop\n");
+fprintf(stdout,"exit from main loop\n");
 exit(EXIT_SUCCESS);
 } 
 
@@ -153,28 +181,28 @@ static int rxdata_processing (serial_t* s)
 	for(i = 0; i < BUFF_SIZE && serial_available(tty); i++){
 			rxdata[i] = serial_get(s);
 	}
-	//printf("%c %c bytes cnt=%d\n", rxdata[0], rxdata[i-1], i);
+	//fprintf(stdout,"%c %c bytes cnt=%d\n", rxdata[0], rxdata[i-1], i);
 	
 	//analyze received data
 	if((rxdata[0] != STARTMSG) || (rxdata[i-1] != STOPMSG)) {
-		printf("incorrect packet data: first byte 0x%X, last byte 0x%X\n", rxdata[0], rxdata[i-1]);
+		fprintf(stdout,"incorrect packet data: first byte 0x%X, last byte 0x%X\n", rxdata[0], rxdata[i-1]);
 		//report to host
 		return -1;
 	}
 	
 	//analyze crc
 	uint16_t crc, crc_rx;
-	//printf("%d %d \n", rxdata[1], rxdata[1]-2);
+	//fprintf(stdout,"%d %d \n", rxdata[1], rxdata[1]-2);
 	crc = gencrc(rxdata+1, rxdata[1] - 4); //calculate crc other than start/stop symbols & received crc
 	
 	crc_rx = rxdata[i-3] << 8 | rxdata[i-2];
-/*	printf("RECEIVED crc=0x%X\n", crc_rx);
-	printf("CALCULATED crc=0x%X\n",crc); */
+/*	fprintf(stdout,"RECEIVED crc=0x%X\n", crc_rx);
+	fprintf(stdout,"CALCULATED crc=0x%X\n",crc); */
 	if(crc != crc_rx) {
-		printf("incorrect packet crc: received 0x%X, calculated 0x%X\n", crc_rx, crc);
+		fprintf(stdout,"incorrect packet crc: received 0x%X, calculated 0x%X\n", crc_rx, crc);
 		return -2;
 	}
-//printf("%c %c i=%d\n", rxdata[0], rxdata[i-1], i);
+//fprintf(stdout,"%c %c i=%d\n", rxdata[0], rxdata[i-1], i);
 return (i-1);
 }
 
@@ -192,16 +220,16 @@ static void cmd_code_processing (uint8_t* data)
 	struct timeval 	now;
 	struct sigaction act_chd;
 	
-	printf("command %c\n", *(data+2));
+	fprintf(stdout,"command %c\n", *(data+2));
 	switch (*(data+2)) {
 	int i;
 	case CMD_START_RECORD:
-			//printf("%s: start record\n", __func__);
+			//fprintf(stdout,"%s: start record\n", __func__);
 			if(pid == -1) {			//if does not have child
 				if (access("/dev/mmcblk0", R_OK) == 0) {
 					pid = fork();	//create new process
 					if (pid != 0) {	//parent proc
-						printf("child pid = %d\n", pid);					
+						fprintf(stdout,"child pid = %d\n", pid);					
 					}
 					else if (!pid) { //child proc: close all file desc & ignore SIGINT
 						memset (&act_chd, 0, sizeof(act_chd));
@@ -222,7 +250,7 @@ static void cmd_code_processing (uint8_t* data)
 					}
 				}
 				else {
-					printf("no SD card!\n");
+					fprintf(stdout,"no SD card!\n");
 					send_response (CMD_REC_NOSDCARD);
 				}
 			}
@@ -231,9 +259,17 @@ static void cmd_code_processing (uint8_t* data)
 	
 	case CMD_STOP_RECORD:
 		if(pid != -1) {
-			//printf("%s: stop record\n", __func__);
+			//fprintf(stdout,"%s: stop record\n", __func__);
 			kill(pid, SIGTERM);
 		}
+	break;
+	
+	case CMD_GET_PHOTO:
+		//get foto
+		fprintf(stdout,"get_photo\n");
+		if(sock)
+		send_to_socket(sock);
+		//recv(sock, buf, sizeof(buf), 0);
 	break;
 	
 	case CMD_CLK_ADJUST:
@@ -246,14 +282,14 @@ static void cmd_code_processing (uint8_t* data)
 			str_time.tm_min = 	(int) rxdata[++i];
 			str_time.tm_sec =	(int) rxdata[++i];
 			str_time.tm_isdst = -1;
-			//printf("%s\n", asctime(&str_time));
+			//fprintf(stdout,"%s\n", asctime(&str_time));
 			now.tv_usec = 0;
 			now.tv_sec = mktime(&str_time);
 			if(settimeofday(&now, NULL) != 0) {
 				perror("settimeofday() failed\n");
 			}
 		}
-		else printf("packet size for adjust time incorrect.\n");
+		else fprintf(stdout,"packet size for adjust time incorrect.\n");
 	break;
 	
 	case CMD_USB_HOST_MODE:
@@ -275,6 +311,52 @@ static void cmd_code_processing (uint8_t* data)
 	} //end switch
 	
 }
+
+/**
+ * Send command from the socket to akipcserver 
+ * @param sock - socket to send
+ * 
+*/
+static int send_to_socket ( int sock )
+{
+	
+	SYSTEM_HEADER sysHeader;
+	CON_SYSTEM_TAG(SYSTEM_TAG, &sysHeader.nSystemTag);
+	sysHeader.nCommandCnt = 1;
+	sysHeader.nLen = sizeof(SYSTEM_HEADER) * sysHeader.nCommandCnt;
+	
+	COMMAND_HEADER cmdHeader;
+	cmdHeader.CommandType = COMM_TYPE_OPEN_SERVICE;
+	cmdHeader.subCommandType = OPEN_COMM_TAKE_PIC;
+	cmdHeader.nLen = sizeof(COMMAND_HEADER);
+		
+	unsigned char buf[TXT_BUF];
+	int nSend = 0;
+	memset(buf, 0x0, TXT_BUF);
+	
+	memcpy(buf, &sysHeader, sizeof(sysHeader));
+	nSend += sizeof(sysHeader);
+
+	memcpy(buf+nSend, &cmdHeader, sizeof(cmdHeader));
+	nSend += sizeof(cmdHeader);
+
+	int ret;
+	unsigned char* pbuf = buf;
+	while(nSend > 0)
+	{
+		ret = send(sock, pbuf, nSend, 0);
+		if(ret < 0)
+		{
+			printf("send error\n");
+			return -1;
+		}
+			
+		nSend -= ret;
+		pbuf += ret;
+	}
+	return 0;
+}
+
 
 /**
  * @brief Generate  CRC-16/XMODEM
@@ -312,7 +394,7 @@ uint16_t crc = 0x0;
 	txbuf[++i]	= (uint8_t)crc; //low
 	//---------------------//
 	txbuf[++i] 	= STOPMSG;
-	//printf("response crc = 0x%04X\n", crc);
+	//fprintf(stdout,"response crc = 0x%04X\n", crc);
 	int j = 0;
 	for(j = 0; j <= i; j++)
 		serial_put(tty, txbuf[j]);
@@ -367,32 +449,32 @@ static void signal_processing (sig_atomic_t signal)
 	case S_CHILD_EXIT:
 		/*wait(&state_val);
 		if (WIFEXITED(state_val))
-			printf("Child exited with code %d\n", WEXITSTATUS(state_val));
+			fprintf("Child exited with code %d\n", WEXITSTATUS(state_val));
 		else if (WIFSIGNALED(state_val))
-			printf("Child exited by %s signal\n", sys_siglist[WTERMSIG(state_val)]);
+			fprintf("Child exited by %s signal\n", sys_siglist[WTERMSIG(state_val)]);
 		else printf("Child terminated abnormally\n");*/
-		//printf("%s",sigmsg);
+		//fprintf("%s",sigmsg);
 		
 		pid = -1;
 	break;
 	
 	case S_RECORDER_RUN:
-		printf("Received msg: RECORDER RUN!\n");
+		fprintf(stdout,"Received msg: RECORDER RUN!\n");
 		send_response (CMD_START_RECORD); 
 	break;
 	
 	case S_RECORDER_STOP:
-		printf("Received msg: RECORDER STOP!\n");
+		fprintf(stdout,"Received msg: RECORDER STOP!\n");
 		send_response (CMD_STOP_RECORD);
 	break;
 	
 	case S_CAMERA_ERROR:
-		printf("Received msg: CAMERA ERROR!\n");
+		fprintf(stdout,"Received msg: CAMERA ERROR!\n");
 		send_response (CMD_REC_CAM_ERROR);
 	break;
 	
 	case S_KEY_INT:
-		printf("%s: signal SIGINT received\n", __func__);
+		fprintf(stdout,"%s: signal SIGINT received\n", __func__);
 		exit(EXIT_SUCCESS);
 	break;
 	
@@ -408,11 +490,13 @@ static void signal_processing (sig_atomic_t signal)
  */
 static void tpoll_exit(void)
 {
-	printf("--%s--\n", __func__);
+	fprintf(stdout,"--%s--\n", __func__);
 	if(pid != -1){		//if child process work, kill his
 		kill(pid, SIGTERM);
 		wait(NULL);
 	}
+	if(sock)
+		close(sock);
 	serial_close(tty);
 	serial_destroy(tty);
 	

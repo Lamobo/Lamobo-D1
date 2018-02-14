@@ -838,8 +838,8 @@ int video_process_start()
 	pthread_attr_destroy(&SchedAttr);
 	
 	return 0;
-
 }
+
 void video_process_stop()
 {
 	videoStartFlag = 0;

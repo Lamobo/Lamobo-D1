@@ -462,13 +462,16 @@ T_S64 GetDiskSize( T_pSTR pstrRecPath )
 **/ 
 T_S32 SendSig_ToParent ( T_S32 signo, T_S32 sig_val )
 {
-	union sigval usr_value;
-	usr_value.sival_int = sig_val;	
-	pid_t ppid = getppid();
-	if ( ppid > 0 ) {
-		if(sigqueue(getppid(), signo, usr_value))
-			loge( "%s: sigqueue error == %s\n", __func__, strerror(errno) );
-		  	return -1;
+	extern T_BOOL sig_flag;
+	if(sig_flag) {
+		union sigval usr_value;
+		usr_value.sival_int = sig_val;	
+		pid_t ppid = getppid();
+		if ( ppid > 0 ) {
+			if(sigqueue(getppid(), signo, usr_value))
+				loge( "%s: sigqueue error == %s\n", __func__, strerror(errno) );
+			  	return -1;
+		}
 	}
 	return 0;
 }

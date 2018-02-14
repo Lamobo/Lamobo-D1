@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <pthread.h>
 
 #include "anyka_types.h"
 #include "akuio.h"
@@ -34,11 +35,21 @@
 #include <AKIPCMJPEGOnDemandMediaSubsession.hh>
 #include <AKIPCMJPEGFramedSource.hh>
 #include <AKIPCAACAudioOnDemandMediaSubsession.hh>
+
+#define RTSPPORT 554
+
 UsageEnvironment* env;
 Boolean reuseFirstSource = False;
 Boolean iFramesOnly = False;
-#define RTSPPORT 554
+T_MUX_INPUT mux_input;
+VIDEO_MODE vm[2] = {VIDEO_MODE_VGA, VIDEO_MODE_VGA};
+
 static int bHasAudio = 0;
+volatile T_BOOL sig_flag = AK_FALSE;
+char   rtsp_flag = 0;
+const char* streamName1 = "vs1";
+const char* streamName2 = "vs2";
+
 #define DELETE_PTR( ptr )                       \
   do {                                          \
     if ( ptr != NULL ) {                        \
@@ -47,9 +58,9 @@ static int bHasAudio = 0;
     }                                           \
   } while( 0 )
 
-
-
 extern init_parse parse;
+
+
 //init the demo setting struct
 static void Settings_Initialize( demo_setting *main );
 #if 0
@@ -83,11 +94,10 @@ static void appExit()
 
 	encode_destroy();
 	akuio_pmem_fini();
-	setled_off();
-	PTZControlDeinit();
 	printf("akuio_pmem_fini\n");
+	setled_off();
+	//PTZControlDeinit();
 	record_rename_file();
-	
 	SendSig_ToParent(SIGUSR1, 0);	//rec stop
     
 	//system("/etc/init.d/wifi_led.sh wps_led off");
@@ -113,8 +123,11 @@ static void sigprocess(int sig)
 		write(1, sigmsg, strlen(sigmsg)+1);
 		exit(sig);	
 	}
-	else if( sig == SIGTERM )
+	else if( sig == SIGTERM || sig == SIGINT)
 		exit(EXIT_SUCCESS);
+	else if( sig == SIGALRM)
+		rtsp_flag = (rtsp_flag) ? 0 : 1;
+		
 }
 
 static int sig_init(void)
@@ -125,7 +138,10 @@ static int sig_init(void)
 	sigset_t   set; 
 	sigemptyset(&set);
 	sigaddset(&set, SIGSEGV);
+	sigaddset(&set, SIGINT);
 	sigaddset(&set, SIGTERM);
+	sigaddset(&set, SIGALRM);
+	
 	act.sa_mask = set;	//blocked sig
 	
 	if (sigaction(SIGSEGV, &act, NULL) < 0) {
@@ -133,6 +149,12 @@ static int sig_init(void)
 	}
 	if (sigaction(SIGTERM, &act, NULL) < 0) {
 		perror ("sigaction init SIGTERM");
+	}
+	if (sigaction(SIGINT, &act, NULL) < 0) {
+		perror ("sigaction init SIGINT");
+	}
+	if (sigaction(SIGALRM, &act, NULL) < 0) {
+		perror ("sigaction init SIGUSR1");
 	}
 	return 0;
 }
@@ -150,7 +172,7 @@ static void getDeviceID(char* strDeviceID)
 	fclose(f);
 	f = NULL;
 }
-
+/*
 static void get_photo(void) 
 {
 	void* *pbuf;
@@ -164,129 +186,45 @@ static void get_photo(void)
 	photograph(pbuf, size);
 	camera_usebufok(pbuf);
 }
-
-/**
-* @brief  main
-* 
-* @author hankejia
-* @date 2012-07-05
-* @param[in] argc  arg count
-* @param[in] argv  arg array.
-* @return T_S32
-* @retval if return 0 success, otherwise failed 
 */
-
-T_MUX_INPUT mux_input;
-int main( int argc, char **argv )
+static void parse_options( int argc, char **argv )
 {
-	//int ret = 0;
-	//PTZControlInit(); no motor support on board
-	demo_setting * ext_gSettings = NULL;
-	
-	// Allocate the "global" settings
-	ext_gSettings = (demo_setting*)malloc( sizeof( demo_setting ) );
-	if ( NULL == ext_gSettings ) {
-		printf( "main::out of memory!\n" );
-		return -1;
+	int c;
+	while((c = getopt(argc, argv, "s")) != -1) {
+		switch (c) {
+			case 's':
+			printf("Possible send/receive signals from parent\n");
+			sig_flag = AK_TRUE;
+			break;
+			
+			default:
+			printf("Unknown option\n");
+			break;
+			
+		}
 	}
-	
-	sig_init();
-    atexit(appExit);
-	//init the setting struct
-	Settings_Initialize( ext_gSettings );
+}
 
-	read_Parse(ext_gSettings);
-	//printf("video type = %d \n", ext_gSettings->video_types);
-	//...do your job
+static void start_netcmd_server (VIDEO_MODE* vm)
+{
+	NetCtlSrvPar ncsp;
+	memset(&ncsp, 0, sizeof(ncsp));
+	getDeviceID(ncsp.strDeviceID);
+	printf("%s: device id:**%s**\n", __func__, ncsp.strDeviceID);
+	strcpy(ncsp.strStreamName1, streamName1);
+	strcpy(ncsp.strStreamName2, streamName2);
+	ncsp.vm1 = vm[0];
+	ncsp.vm2 = vm[1];
+	ncsp.nRtspPort = RTSPPORT;
+	ncsp.nMainFps = parse.fps1;
+	ncsp.nSubFps = parse.fps2;
+	//start net command server
+	startNetCtlServer(&ncsp);
+}
 
-
-	//init dma memory
-	akuio_pmem_init();
-	encode_init();
-	printf("encode_init ok\n");
-	
-	//open camera
-	camera_open(ext_gSettings->width, ext_gSettings->height);
-	printf("camera_open ok\n");
-	
-	//encode_open
-	T_ENC_INPUT encInput;
-	encInput.width = ext_gSettings->width;			//实际编码图像的宽度，能被4整除
-	encInput.height = ext_gSettings->height;			//实际编码图像的长度，能被2整除
-	encInput.kbpsmode = ext_gSettings->kbpsmode; 
-	encInput.qpHdr = ext_gSettings->qpHdr;			//初始的QP的值
-	encInput.iqpHdr = ext_gSettings->iqpHdr;			//初始的QP的值
-	encInput.bitPerSecond = ext_gSettings->bitPerSecond;	//目标bps
-	encInput.minQp = ext_gSettings->minQp;
-	encInput.maxQp = ext_gSettings->maxQp;
-	encInput.framePerSecond = ext_gSettings->framePerSecond;
-	encInput.video_tytes = ext_gSettings->video_types;
-	encode_open(&encInput);
-	printf("encode_open ok\n");
-	
-	Init_photograph();
-
-	for(int i=0;i<3;i++) {
-		
-	get_photo();
-		sleep(1);
-	}
-
-	//set mux
-	mux_input.rec_path = ext_gSettings->rec_path;
-	mux_input.m_MediaRecType = MEDIALIB_REC_AVI_NORMAL;
-
-	if (ext_gSettings->bhasAudio)
-	{
-		bHasAudio = 1;
-		//mux_input.m_bCaptureAudio = 1;
-	}
-	else
-	{
-		bHasAudio = 0;
-		//mux_input.m_bCaptureAudio = 0;
-	}
-	mux_input.m_bCaptureAudio = 1;
-	//mux video
-	if(parse.format2 == 0)
-	{
-		mux_input.m_eVideoType = MEDIALIB_VIDEO_H264;
-	}
-	else if(parse.format2 == 1)
-	{
-		mux_input.m_eVideoType = MEDIALIB_VIDEO_MJPEG;
-	}
-	mux_input.m_nWidth = parse.width2;
-	mux_input.m_nHeight = parse.height2;
-	
-	//mux audio
-	mux_input.m_eAudioType = MEDIALIB_AUDIO_AAC;
-	mux_input.m_nSampleRate = 8000;
-	//mux_input.abitsrate = ext_gSettings->abitsrate;
-
-	printf("mux_open ok\n");
-
-	if (bHasAudio)
-	{
-		T_AUDIO_INPUT audioInput;
-		audioInput.enc_type = (AUDIO_ENCODE_TYPE_CC)ext_gSettings->audioType;
-		audioInput.nBitsRate = ext_gSettings->abitsrate;
-		audioInput.nBitsPerSample = 16;
-		audioInput.nChannels = 1;
-		audioInput.nSampleRate = ext_gSettings->aSamplerate;
-		audio_open(&audioInput);
-		printf("audio_open ok\n");
-		audio_start();
-	}
-
-	//start ftp server
-	//startFTPSrv();
-
-	
-	//PTZControlInit();
-	//start video process
-	video_process_start();
-	//InitMotionDetect();
+void* thread_RTSP (void* param )
+{
+	demo_setting* ext_gSettings = (demo_setting*) param;
 	DemuxForLiveSetCallBack();
 	TaskScheduler* scheduler = BasicTaskScheduler::createNew();
 	env = BasicUsageEnvironment::createNew(*scheduler);
@@ -316,9 +254,8 @@ int main( int argc, char **argv )
 	// "ServerMediaSubsession" objects for each audio/video substream.
 
 	int vsIndex = 0;
-	VIDEO_MODE vm[2] = {VIDEO_MODE_VGA,VIDEO_MODE_VGA};
-	const char* streamName1 = "vs1";
-	const char* streamName2 = "vs2";
+	
+	
 	((AKRTSPServer*)rtspServer)->SetStreamName(streamName1, streamName2);	
 	
 	if(ext_gSettings->video_types == 1)
@@ -475,30 +412,170 @@ int main( int argc, char **argv )
 	}
 #endif
 
-	//printf("streamName:%s,Port:%d\n", streamName1, RTSPPORT);
+	env->taskScheduler().doEventLoop(&rtsp_flag ); // does not return if rtsp_flag = 0
+	return 0;
+}
+
+
+/**
+* @brief  main
+* 
+* @author hankejia
+* @date 2012-07-05
+* @param[in] argc  arg count
+* @param[in] argv  arg array.
+* @return T_S32
+* @retval if return 0 success, otherwise failed 
+*/
+
+
+int main( int argc, char **argv )
+{
+	//PTZControlInit(); no motor support on board
+	demo_setting * ext_gSettings = NULL;
+	
+	// Allocate the "global" settings
+	ext_gSettings = (demo_setting*)malloc( sizeof( demo_setting ) );
+	if ( NULL == ext_gSettings ) {
+		printf( "main::out of memory!\n" );
+		return -1;
+	}
+	parse_options(argc, argv);
+	
+	sig_init();
+    atexit(appExit);
+	//init the setting struct
+	Settings_Initialize( ext_gSettings );
+
+	read_Parse(ext_gSettings);
+	//printf("video type = %d \n", ext_gSettings->video_types);
+	//...do your job
+
+
+	//init dma memory
+	akuio_pmem_init();
+	encode_init();
+	printf("encode_init ok\n");
+	
+	//open camera
+	camera_open(ext_gSettings->width, ext_gSettings->height);
+	printf("camera_open ok\n");
+	
+	//encode_open
+	T_ENC_INPUT encInput;
+	encInput.width = ext_gSettings->width;			//实际编码图像的宽度，能被4整除
+	encInput.height = ext_gSettings->height;			//实际编码图像的长度，能被2整除
+	encInput.kbpsmode = ext_gSettings->kbpsmode; 
+	encInput.qpHdr = ext_gSettings->qpHdr;			//初始的QP的值
+	encInput.iqpHdr = ext_gSettings->iqpHdr;			//初始的QP的值
+	encInput.bitPerSecond = ext_gSettings->bitPerSecond;	//目标bps
+	encInput.minQp = ext_gSettings->minQp;
+	encInput.maxQp = ext_gSettings->maxQp;
+	encInput.framePerSecond = ext_gSettings->framePerSecond;
+	encInput.video_tytes = ext_gSettings->video_types;
+	encode_open(&encInput);
+	printf("encode_open ok\n");
+	
+	Init_photograph();
+/*
+	for(int i=0;i<3;i++) {
+		
+	get_photo();
+		sleep(1);
+	}
+*/
+	//set mux
+	mux_input.rec_path = ext_gSettings->rec_path;
+	mux_input.m_MediaRecType = MEDIALIB_REC_AVI_NORMAL;
+
+	if (ext_gSettings->bhasAudio)
+	{
+		bHasAudio = 1;
+		//mux_input.m_bCaptureAudio = 1;
+	}
+	else
+	{
+		bHasAudio = 0;
+		//mux_input.m_bCaptureAudio = 0;
+	}
+	mux_input.m_bCaptureAudio = 1;
+	//mux video
+	if(parse.format2 == 0)
+	{
+		mux_input.m_eVideoType = MEDIALIB_VIDEO_H264;
+	}
+	else if(parse.format2 == 1)
+	{
+		mux_input.m_eVideoType = MEDIALIB_VIDEO_MJPEG;
+	}
+	mux_input.m_nWidth = parse.width2;
+	mux_input.m_nHeight = parse.height2;
+	
+	//mux audio
+	mux_input.m_eAudioType = MEDIALIB_AUDIO_AAC;
+	mux_input.m_nSampleRate = 8000;
+	//mux_input.abitsrate = ext_gSettings->abitsrate;
+
+	printf("mux_open ok\n");
+
+	if (bHasAudio)
+	{
+		T_AUDIO_INPUT audioInput;
+		audioInput.enc_type = (AUDIO_ENCODE_TYPE_CC)ext_gSettings->audioType;
+		audioInput.nBitsRate = ext_gSettings->abitsrate;
+		audioInput.nBitsPerSample = 16;
+		audioInput.nChannels = 1;
+		audioInput.nSampleRate = ext_gSettings->aSamplerate;
+		audio_open(&audioInput);
+		printf("audio_open ok\n");
+		audio_start();
+	}
+
+	//PTZControlInit();
+	
+	//start video process
+	video_process_start();
 	
 	
-	NetCtlSrvPar ncsp;
-	memset(&ncsp, 0, sizeof(ncsp));
-	getDeviceID(ncsp.strDeviceID);
-	printf("device id:**%s**\n", ncsp.strDeviceID);
-	strcpy(ncsp.strStreamName1, streamName1);
-	strcpy(ncsp.strStreamName2, streamName2);
-	ncsp.vm1 = vm[0];
-	ncsp.vm2 = vm[1];
-	ncsp.nRtspPort = RTSPPORT;
-	ncsp.nMainFps = parse.fps1;
-	ncsp.nSubFps = parse.fps2;
-	//start net command server
-	startNetCtlServer(&ncsp);
-	//system("/etc/init.d/wifi_led.sh wps_led on");
-    //printf("[##]start record...\n");
-    auto_record_file();
+	//InitMotionDetect();
+	auto_record_file(); //start thread_enc
     printf("[##]auto_record_file() called..\n");
+    /*
+    for (int i=0;i<3;i++) {
+	    sleep(15);
+		mux_close(); //close file
+		record_rename_file();
+		sleep(5);
+		mux_open(&mux_input); //open new file
+	}
+	*/
+	//start net command server
+	start_netcmd_server (vm);
+	
+	//start rtsp server
+	pthread_t rtspid;
+	int ret;
+	ret=pthread_create(&rtspid, NULL, thread_RTSP, (void*) ext_gSettings );
+	if(ret) {
+		printf("pthread create error %d", ret);
+		exit(EXIT_FAILURE);
+	}
 
-	//at last,start rtsp loop
-	env->taskScheduler().doEventLoop(); // does not return
+	//mux_close();
+	//thread_RTSP((void*)ext_gSettings);
+	//alarm(20);
+	//env->taskScheduler().doEventLoop(&rtsp_flag ); // does not return if rtsp_flag = 0
+	/*video_process_stop();
+	mux_close();
+	sleep(5);
 
+	mux_open(&mux_input);
+	video_process_start();
+	rtsp_flag = 0;
+	env->taskScheduler().doEventLoop(&rtsp_flag );
+	* */
+	for(;;);
+	
 	exit (EXIT_SUCCESS);
 }
 

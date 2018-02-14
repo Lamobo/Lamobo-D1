@@ -8,6 +8,7 @@
 #ifndef TPOLL__H
 #define TPOLL__H
 
+#define TCPLISTENPORT 8046
 //typedef unsigned short u16;
 //typedef unsigned char u8;
 /**
@@ -22,6 +23,7 @@ enum msg{
 	CMD_CLK_ADJUST		= 	'A',
 	CMD_USB_HOST_MODE	= 	'H',
 	CMD_USB_DEVICE_MODE	= 	'D',
+	CMD_GET_PHOTO		= 	'P',
 	//--commands to MCU------//
 	CMD_REC_ERROR		= 	'E',
 	CMD_REC_NOSDCARD	= 	'N',
@@ -111,6 +113,9 @@ static int rxdata_processing (serial_t* s);
 
 
 static void cmd_code_processing (uint8_t* data);
+
+static int send_to_socket ( int sock );
+
 
 /**
  * @brief Send responce to MCU
