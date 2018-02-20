@@ -18,7 +18,8 @@ enum msg{
 	STARTMSG 	=			'[', ///< Start packet message
 
 	//--commands from MCU-----//
-	CMD_START_RECORD 	= 	'R', 
+	CMD_START_RECORD 	= 	'R',
+	CMD_START_TRANSL	= 	'T',
 	CMD_STOP_RECORD 	= 	'S',
 	CMD_CLK_ADJUST		= 	'A',
 	CMD_USB_HOST_MODE	= 	'H',

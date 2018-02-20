@@ -25,9 +25,11 @@
 #include <netinet/in.h>
 #include "IPCameraCommand.h"
 
-#define REC_PATH	"/mnt/akipcserver"/*"/usr/bin/akipcserver"*/ ///< Path to recorder
-#define REC_NAME	"akipcserver"								 ///< Recorder name
-#define TXT_BUF	100												///< Buffer for text messages
+#define REC_PATH		"/mnt/akipcserver"/*"/usr/bin/akipcserver"*/ ///< Path to recorder
+#define REC_NAME		"akipcserver"								 ///< Recorder name
+#define REC_PARAM		"-s"										 ///< Recorder send/receive signals
+#define REC_PARAM_RTSP	"-sr"										 ///< Recorder send/receive signals with rtsp stream
+#define TXT_BUF	100													///< Buffer for text messages
 
 
 //extern const char * const sys_siglist[];
@@ -41,6 +43,8 @@ pid_t pid = -1;												///< Pid child process
 volatile sig_atomic_t sig = S_IDLE;							///< Signal flag
 siginfo_t s_inf;											///< Structure for handle info of received signal 
 int sock;													///<Socket descriptor
+struct sockaddr_in addr;									///<Socket address struct
+int conn = -1;												///<If connected to socket conn = 0
 /**
  * @brief Main loop
  * \retval 0 if ok, else return 1
@@ -51,31 +55,21 @@ int sock;													///<Socket descriptor
 int main(void) {
 //
 atexit(tpoll_exit);
+//create socket to send cmd to akipcserver
 
-
-if( system("pgrep akipcserver") == 0 ) {
-	//create socket to send cmd to akipcserver
-	struct sockaddr_in addr;
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if(sock < 0)
-	{
-		perror("socket");
-		exit(1);
-	}
-	
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(TCPLISTENPORT); 
-	addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-	
-	if(connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-	{
-		perror("connect");
-		exit(2);
-	}
+sock = socket(AF_INET, SOCK_STREAM, 0);
+if(sock < 0)
+{
+	perror("socket");
+	exit(1);
 }
 
+addr.sin_family = AF_INET;
+addr.sin_port = htons(TCPLISTENPORT); 
+addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
 
+//initialize signals
 if (sig_init() < 0) {
 	exit(EXIT_FAILURE);
 }
@@ -87,7 +81,7 @@ if(serial_connect(tty, dev, baud) < 0){
 }
 
 for(;;){
-	usleep(200000);
+	usleep(100 * 1000);
 	int cnt;
 	if(serial_available(tty)) {
 		if((cnt = rxdata_processing(tty)) > 0) {
@@ -219,10 +213,14 @@ static void cmd_code_processing (uint8_t* data)
 	struct tm 		str_time;
 	struct timeval 	now;
 	struct sigaction act_chd;
+	char param[6];
+	uint8_t cmd = *(data+2);
 	
 	fprintf(stdout,"command %c\n", *(data+2));
-	switch (*(data+2)) {
+	switch (cmd) {
 	int i;
+	case CMD_START_TRANSL:
+			//strcpy(param, REC_PARAM_RTSP);
 	case CMD_START_RECORD:
 			//fprintf(stdout,"%s: start record\n", __func__);
 			if(pid == -1) {			//if does not have child
@@ -238,8 +236,12 @@ static void cmd_code_processing (uint8_t* data)
 							perror ("failed sigaction block SIGINT");
 						serial_close(tty);
 						serial_destroy(tty);
-							
-						if(execl(REC_PATH, REC_NAME, NULL) < 0) { //execute recorder on child proc
+						if (cmd == CMD_START_RECORD)
+							strcpy(param, REC_PARAM);
+						else if (cmd == CMD_START_TRANSL) 
+							strcpy(param, REC_PARAM_RTSP);
+						
+						if(execl(REC_PATH, REC_NAME, param, NULL) < 0) { //execute recorder on child proc
 							perror("child exec err");
 							exit(EXIT_FAILURE);
 						}
@@ -267,9 +269,19 @@ static void cmd_code_processing (uint8_t* data)
 	case CMD_GET_PHOTO:
 		//get foto
 		fprintf(stdout,"get_photo\n");
-		if(sock)
-		send_to_socket(sock);
-		//recv(sock, buf, sizeof(buf), 0);
+		
+		if( system("pgrep akipcserver") == 0)  {
+			if(conn != 0) {
+				conn = connect(sock, (struct sockaddr *)&addr, sizeof(addr));
+					if(conn < 0) {
+						perror("connect");
+						break;
+					}
+			}
+			send_to_socket(sock);
+		}
+		else fprintf(stdout,"No record process found!\n");
+		
 	break;
 	
 	case CMD_CLK_ADJUST:
@@ -439,7 +451,7 @@ static int sig_init (void)
 
 /**
  * @brief Signals processing
- * @param signal - value to process 
+ * @param signal - value to processing 
  */
 static void signal_processing (sig_atomic_t signal) 
 {
@@ -454,8 +466,8 @@ static void signal_processing (sig_atomic_t signal)
 			fprintf("Child exited by %s signal\n", sys_siglist[WTERMSIG(state_val)]);
 		else printf("Child terminated abnormally\n");*/
 		//fprintf("%s",sigmsg);
-		
 		pid = -1;
+		conn = -1;	
 	break;
 	
 	case S_RECORDER_RUN:

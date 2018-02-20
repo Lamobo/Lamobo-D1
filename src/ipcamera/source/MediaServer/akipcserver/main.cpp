@@ -46,7 +46,12 @@ VIDEO_MODE vm[2] = {VIDEO_MODE_VGA, VIDEO_MODE_VGA};
 
 static int bHasAudio = 0;
 volatile T_BOOL sig_flag = AK_FALSE;
-char   rtsp_flag = 0;
+volatile T_BOOL   rtsp_flag = AK_FALSE;
+
+sig_atomic_t alrm_Flag;
+
+
+
 const char* streamName1 = "vs1";
 const char* streamName2 = "vs2";
 
@@ -126,7 +131,8 @@ static void sigprocess(int sig)
 	else if( sig == SIGTERM || sig == SIGINT)
 		exit(EXIT_SUCCESS);
 	else if( sig == SIGALRM)
-		rtsp_flag = (rtsp_flag) ? 0 : 1;
+		//stopREC = (stopREC == STATE_START) : STATE_STOP ? STATE_START;
+		alrm_Flag = 1;
 		
 }
 
@@ -140,7 +146,7 @@ static int sig_init(void)
 	sigaddset(&set, SIGSEGV);
 	sigaddset(&set, SIGINT);
 	sigaddset(&set, SIGTERM);
-	sigaddset(&set, SIGALRM);
+	//sigaddset(&set, SIGALRM);
 	
 	act.sa_mask = set;	//blocked sig
 	
@@ -152,10 +158,10 @@ static int sig_init(void)
 	}
 	if (sigaction(SIGINT, &act, NULL) < 0) {
 		perror ("sigaction init SIGINT");
-	}
+	}/*
 	if (sigaction(SIGALRM, &act, NULL) < 0) {
 		perror ("sigaction init SIGUSR1");
-	}
+	}*/
 	return 0;
 }
 
@@ -190,15 +196,22 @@ static void get_photo(void)
 static void parse_options( int argc, char **argv )
 {
 	int c;
-	while((c = getopt(argc, argv, "s")) != -1) {
+	while((c = getopt(argc, argv, "sr")) != -1) {
 		switch (c) {
 			case 's':
 			printf("Possible send/receive signals from parent\n");
 			sig_flag = AK_TRUE;
 			break;
 			
+			
+			case 'r':
+			printf("Possible rtsp stream\n");
+			rtsp_flag = AK_TRUE;
+			break;	
+					
 			default:
-			printf("Unknown option\n");
+			printf("Unknown option, use '-r' for rtsp stream, '-s' for possible receive/send signals\n");
+			exit(EXIT_FAILURE);
 			break;
 			
 		}
@@ -222,9 +235,8 @@ static void start_netcmd_server (VIDEO_MODE* vm)
 	startNetCtlServer(&ncsp);
 }
 
-void* thread_RTSP (void* param )
+void config_RTSPserver (demo_setting* ext_gSettings)
 {
-	demo_setting* ext_gSettings = (demo_setting*) param;
 	DemuxForLiveSetCallBack();
 	TaskScheduler* scheduler = BasicTaskScheduler::createNew();
 	env = BasicUsageEnvironment::createNew(*scheduler);
@@ -412,10 +424,15 @@ void* thread_RTSP (void* param )
 	}
 #endif
 
-	env->taskScheduler().doEventLoop(&rtsp_flag ); // does not return if rtsp_flag = 0
+}
+/*
+
+void* thread_RTSP(void* param)
+{
+	env->taskScheduler().doEventLoop(); // does not return
 	return 0;
 }
-
+*/
 
 /**
 * @brief  main
@@ -441,6 +458,8 @@ int main( int argc, char **argv )
 		return -1;
 	}
 	parse_options(argc, argv);
+	//start net command server
+	start_netcmd_server (vm);
 	
 	sig_init();
     atexit(appExit);
@@ -540,41 +559,15 @@ int main( int argc, char **argv )
 	//InitMotionDetect();
 	auto_record_file(); //start thread_enc
     printf("[##]auto_record_file() called..\n");
-    /*
-    for (int i=0;i<3;i++) {
-	    sleep(15);
-		mux_close(); //close file
-		record_rename_file();
-		sleep(5);
-		mux_open(&mux_input); //open new file
-	}
-	*/
-	//start net command server
-	start_netcmd_server (vm);
+
+
+	if(rtsp_flag) {		//start rtsp server
+		config_RTSPserver(ext_gSettings);
+		env->taskScheduler().doEventLoop(); 
 	
-	//start rtsp server
-	pthread_t rtspid;
-	int ret;
-	ret=pthread_create(&rtspid, NULL, thread_RTSP, (void*) ext_gSettings );
-	if(ret) {
-		printf("pthread create error %d", ret);
-		exit(EXIT_FAILURE);
 	}
-
-	//mux_close();
-	//thread_RTSP((void*)ext_gSettings);
-	//alarm(20);
-	//env->taskScheduler().doEventLoop(&rtsp_flag ); // does not return if rtsp_flag = 0
-	/*video_process_stop();
-	mux_close();
-	sleep(5);
-
-	mux_open(&mux_input);
-	video_process_start();
-	rtsp_flag = 0;
-	env->taskScheduler().doEventLoop(&rtsp_flag );
-	* */
-	for(;;);
+	else for(;;);
+	
 	
 	exit (EXIT_SUCCESS);
 }
