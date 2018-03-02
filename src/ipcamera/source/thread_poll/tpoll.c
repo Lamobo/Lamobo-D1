@@ -25,10 +25,10 @@
 #include <netinet/in.h>
 #include "IPCameraCommand.h"
 
-#define REC_PATH		"/mnt/akipcserver"/*"/usr/bin/akipcserver"*/ ///< Path to recorder
+#define REC_PATH		/*"/mnt/akipcserver"*/ "/usr/bin/akipcserver"  ///< Path to recorder
 #define REC_NAME		"akipcserver"								 ///< Recorder name
 #define REC_PARAM		"-s"										 ///< Recorder send/receive signals
-#define REC_PARAM_RTSP	"-sr"										 ///< Recorder send/receive signals with rtsp stream
+#define REC_PARAM_RTSP	"-sr"										 ///< Recorder send/receive signals & rtsp stream
 #define TXT_BUF	100													///< Buffer for text messages
 
 
@@ -55,19 +55,6 @@ int conn = -1;												///<If connected to socket conn = 0
 int main(void) {
 //
 atexit(tpoll_exit);
-//create socket to send cmd to akipcserver
-
-sock = socket(AF_INET, SOCK_STREAM, 0);
-if(sock < 0)
-{
-	perror("socket");
-	exit(1);
-}
-
-addr.sin_family = AF_INET;
-addr.sin_port = htons(TCPLISTENPORT); 
-addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-
 
 //initialize signals
 if (sig_init() < 0) {
@@ -84,7 +71,7 @@ for(;;){
 	usleep(100 * 1000);
 	int cnt;
 	if(serial_available(tty)) {
-		if((cnt = rxdata_processing(tty)) > 0) {
+		if((cnt = serial_data_processing(tty)) > 0) {
 			//processing cmd_code
 			cmd_code_processing (rxdata); 
 		} // end if processing
@@ -96,7 +83,7 @@ for(;;){
 
 	
 	if(sig != S_IDLE)	{						 //signal received?
-		signal_processing(sig); 
+		incoming_signal_processing(sig); 
 		sig = S_IDLE;
 	}
 } //end for
@@ -169,7 +156,7 @@ void sig_hdl(int signal, siginfo_t* s_inf, void* ucontext)
  * @param *s - pointer to serial structure.
  * @return received bytes
  */
-static int rxdata_processing (serial_t* s)
+static int serial_data_processing (serial_t* s)
 {
 	int i;
 	for(i = 0; i < BUFF_SIZE && serial_available(tty); i++){
@@ -203,10 +190,8 @@ return (i-1);
 /**
  * @brief Processing & analyze received command
  * 
- * 
  * @param *data - pointer to rxdata buffer.
- *
- */
+ * */
 static void cmd_code_processing (uint8_t* data) 
 {
 	bool B_mode_wifi = true;
@@ -272,6 +257,17 @@ static void cmd_code_processing (uint8_t* data)
 		
 		if( system("pgrep akipcserver") == 0)  {
 			if(conn != 0) {
+				//create socket to send cmd to akipcserver
+			sock = socket(AF_INET, SOCK_STREAM, 0);
+			if(sock < 0)
+			{
+				perror("socket");
+				exit(1);
+			}
+			
+			addr.sin_family = AF_INET;
+			addr.sin_port = htons(TCPLISTENPORT); 
+			addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 				conn = connect(sock, (struct sockaddr *)&addr, sizeof(addr));
 					if(conn < 0) {
 						perror("connect");
@@ -313,7 +309,7 @@ static void cmd_code_processing (uint8_t* data)
 	
 	case CMD_USB_DEVICE_MODE:
 		if(B_mode_wifi == true) {
-			system("/etc/init.d/udisk.sh stop");
+			system("/etc/init.d/udisk.sh start");
 			B_mode_wifi = false;
 		}
 	break;			
@@ -453,7 +449,7 @@ static int sig_init (void)
  * @brief Signals processing
  * @param signal - value to processing 
  */
-static void signal_processing (sig_atomic_t signal) 
+static void incoming_signal_processing (sig_atomic_t signal) 
 {
 	
 	//int state_val = 0;
@@ -466,8 +462,8 @@ static void signal_processing (sig_atomic_t signal)
 			fprintf("Child exited by %s signal\n", sys_siglist[WTERMSIG(state_val)]);
 		else printf("Child terminated abnormally\n");*/
 		//fprintf("%s",sigmsg);
-		pid = -1;
-		conn = -1;	
+		pid = -1;					//child process exited
+		conn = -1;					//connection closed
 	break;
 	
 	case S_RECORDER_RUN:

@@ -22,8 +22,7 @@ insmod /root/8188eu.ko
 date 0101000017 --utc
 #/etc/init.d/wifi
 #/etc/init.d/monitor.sh &
-
-/etc/jffs2/service.sh 
 init -q
-#/usr/bin/tpolld & # start polling
+/etc/jffs2/service.sh 
+/usr/bin/tpolld & # start polling
 

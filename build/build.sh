@@ -277,8 +277,8 @@ build_all()
     #build_tools
     #$MKDIR $DEV_ROOT/output/local/bin
     #$MKDIR $DEV_ROOT/output/local/lib
-    config_kernel
-    build_kernel
+    #config_kernel
+    #build_kernel
     #config_busybox
     #build_busybox
     build_rootfs
@@ -292,7 +292,7 @@ build_all()
 clean_all()
 {
     #clean_tools
-    clean_kernel
+    #clean_kernel
     #clean_busybox
     clean_rootfs
     #clean_samples
@@ -309,6 +309,34 @@ usage()
     echo Build Lamobo-D1 Firmware.
 }
 
+rebuild_kernel()
+{
+	echo "Rebuild kernel"
+	clean_kernel
+    config_kernel
+    build_kernel
+    pack_basic
+    pack_extra	
+}
+
+rebuild_rootfs()
+{
+	echo "Rebuild rootfs"
+	clean_rootfs
+    build_rootfs
+    pack_basic
+    pack_extra	
+}
+
+rebuild_busybox()
+{
+	echo "Rebuild busybox"
+	clean_busybox
+    config_busybox
+    build_busybox
+    pack_basic
+    pack_extra	
+}
 
 #
 # Main
@@ -341,6 +369,18 @@ while :; do
             ACTION=clean
             break
             ;;
+        -k)
+            ACTION=kernel
+            break
+            ;;
+        -r)
+            ACTION=rootfs
+            break
+            ;;
+        -b)
+            ACTION=busybox
+            break
+            ;;                         
         '')
             ACTION=build
             break
@@ -385,4 +425,10 @@ if [ "$ACTION" == "build" ]; then
     build_all
 elif [ "$ACTION" == "clean" ]; then
     clean_all
+elif [ "$ACTION" == "kernel" ]; then
+    rebuild_kernel
+elif [ "$ACTION" == "rootfs" ]; then
+    rebuild_rootfs 
+elif [ "$ACTION" == "busybox" ]; then
+    rebuild_busybox 
 fi

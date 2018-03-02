@@ -110,11 +110,20 @@ static uint16_t gencrc(uint8_t *bfr, size_t len);
  * @param *s - pointer to serial structure.
  * @return received bytes
  */
-static int rxdata_processing (serial_t* s);
+static int serial_data_processing (serial_t* s);
 
-
+/**
+ * @brief Processing & analyze received command
+ * 
+ * @param *data - pointer to rxdata buffer.
+ * */
 static void cmd_code_processing (uint8_t* data);
 
+/**
+ * Send command from the socket to akipcserver 
+ * @param sock - socket to send
+ * 
+*/
 static int send_to_socket ( int sock );
 
 
@@ -135,7 +144,7 @@ static int sig_init (void);
  * @brief Signals processing
  * @param signal - value to process 
  */
-static void signal_processing (sig_atomic_t signal);
+static void incoming_signal_processing (sig_atomic_t signal);
 
 /**
  * @brief Exit from the func

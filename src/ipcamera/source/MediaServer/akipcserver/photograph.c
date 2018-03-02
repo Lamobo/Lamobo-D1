@@ -285,12 +285,12 @@ void Init_photograph( void )
 	}
 
 	pthread_create( &g_phid, NULL, photograph_thread, NULL);
-	
+	/*
 	void* *pbuf;
 	long size;
 	unsigned long ts;
-	//camera_getframe((void**)&pbuf, &size, &ts); //get empty frame from camera
-	
+	camera_getframe((void**)&pbuf, &size, &ts); //get empty frame from camera 
+	*/
 }
 
 
