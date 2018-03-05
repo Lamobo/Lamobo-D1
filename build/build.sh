@@ -305,10 +305,10 @@ clean_all()
 
 usage()
 {
-    echo Usage: $0 [-v] [clean]
-    echo Build Lamobo-D1 Firmware.
+    echo Usage: $0 [-vkbr] [clean]
+    echo Build Firmware.
+    echo "-v verbose; -k rebuild kernel; -b rebuild busybox; -r rebuild rootfs"
 }
-
 rebuild_kernel()
 {
 	echo "Rebuild kernel"
@@ -337,7 +337,6 @@ rebuild_busybox()
     pack_basic
     pack_extra	
 }
-
 #
 # Main
 #
