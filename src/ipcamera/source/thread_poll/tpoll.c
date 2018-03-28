@@ -66,7 +66,7 @@ if(serial_connect(tty, dev, baud) < 0){
 	perror("serial connect");
 	exit(EXIT_FAILURE);
 }
-
+send_response(CMD_REC_READY);
 for(;;){
 	usleep(100 * 1000);
 	int cnt;
