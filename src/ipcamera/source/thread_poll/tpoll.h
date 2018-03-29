@@ -25,6 +25,7 @@ enum msg{
 	CMD_USB_HOST_MODE	= 	'H',
 	CMD_USB_DEVICE_MODE	= 	'D',
 	CMD_GET_PHOTO		= 	'P',
+	CMD_GET_STATUS		= 	'G',
 	//--commands to MCU------//
 	CMD_REC_READY		=	'!',
 	CMD_REC_ERROR		= 	'E',

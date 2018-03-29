@@ -68,7 +68,7 @@ if(serial_connect(tty, dev, baud) < 0){
 }
 send_response(CMD_REC_READY);
 for(;;){
-	usleep(100 * 1000);
+	usleep(100 * 1000); //sleep 100ms
 	int cnt;
 	if(serial_available(tty)) {
 		if((cnt = serial_data_processing(tty)) > 0) {
@@ -204,6 +204,11 @@ static void cmd_code_processing (uint8_t* data)
 	fprintf(stdout,"command %c\n", *(data+2));
 	switch (cmd) {
 	int i;
+	
+	case CMD_GET_STATUS:
+			send_response(CMD_REC_READY);
+	break;
+	
 	case CMD_START_TRANSL:
 			//strcpy(param, REC_PARAM_RTSP);
 	case CMD_START_RECORD:
