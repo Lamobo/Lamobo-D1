@@ -43,6 +43,7 @@ enum sig_flag {
 	S_CHILD_EXIT,
 	S_KEY_INT,
 	S_RECORDER_RUN,
+	S_TRANSLATE_RUN,
 	S_RECORDER_STOP,
 	S_CAMERA_ERROR,
 	///////////////
@@ -146,7 +147,7 @@ static int sig_init (void);
  * @brief Signals processing
  * @param signal - value to process 
  */
-static void incoming_signal_processing (sig_atomic_t signal);
+static void incoming_signal_processing (sig_atomic_t signal, int flag);
 
 /**
  * @brief Exit from the func

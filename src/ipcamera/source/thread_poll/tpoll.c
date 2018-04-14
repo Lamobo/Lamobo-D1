@@ -45,6 +45,7 @@ siginfo_t s_inf;											///< Structure for handle info of received signal
 int sock;													///<Socket descriptor
 struct sockaddr_in addr;									///<Socket address struct
 int conn = -1;												///<If connected to socket conn = 0
+int flag_translate = 0;								///<If rtsp stream enabled = true
 /**
  * @brief Main loop
  * \retval 0 if ok, else return 1
@@ -66,7 +67,16 @@ if(serial_connect(tty, dev, baud) < 0){
 	perror("serial connect");
 	exit(EXIT_FAILURE);
 }
-send_response(CMD_REC_READY);
+if (access("/dev/mmcblk0", R_OK) == 0) {
+	send_response(CMD_REC_READY);
+	fprintf(stdout,"---REC_READY send to MCU\n");
+}
+	else {
+	fprintf(stdout, "---no SD card! CMD_REC_NOSDCARD send\n");
+	send_response (CMD_REC_NOSDCARD);
+	}
+
+
 for(;;){
 	usleep(100 * 1000); //sleep 100ms
 	int cnt;
@@ -83,7 +93,7 @@ for(;;){
 
 	
 	if(sig != S_IDLE)	{						 //signal received?
-		incoming_signal_processing(sig); 
+		incoming_signal_processing(sig, flag_translate); 
 		sig = S_IDLE;
 	}
 } //end for
@@ -206,30 +216,56 @@ static void cmd_code_processing (uint8_t* data)
 	int i;
 	
 	case CMD_GET_STATUS:
-			send_response(CMD_REC_READY);
+	if(pid == -1) { 			//if does not have child
+		fprintf(stdout,"---%s: recorder ready\n", __func__);
+		send_response(CMD_REC_READY);
+	}
+	else {			//if record run
+		if(flag_translate) {
+			 send_response(CMD_START_TRANSL);
+			 fprintf(stdout,"---%s: status \"translate\" send\n", __func__);
+			 }
+			 
+			 else {
+				 fprintf(stdout,"---%s: status \"record\" send\n", __func__);
+				 send_response(CMD_START_RECORD);
+			}
+		
+	}
 	break;
-	
+
 	case CMD_START_TRANSL:
-			//strcpy(param, REC_PARAM_RTSP);
+	
 	case CMD_START_RECORD:
-			//fprintf(stdout,"%s: start record\n", __func__);
+			
 			if(pid == -1) {			//if does not have child
 				if (access("/dev/mmcblk0", R_OK) == 0) {
-					pid = fork();	//create new process
-					if (pid != 0) {	//parent proc
-						fprintf(stdout,"child pid = %d\n", pid);					
+					pid = fork();								//create new process
+					if (pid != 0) {												//parent proc
+						fprintf(stdout,"child pid = %d\n", pid);
+						if(cmd == CMD_START_TRANSL)	{
+							flag_translate = 1;
+							fprintf(stdout,"%s: start translate\n", __func__);
+						}	
+						else {
+							flag_translate = 0;
+							fprintf(stdout,"%s: start record\n", __func__);
+						}			
 					}
-					else if (!pid) { //child proc: close all file desc & ignore SIGINT
+					else if (!pid) { 										//child proc: close all file desc & ignore SIGINT
 						memset (&act_chd, 0, sizeof(act_chd));
 						act_chd.sa_handler = SIG_IGN;
 						if (sigaction(SIGINT, &act_chd, NULL) < 0) 	//block SIGINT on child
 							perror ("failed sigaction block SIGINT");
 						serial_close(tty);
 						serial_destroy(tty);
-						if (cmd == CMD_START_RECORD)
+						if (cmd == CMD_START_RECORD) {
 							strcpy(param, REC_PARAM);
-						else if (cmd == CMD_START_TRANSL) 
+							
+						}
+						else if (cmd == CMD_START_TRANSL) {
 							strcpy(param, REC_PARAM_RTSP);
+						}
 						
 						if(execl(REC_PATH, REC_NAME, param, NULL) < 0) { //execute recorder on child proc
 							perror("child exec err");
@@ -251,7 +287,7 @@ static void cmd_code_processing (uint8_t* data)
 	
 	case CMD_STOP_RECORD:
 		if(pid != -1) {
-			//fprintf(stdout,"%s: stop record\n", __func__);
+			fprintf(stdout,"%s: stop record\n", __func__);
 			kill(pid, SIGTERM);
 		}
 	break;
@@ -300,6 +336,10 @@ static void cmd_code_processing (uint8_t* data)
 			now.tv_sec = mktime(&str_time);
 			if(settimeofday(&now, NULL) != 0) {
 				perror("settimeofday() failed\n");
+			}
+			else {
+				fprintf(stdout,"---%s: Adjust time success, status \"CMD_REC_READY\" send\n", __func__);
+				send_response(CMD_REC_READY);
 			}
 		}
 		else fprintf(stdout,"packet size for adjust time incorrect.\n");
@@ -408,6 +448,7 @@ uint16_t crc = 0x0;
 	//---------------------//
 	txbuf[++i] 	= STOPMSG;
 	//fprintf(stdout,"response crc = 0x%04X\n", crc);
+	serial_clear(tty);
 	int j = 0;
 	for(j = 0; j <= i; j++)
 		serial_put(tty, txbuf[j]);
@@ -454,7 +495,7 @@ static int sig_init (void)
  * @brief Signals processing
  * @param signal - value to processing 
  */
-static void incoming_signal_processing (sig_atomic_t signal) 
+static void incoming_signal_processing (sig_atomic_t signal, int flag) 
 {
 	
 	//int state_val = 0;
@@ -470,19 +511,26 @@ static void incoming_signal_processing (sig_atomic_t signal)
 		pid = -1;					//child process exited
 		conn = -1;					//connection closed
 	break;
-	
 	case S_RECORDER_RUN:
-		fprintf(stdout,"Received msg: RECORDER RUN!\n");
-		send_response (CMD_START_RECORD); 
+	{
+	if(flag){
+		fprintf(stdout,"---Translate started, send response to MCU\n");
+		send_response(CMD_START_TRANSL); 
+	}
+	else {
+		fprintf(stdout,"---Record started, send response to MCU\n");
+		send_response(CMD_START_RECORD);
+	}
+	}
 	break;
 	
 	case S_RECORDER_STOP:
-		fprintf(stdout,"Received msg: RECORDER STOP!\n");
+		fprintf(stdout,"---Record stop, send to MCU\n");
 		send_response (CMD_STOP_RECORD);
 	break;
 	
 	case S_CAMERA_ERROR:
-		fprintf(stdout,"Received msg: CAMERA ERROR!\n");
+		fprintf(stdout,"---akipcserver: CAMERA ERROR!\n");
 		send_response (CMD_REC_CAM_ERROR);
 	break;
 	
