@@ -37,7 +37,7 @@ void IniSetting_akidestroy();
 int IniSetting_akisave();
 struct md_info * IniSetting_GetmdInfo();
 struct isp_info *IniSetting_GetispInfo();
-int IniSetting_SetPictureInfo(struct picture_info *);
+int IniSetting_SetPictureInfo(struct picture_info* pic);
 
 
 

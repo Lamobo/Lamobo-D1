@@ -137,11 +137,11 @@ struct picture_info *IniSetting_GetPictureInfo()
 	return &(setting.picture);
 }
 
-int IniSetting_SetPictureInfo(struct picture_info *pic )
+int IniSetting_SetPictureInfo( struct picture_info *pic )
 {
 	int ret = 0; 
 	if(!nInit)
-		return NULL;
+		return 0;
 	settingDebug("Set osd_name=%s\n", pic->osd_name);
 	settingDebug("Set osd_place=%s\n",pic->osd_place);
 	settingDebug("Set osd_time=%s\n", pic->osd_time);
