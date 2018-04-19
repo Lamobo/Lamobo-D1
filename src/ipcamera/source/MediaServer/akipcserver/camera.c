@@ -1326,39 +1326,39 @@ int SetOsd1( int size )
 	#endif
 	switch(g_time_osd)
 	{
-		case 0:
+		case 0:	//left_up
 		{
 			start_x = 26;
-			start_y = 26;
+			start_y = height;
 			end_x = width+26;
-			end_y = height+26;
+			end_y = 2*height;
 			break;
 		}
-		case 1:
+		case 1: //right_up
 		{
 			start_x = parse.width-width;
-			start_y = 1;
+			start_y = height;//1;
 			end_x = parse.width;
-			end_y = height;
+			end_y = 2*height;
 			break;
 		}
-		case 2:
+		case 2: //left_down
 		{
 			start_x = 0;
-			start_y = parse.height - height;
+			start_y = parse.height - 2*height;
 			end_x = width;
-			end_y = parse.height;
+			end_y = parse.height - height;
 			break;
 		}
-		case 3:
+		case 3: //right_down
 		{
 			start_x = parse.width-width;
-			start_y = parse.height - height;
+			start_y = parse.height - 2*height;
 			end_x = parse.width;
-			end_y = parse.height;
+			end_y = parse.height - height;
 			break;
 		}
-		case 4:
+		case 4: 
 		{
 			return 0;
 		}

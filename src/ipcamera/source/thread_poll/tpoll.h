@@ -8,7 +8,11 @@
 #ifndef TPOLL__H
 #define TPOLL__H
 
-#define TCPLISTENPORT 8046
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define TCPLISTENPORT		8046
 //typedef unsigned short u16;
 //typedef unsigned char u8;
 /**
@@ -35,6 +39,7 @@ enum msg{
 	//----------------------//
 	STOPMSG 	= 			']',
 };
+
 /**
  * \enum sig_flag - Flags for signal handler
  * */
@@ -48,6 +53,19 @@ enum sig_flag {
 	S_CAMERA_ERROR,
 	///////////////
 	LAST_MSG,
+};
+
+/**
+ * \enum Date string  position on osd
+ * */
+enum osd{
+	LEFT_UP = 0U,
+	RIGHT_UP,
+	LEFT_DOWN,
+	RIGHT_DOWN,	
+	HIDE,
+	///////
+	END_POSITION,
 };
 
 /**
@@ -150,8 +168,26 @@ static int sig_init (void);
 static void incoming_signal_processing (sig_atomic_t signal, int flag);
 
 /**
+ * @brief Read camera ini file
+ *
+ */
+static int read_osd_ini(void);
+
+/**
+ * @brief Write camera ini file
+ *
+ */
+static int write_osd_ini();
+
+/**
  * @brief Exit from the func
  * 
  */
 static void tpoll_exit(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+
 #endif

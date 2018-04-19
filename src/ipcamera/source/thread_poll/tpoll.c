@@ -21,6 +21,7 @@
 #include <sys/wait.h>
 #include "uart.h"
 #include "tpoll.h"
+#include "inisetting.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "IPCameraCommand.h"
@@ -45,7 +46,13 @@ siginfo_t s_inf;											///< Structure for handle info of received signal
 int sock;													///<Socket descriptor
 struct sockaddr_in addr;									///<Socket address struct
 int conn = -1;												///<If connected to socket conn = 0
-int flag_translate = 0;								///<If rtsp stream enabled = true
+bool b_flag_translate = true;								///<If rtsp stream enabled = true
+enum osd g_osd = HIDE;											///<Date string  position on osd from ini file
+enum osd t_osd = HIDE;											///<Date string  position on osd from MCU
+
+bool g_time_osd = false;									///<Display time on osd or not from ini file
+bool t_time_osd = false;									///<Display time on osd or not from MCU
+struct picture_info *picture;
 /**
  * @brief Main loop
  * \retval 0 if ok, else return 1
@@ -75,7 +82,8 @@ if (access("/dev/mmcblk0", R_OK) == 0) {
 	fprintf(stdout, "---no SD card! CMD_REC_NOSDCARD send\n");
 	send_response (CMD_REC_NOSDCARD);
 	}
-
+//read camera ini file
+read_osd_ini();
 
 for(;;){
 	usleep(100 * 1000); //sleep 100ms
@@ -93,7 +101,7 @@ for(;;){
 
 	
 	if(sig != S_IDLE)	{						 //signal received?
-		incoming_signal_processing(sig, flag_translate); 
+		incoming_signal_processing(sig, b_flag_translate); 
 		sig = S_IDLE;
 	}
 } //end for
@@ -221,7 +229,7 @@ static void cmd_code_processing (uint8_t* data)
 		send_response(CMD_REC_READY);
 	}
 	else {			//if record run
-		if(flag_translate) {
+		if(b_flag_translate) {
 			 send_response(CMD_START_TRANSL);
 			 fprintf(stdout,"---%s: status \"translate\" send\n", __func__);
 			 }
@@ -244,11 +252,11 @@ static void cmd_code_processing (uint8_t* data)
 					if (pid != 0) {												//parent proc
 						fprintf(stdout,"child pid = %d\n", pid);
 						if(cmd == CMD_START_TRANSL)	{
-							flag_translate = 1;
+							b_flag_translate = true;
 							fprintf(stdout,"%s: start translate\n", __func__);
 						}	
 						else {
-							flag_translate = 0;
+							b_flag_translate = false;
 							fprintf(stdout,"%s: start record\n", __func__);
 						}			
 					}
@@ -322,7 +330,7 @@ static void cmd_code_processing (uint8_t* data)
 	break;
 	
 	case CMD_CLK_ADJUST:
-		if (*(data+1) == 0x0C){ 		//if packet size less or more: error
+		if (*(data+1) == 14){ 		//if packet size less or more: error
 			i = 3;
 			str_time.tm_year = 	(int) rxdata[i];
 			str_time.tm_mon = 	(int) rxdata[++i];
@@ -337,10 +345,24 @@ static void cmd_code_processing (uint8_t* data)
 			if(settimeofday(&now, NULL) != 0) {
 				perror("settimeofday() failed\n");
 			}
-			else {
-				fprintf(stdout,"---%s: Adjust time success, status \"CMD_REC_READY\" send\n", __func__);
-				send_response(CMD_REC_READY);
+			//take osd position
+			t_osd = rxdata[++i];
+			t_time_osd = rxdata[++i];
+			
+			if( (t_osd != g_osd) || (t_time_osd != g_time_osd) ) {
+				if(!write_osd_ini()) {
+					g_osd = t_osd;
+					g_time_osd = t_time_osd;
+				}
+				else {
+					perror("Adjust osd position error\n");
+					break;
+				}
+				
 			}
+			fprintf(stdout,"---%s: Adjust time success, status \"CMD_REC_READY\" send\n", __func__);
+			send_response(CMD_REC_READY);
+			
 		}
 		else fprintf(stdout,"packet size for adjust time incorrect.\n");
 	break;
@@ -543,6 +565,117 @@ static void incoming_signal_processing (sig_atomic_t signal, int flag)
 	break;
 	}
 	
+}
+
+/**
+ * @brief Read camera ini file
+ *
+ */
+static int read_osd_ini(void)
+{
+	IniSetting_init();
+	//get pic info
+	picture = IniSetting_GetPictureInfo();
+	fprintf(stdout,"-osd name from ini file: %s\n", picture->osd_name);
+	fprintf(stdout,"-osd place from ini file: %s\n", picture->osd_place);
+	fprintf(stdout,"-osd time from ini file: %s\n", picture->osd_time);
+	if(strlen(picture->osd_name) == 0)
+	{
+		g_osd = HIDE;
+	}
+	else {
+		if( !strcmp(picture->osd_place, "right_up"))
+		{
+			g_osd = RIGHT_UP;
+		}
+		else if(!strcmp(picture->osd_place, "right_down"))
+		{
+			g_osd = RIGHT_DOWN;
+		}
+		else if(!strcmp(picture->osd_place, "left_up"))
+		{
+			g_osd = LEFT_UP;
+		}
+		else if(!strcmp(picture->osd_place, "left_down"))
+		{
+			g_osd = LEFT_DOWN;
+		}
+		else 
+		{
+			g_osd = HIDE;
+		}
+	}
+
+	if(!strcmp(picture->osd_time, "show"))
+	{
+		g_time_osd = true;
+	}
+	else 
+	{
+		g_time_osd = false;
+	}
+	
+	
+	IniSetting_destroy();
+	return 0;
+}
+/**
+ * @brief Write camera ini file
+ *
+ */
+static int write_osd_ini()
+{
+	int ret = -1;
+	
+	IniSetting_init();
+	fprintf(stdout,"Call %s\n", __func__);
+	//struct picture_info *picture;	// 
+	if(t_osd != g_osd) {
+		if(t_osd != HIDE) {
+			picture->osd_name = "REC";
+			switch (t_osd) {
+		
+				case LEFT_UP: 
+					picture->osd_place = "left_up";
+				break;
+				
+				case RIGHT_UP:
+					picture->osd_place = "right_up";
+				break;
+				
+				case LEFT_DOWN:
+					picture->osd_place = "left_down";
+				break;
+				
+				case RIGHT_DOWN:
+					picture->osd_place = "right_down";
+				break;
+		
+				default:
+				perror("Receive osd position error\n");
+				break;
+			}
+		}
+		else {
+			picture->osd_name = '\0';
+		}
+	}
+	
+	if(t_time_osd != g_time_osd) {
+		if(t_time_osd) {
+			picture->osd_time = "show";
+		}
+			else {
+				picture->osd_time = "hide";
+				
+			}
+	}
+	ret += IniSetting_SetPictureInfo(picture); 	//return 0 if success, else -1
+	ret += IniSetting_save(); 					//return 1 if success
+	
+	IniSetting_destroy();
+	//fprintf(stdout,"%s: ret=%d\n", __func__, ret);
+	return ret;
 }
 
 /**
