@@ -3,7 +3,9 @@
 #define INI_AKI		"/etc/jffs2/akiserver.ini"
 
 
-static struct setting_info setting;
+//static struct setting_info setting;
+struct setting_info setting;
+
 static struct akisetting_info akiset;
 static int nInit = 0;
 static int nInitaki = 0;

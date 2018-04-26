@@ -56,11 +56,11 @@ enum sig_flag {
 };
 
 /**
- * \enum Date string  position on osd
+ * \enum osd Date string  position on osd
  * */
 enum osd{
-	LEFT_UP = 0U,
-	RIGHT_UP,
+	LEFT_UP = 0U,		///< LEFT_UP position osd
+	RIGHT_UP,			///< RIGHT_UP position osd
 	LEFT_DOWN,
 	RIGHT_DOWN,	
 	HIDE,

@@ -1307,6 +1307,7 @@ int SetOsd1( int size )
 
 	int width = size*10;
 	int height = size*2;
+	
 	#if 0
 	switch(size)
 	{
@@ -1318,7 +1319,7 @@ int SetOsd1( int size )
 			width = 256+fontnum*size;
 			height = 32;
 			break;
-		case 16:
+		case 16: 					//default
 			width = 128+fontnum*size;
 			height = 16;
 			break;
@@ -1329,33 +1330,33 @@ int SetOsd1( int size )
 		case 0:	//left_up
 		{
 			start_x = 26;
-			start_y = height;
+			start_y = height+size;
 			end_x = width+26;
-			end_y = 2*height;
+			end_y = 2*height+size;
 			break;
 		}
 		case 1: //right_up
 		{
 			start_x = parse.width-width;
-			start_y = height;//1;
+			start_y = height+size;//1;
 			end_x = parse.width;
-			end_y = 2*height;
+			end_y = 2*height+size;
 			break;
 		}
 		case 2: //left_down
 		{
 			start_x = 0;
-			start_y = parse.height - 2*height;
+			start_y = parse.height - 2*height-size;
 			end_x = width;
-			end_y = parse.height - height;
+			end_y = parse.height - height-size;
 			break;
 		}
 		case 3: //right_down
 		{
 			start_x = parse.width-width;
-			start_y = parse.height - 2*height;
+			start_y = parse.height - 2*height-size;
 			end_x = parse.width;
-			end_y = parse.height - height;
+			end_y = parse.height - height-size;
 			break;
 		}
 		case 4: 

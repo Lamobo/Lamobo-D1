@@ -47,12 +47,13 @@ int sock;													///<Socket descriptor
 struct sockaddr_in addr;									///<Socket address struct
 int conn = -1;												///<If connected to socket conn = 0
 bool b_flag_translate = true;								///<If rtsp stream enabled = true
-enum osd g_osd = HIDE;											///<Date string  position on osd from ini file
-enum osd t_osd = HIDE;											///<Date string  position on osd from MCU
+uint8_t g_osd = HIDE;											///<Date string  position on osd from ini file
+uint8_t t_osd = HIDE;											///<Date string  position on osd from MCU
 
 bool g_time_osd = false;									///<Display time on osd or not from ini file
 bool t_time_osd = false;									///<Display time on osd or not from MCU
-struct picture_info *picture;
+extern struct setting_info setting;
+struct picture_info *picture = &setting.picture;
 /**
  * @brief Main loop
  * \retval 0 if ok, else return 1
@@ -82,7 +83,7 @@ if (access("/dev/mmcblk0", R_OK) == 0) {
 	fprintf(stdout, "---no SD card! CMD_REC_NOSDCARD send\n");
 	send_response (CMD_REC_NOSDCARD);
 	}
-//read camera ini file
+//read camera ini
 read_osd_ini();
 
 for(;;){
@@ -90,6 +91,7 @@ for(;;){
 	int cnt;
 	if(serial_available(tty)) {
 		if((cnt = serial_data_processing(tty)) > 0) {
+			serial_clear(tty);
 			//processing cmd_code
 			cmd_code_processing (rxdata); 
 		} // end if processing
@@ -177,11 +179,14 @@ void sig_hdl(int signal, siginfo_t* s_inf, void* ucontext)
 static int serial_data_processing (serial_t* s)
 {
 	int i;
+	fprintf(stdout,"--------incoming %s\n", __func__);
+	
 	for(i = 0; i < BUFF_SIZE && serial_available(tty); i++){
 			rxdata[i] = serial_get(s);
 	}
-	//fprintf(stdout,"%c %c bytes cnt=%d\n", rxdata[0], rxdata[i-1], i);
-	
+	for(i = 0; i < rxdata[1]; i++){ 
+	fprintf(stdout,"rxdata[%d] = %d \n", i, rxdata[i]);
+	}
 	//analyze received data
 	if((rxdata[0] != STARTMSG) || (rxdata[i-1] != STOPMSG)) {
 		fprintf(stdout,"incorrect packet data: first byte 0x%X, last byte 0x%X\n", rxdata[0], rxdata[i-1]);
@@ -349,6 +354,8 @@ static void cmd_code_processing (uint8_t* data)
 			t_osd = rxdata[++i];
 			t_time_osd = rxdata[++i];
 			
+			//read camera ini file
+			read_osd_ini();
 			if( (t_osd != g_osd) || (t_time_osd != g_time_osd) ) {
 				if(!write_osd_ini()) {
 					g_osd = t_osd;
@@ -657,7 +664,7 @@ static int write_osd_ini()
 			}
 		}
 		else {
-			picture->osd_name = '\0';
+			picture->osd_name = 0;
 		}
 	}
 	
