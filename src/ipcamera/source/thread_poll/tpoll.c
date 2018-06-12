@@ -378,6 +378,8 @@ static void cmd_code_processing (uint8_t* data)
 		if(B_mode_wifi == false) {
 			system("/etc/init.d/udisk.sh stop");
 			B_mode_wifi = true;
+			fprintf(stdout,"---%s: Change USB mode to HOST, status \"CMD_REC_READY\" send\n", __func__);
+			send_response(CMD_REC_READY);
 		}
 	break;
 	
@@ -385,6 +387,8 @@ static void cmd_code_processing (uint8_t* data)
 		if(B_mode_wifi == true) {
 			system("/etc/init.d/udisk.sh start");
 			B_mode_wifi = false;
+			fprintf(stdout,"---%s: Change USB mode to DEVICE, status \"CMD_REC_READY\" send\n", __func__);
+			send_response(CMD_REC_READY);
 		}
 	break;			
 	
