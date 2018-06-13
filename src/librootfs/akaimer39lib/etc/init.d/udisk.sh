@@ -21,9 +21,9 @@ start ()
 	umount $MOUNT_PATH
 	
 	rmmod 8188eu
-	sleep 1
+	usleep 500000
 	rmmod otg_hs
-	sleep 1
+	#sleep 500*1000
 
 	dev=`ls /dev | grep mmc`
 	if [ "$dev" != "" ]
@@ -64,6 +64,7 @@ stop ()
 		mount -t auto  /dev/mmcblk0 $MOUNT_PATH
 		
 	fi
+	exit 0
 }
 
 #

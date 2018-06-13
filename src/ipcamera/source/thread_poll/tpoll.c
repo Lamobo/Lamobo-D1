@@ -40,7 +40,8 @@ serial_t* tty;												///< Pointer to serial structure
 char dev[]={"/dev/ttySAK1"}; 								///< Name of serial device
 int baud = 115200;											///< Default baudrate
 uint8_t rxdata[BUFF_SIZE];									///< Buffer for received data
-pid_t pid = -1;												///< Pid child process
+pid_t pid = -1;												///< Pid child recprocess
+pid_t pid_ud = -1;											///< Pid child usb disk process
 volatile sig_atomic_t sig = S_IDLE;							///< Signal flag
 siginfo_t s_inf;											///< Structure for handle info of received signal 
 int sock;													///<Socket descriptor
@@ -48,10 +49,10 @@ struct sockaddr_in addr;									///<Socket address struct
 int conn = -1;												///<If connected to socket conn = 0
 bool b_flag_translate = true;								///<If rtsp stream enabled = true
 uint8_t g_osd = HIDE;											///<Date string  position on osd from ini file
-uint8_t t_osd = HIDE;											///<Date string  position on osd from MCU
+uint8_t t_osd = LEFT_DOWN;											///<Date string  position on osd from MCU
 
 bool g_time_osd = false;									///<Display time on osd or not from ini file
-bool t_time_osd = false;									///<Display time on osd or not from MCU
+bool t_time_osd = true;									///<Display time on osd or not from MCU
 extern struct setting_info setting;
 struct picture_info *picture = &setting.picture;
 /**
@@ -217,7 +218,7 @@ return (i-1);
  * */
 static void cmd_code_processing (uint8_t* data) 
 {
-	bool B_mode_wifi = true;
+	//bool B_mode_wifi = true;
 	struct tm 		str_time;
 	struct timeval 	now;
 	struct sigaction act_chd;
@@ -375,21 +376,51 @@ static void cmd_code_processing (uint8_t* data)
 	break;
 	
 	case CMD_USB_HOST_MODE:
-		if(B_mode_wifi == false) {
-			system("/etc/init.d/udisk.sh stop");
-			B_mode_wifi = true;
-			fprintf(stdout,"---%s: Change USB mode to HOST, status \"CMD_REC_READY\" send\n", __func__);
-			send_response(CMD_REC_READY);
-		}
+	
+			fprintf(stdout,"---%s: Stop Udisk\n", __func__);
+			pid_ud = fork();
+			if (pid_ud != 0) {												//parent proc
+				fprintf(stdout,"wait child usbpid = %d\n", pid_ud);
+				waitpid(pid_ud, NULL, 0);
+				pid_ud = -1;
+				fprintf(stdout,"---%s: Change USB mode to HOST, status \"CMD_REC_READY\" send\n", __func__);
+				send_response(CMD_REC_READY);
+			}
+			else if (!pid_ud) { 										//child proc: close all file desc & ignore SIGINT
+				memset (&act_chd, 0, sizeof(act_chd));
+				act_chd.sa_handler = SIG_IGN;
+				if (sigaction(SIGINT, &act_chd, NULL) < 0) 	//block SIGINT on child
+					perror ("failed sigaction block SIGINT");
+				serial_close(tty);
+				serial_destroy(tty);
+				if (execl("/etc/init.d/udisk.sh", "udisk.sh", "stop", NULL) < 0)
+					perror("execl failed");
+				else fprintf(stdout,"---%s: Stop Udisk\n", __func__);						
+				}
 	break;
 	
 	case CMD_USB_DEVICE_MODE:
-		if(B_mode_wifi == true) {
-			system("/etc/init.d/udisk.sh start");
-			B_mode_wifi = false;
-			fprintf(stdout,"---%s: Change USB mode to DEVICE, status \"CMD_REC_READY\" send\n", __func__);
-			send_response(CMD_REC_READY);
-		}
+
+			fprintf(stdout,"---%s: Start Udisk\n", __func__);
+			pid_ud = fork();
+			if (pid_ud != 0) {												//parent proc
+				fprintf(stdout,"wait child usbpid = %d\n", pid_ud);
+				waitpid(pid_ud, NULL, 0);
+				pid_ud = -1;
+				fprintf(stdout,"---%s: Change USB mode to DEVICE, status \"CMD_REC_READY\" send\n", __func__);
+				send_response(CMD_REC_READY);
+			}
+			else if (!pid_ud) { 										//child proc: close all file desc & ignore SIGINT
+				memset (&act_chd, 0, sizeof(act_chd));
+				act_chd.sa_handler = SIG_IGN;
+				if (sigaction(SIGINT, &act_chd, NULL) < 0) 	//block SIGINT on child
+					perror ("failed sigaction block SIGINT");
+				serial_close(tty);
+				serial_destroy(tty);
+				if(execl("/etc/init.d/udisk.sh", "udisk.sh", "start", NULL) < 0)
+					perror("execl failed");
+				else fprintf(stdout,"---%s: Start Udisk end\n", __func__);						
+				}
 	break;			
 	
 	default:
@@ -541,8 +572,10 @@ static void incoming_signal_processing (sig_atomic_t signal, int flag)
 			fprintf("Child exited by %s signal\n", sys_siglist[WTERMSIG(state_val)]);
 		else printf("Child terminated abnormally\n");*/
 		//fprintf("%s",sigmsg);
+		if (pid != -1) {
 		pid = -1;					//child process exited
 		conn = -1;					//connection closed
+		}
 	break;
 	case S_RECORDER_RUN:
 	{

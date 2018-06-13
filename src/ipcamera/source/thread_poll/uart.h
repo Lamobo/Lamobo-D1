@@ -8,7 +8,7 @@
 #define SERIAL_H
 
 #define BUFF_SIZE 512
-#define POLL_TIMEOUT 2000
+#define POLL_TIMEOUT 5000
 
 #include <stdint.h>
 
