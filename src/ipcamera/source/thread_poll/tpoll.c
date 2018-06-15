@@ -49,7 +49,7 @@ struct sockaddr_in addr;									///<Socket address struct
 int conn = -1;												///<If connected to socket conn = 0
 bool b_flag_translate = true;								///<If rtsp stream enabled = true
 uint8_t g_osd = HIDE;											///<Date string  position on osd from ini file
-uint8_t t_osd = LEFT_DOWN;											///<Date string  position on osd from MCU
+uint8_t t_osd = RIGHT_UP;											///<Date string  position on osd from MCU
 
 bool g_time_osd = false;									///<Display time on osd or not from ini file
 bool t_time_osd = true;									///<Display time on osd or not from MCU
@@ -654,7 +654,7 @@ static int read_osd_ini(void)
 	{
 		g_time_osd = true;
 	}
-	else 
+	else if (!strcmp(picture->osd_time, "hide"))
 	{
 		g_time_osd = false;
 	}
@@ -674,46 +674,45 @@ static int write_osd_ini()
 	IniSetting_init();
 	fprintf(stdout,"Call %s\n", __func__);
 	//struct picture_info *picture;	// 
-	if(t_osd != g_osd) {
-		if(t_osd != HIDE) {
-			picture->osd_name = "REC";
-			switch (t_osd) {
-		
-				case LEFT_UP: 
-					picture->osd_place = "left_up";
-				break;
-				
-				case RIGHT_UP:
-					picture->osd_place = "right_up";
-				break;
-				
-				case LEFT_DOWN:
-					picture->osd_place = "left_down";
-				break;
-				
-				case RIGHT_DOWN:
-					picture->osd_place = "right_down";
-				break;
-		
-				default:
-				perror("Receive osd position error\n");
-				break;
-			}
-		}
-		else {
-			picture->osd_name = 0;
-		}
-	}
 	
-	if(t_time_osd != g_time_osd) {
-		if(t_time_osd) {
-			picture->osd_time = "show";
+	if(t_osd != HIDE) {
+		picture->osd_name = "REC";
+		switch (t_osd) {
+	
+			case LEFT_UP: 
+				picture->osd_place = "left_up";
+			break;
+			
+			case RIGHT_UP:
+				picture->osd_place = "right_up";
+			break;
+			
+			case LEFT_DOWN:
+				picture->osd_place = "left_down";
+			break;
+			
+			case RIGHT_DOWN:
+				picture->osd_place = "right_down";
+			break;
+	
+			default:
+			perror("Receive osd position error\n");
+			break;
 		}
-			else {
-				picture->osd_time = "hide";
-				
-			}
 	}
+	else {
+		picture->osd_name = 0;
+		picture->osd_place = 0;
+	}
+
+	if(t_time_osd) {
+		picture->osd_time = "show";
+	}
+		else {
+			picture->osd_time = "hide";
+			
+		}
+	
 	ret += IniSetting_SetPictureInfo(picture); 	//return 0 if success, else -1
 	ret += IniSetting_save(); 					//return 1 if success
 	
