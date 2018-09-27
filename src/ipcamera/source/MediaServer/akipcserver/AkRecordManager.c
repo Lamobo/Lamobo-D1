@@ -467,12 +467,14 @@ static char g_filename[1024];
 int ChangFileName( void )
 {
 	char filename[1024];
+	int ret = -1;
 	memset(filename, 0x00, 1024);
 	strncpy(filename, g_filename, strlen(g_filename)-9);
 	strcat(filename, FILE_SUFFIZ);
+	ret = rename(g_filename, filename);
 	printf("filename %s \n", filename);
-	rename(g_filename, filename);
-	return 0;
+	sync();
+	return ret;
 }
 
 int rec_count = 0;
@@ -533,7 +535,7 @@ static T_pSTR MakeFileName()
     ///////////-------------------------------------
 	
 	//Add the ending bit, and the five characters to be added under the same name. "_1~1024"
-	iPathLen = strlen( g_RecPath ) + strlen( astrFileName ) + 6;
+	iPathLen = strlen( g_RecPath ) + strlen( astrFileName ) + 9;
 	strCompletePath = (T_pSTR)malloc( iPathLen );
 	if ( NULL == strCompletePath ) {
 		loge( "MakeFileName::out of memory!\n" );
@@ -545,13 +547,16 @@ static T_pSTR MakeFileName()
 	strcpy( strCompletePath, g_RecPath );
 	strcat( strCompletePath, astrFileName );
 
-	strAdd = strrchr( strCompletePath, '.' );
+	strAdd = strrchr( strCompletePath, '(' );
 	while (IsExists(strCompletePath)) {
+		printf("This file exist! Rename..\n");
 		++iIndex;
 		bzero( strAdd, strlen( strAdd ) );
 		sprintf( strAdd, "_%d", (int)iIndex );
-		strcat( strCompletePath, FILE_SUFFIZ );
+		strcat( strAdd, FILE_NAME_DIF );
+		strcat( strAdd, FILE_SUFFIZ );
 		
+		printf("Renaming filename is %s \n", strCompletePath);
 		if ( iIndex > 1024 ) {
 			logi( "the dir is file full!\n" );
 			break;

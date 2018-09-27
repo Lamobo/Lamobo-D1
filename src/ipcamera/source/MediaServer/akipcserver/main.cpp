@@ -102,7 +102,9 @@ static void appExit()
 	printf("akuio_pmem_fini\n");
 	setled_off();
 	//PTZControlDeinit();
-	record_rename_file();
+	if (record_rename_file() != 0)
+		SendSig_ToParent(SIGUSR1, 2);	//rec error
+	sleep(1);	
 	SendSig_ToParent(SIGUSR1, 0);	//rec stop
     
 	//system("/etc/init.d/wifi_led.sh wps_led off");

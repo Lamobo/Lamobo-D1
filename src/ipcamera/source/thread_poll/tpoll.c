@@ -25,6 +25,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "IPCameraCommand.h"
+#include <sys/mount.h>\
 
 #define REC_PATH		/*"/mnt/akipcserver"*/ "/usr/bin/akipcserver"  ///< Path to recorder
 #define REC_NAME		"akipcserver"								 ///< Recorder name
@@ -303,6 +304,7 @@ static void cmd_code_processing (uint8_t* data)
 		if(pid != -1) {
 			fprintf(stdout,"%s: stop record\n", __func__);
 			kill(pid, SIGTERM);
+			
 		}
 	break;
 	
