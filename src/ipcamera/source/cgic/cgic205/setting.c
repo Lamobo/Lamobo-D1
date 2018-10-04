@@ -85,6 +85,7 @@ static char *format[] = {
 static char *dpi[] = {
 	"720",
 	"DVC",
+	"svga",
 };
 static char *dpi2[] = {
 	"d1",
@@ -899,7 +900,9 @@ static void printVideoHtml(struct setting_info *setting)
 	fprintf(cgiOut, "<option value=\"720\" %s>720P(1280x720)</option>\n",
 			!strcmp(info->video1.dpi,"720")?"selected":"");
 	fprintf(cgiOut, "<option value=\"DVC\" %s>720P(960x720HD)</option>\n",
-			!strcmp(info->video1.dpi,"DVC")?"selected":"");		
+			!strcmp(info->video1.dpi,"DVC")?"selected":"");	
+	fprintf(cgiOut, "<option value=\"svga\" %s>SVGA(800x600)</option>\n",
+			!strcmp(info->video1.dpi,"svga")?"selected":"");		
 	fprintf(cgiOut, "</select>\n");
 	fprintf(cgiOut, "</td>\n");
 	fprintf(cgiOut, "</tr>\n");

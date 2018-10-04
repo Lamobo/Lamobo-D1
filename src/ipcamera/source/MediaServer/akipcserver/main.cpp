@@ -309,10 +309,14 @@ void config_RTSPserver (demo_setting* ext_gSettings)
 		{
 			vm[0] = VIDEO_MODE_720P;
 		}
-		if(ext_gSettings->width == 960)
+		else if(ext_gSettings->width == 960)
 		{
 			vm[0] = VIDEO_MODE_DVC;
 		}
+		else if(ext_gSettings->width == 800)
+		{
+			vm[0] = VIDEO_MODE_SVGA;
+		}		
 		else if(ext_gSettings->width == 640)
 		{
 			vm[0] = VIDEO_MODE_VGA;
@@ -351,10 +355,14 @@ void config_RTSPserver (demo_setting* ext_gSettings)
 		{
 			vm[1] = VIDEO_MODE_720P;
 		}
-		if(parse.width2 == 960)
+		else if(parse.width2 == 960)
 		{
 			vm[1] = VIDEO_MODE_DVC;
 		}
+		else if(ext_gSettings->width == 800)
+		{
+			vm[1] = VIDEO_MODE_SVGA;
+		}	
 		else if(parse.width2 == 640)
 		{
 			vm[1] = VIDEO_MODE_VGA;

@@ -413,6 +413,11 @@ int Get_Resolution(char *Res, int *width, int *height)
 		*width = 960;
 		*height = 720;
 	}
+	else if( !strcmp(Res, "svga") )
+	{
+		*width = 800;
+		*height = 600;
+	}
 	else if( !strcmp(Res, "vga") )
 	{
 		*width = 640;
