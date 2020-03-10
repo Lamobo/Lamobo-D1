@@ -39,6 +39,8 @@ struct md_info * IniSetting_GetmdInfo();
 struct isp_info *IniSetting_GetispInfo();
 int IniSetting_SetPictureInfo(struct picture_info* pic);
 
+struct video_info * IniSetting_GetVideoResolution();
+int IniSetting_SetVideoResolution( struct video_info *vid);
 
 
 

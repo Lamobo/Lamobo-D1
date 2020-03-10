@@ -1,7 +1,6 @@
 /**
  * \file 
-	\brief Poll serial data
-	
+	\brief Poll serial data daemon
 	poll serial data from ttySAK1 port /analyzing / execute scripts
 	\author amartol
 	\version 1.0
@@ -33,6 +32,7 @@
 #define REC_PARAM_RTSP	"-sr"										 ///< Recorder send/receive signals & rtsp stream
 #define TXT_BUF	100													///< Buffer for text messages
 
+//#define TPOLL_DBG 
 
 //extern const char * const sys_siglist[];
 
@@ -49,18 +49,20 @@ int sock;													///<Socket descriptor
 struct sockaddr_in addr;									///<Socket address struct
 int conn = -1;												///<If connected to socket conn = 0
 bool b_flag_translate = true;								///<If rtsp stream enabled = true
-uint8_t g_osd = HIDE;											///<Date string  position on osd from ini file
-uint8_t t_osd = RIGHT_UP;											///<Date string  position on osd from MCU
+uint8_t g_osd = HIDE;										///<Date string  position on osd from ini file
+uint8_t t_osd = RIGHT_UP;									///<Date string  position on osd from MCU
+uint8_t g_resolution = VIDEO_MODE_DVC;						///<Resolution from ini file
+uint8_t t_resolution = VIDEO_MODE_DVC;						///<Video resolution from MCU
 
 bool g_time_osd = false;									///<Display time on osd or not from ini file
 bool t_time_osd = true;									///<Display time on osd or not from MCU
 extern struct setting_info setting;
 struct picture_info *picture = &setting.picture;
+struct video_info *video = &setting.video; 
 /**
  * @brief Main loop
  * \retval 0 if ok, else return 1
- * 
- * 
+ *  
  * 
 */
 int main(void) {
@@ -79,10 +81,14 @@ if(serial_connect(tty, dev, baud) < 0){
 }
 if (access("/dev/mmcblk0", R_OK) == 0) {
 	send_response(CMD_REC_READY);
+	#ifdef TPOLL_DBG
 	fprintf(stdout,"---REC_READY send to MCU\n");
+	#endif
 }
 	else {
+	#ifdef TPOLL_DBG
 	fprintf(stdout, "---no SD card! CMD_REC_NOSDCARD send\n");
+	#endif
 	send_response (CMD_REC_NOSDCARD);
 	}
 //read camera ini
@@ -98,7 +104,9 @@ for(;;){
 			cmd_code_processing (rxdata); 
 		} // end if processing
 		else {								//error processing rxdata
+			#ifdef TPOLL_DBG
 			fprintf(stdout,"clear rx buffer\n");
+			#endif
 			serial_clear(tty);
 		}	
 	} //end serial available
@@ -181,17 +189,22 @@ void sig_hdl(int signal, siginfo_t* s_inf, void* ucontext)
 static int serial_data_processing (serial_t* s)
 {
 	int i;
+	#ifdef TPOLL_DBG
 	fprintf(stdout,"--------incoming %s\n", __func__);
-	
+	#endif
 	for(i = 0; i < BUFF_SIZE && serial_available(tty); i++){
 			rxdata[i] = serial_get(s);
 	}
+	#ifdef TPOLL_DBG
 	for(i = 0; i < rxdata[1]; i++){ 
 	fprintf(stdout,"rxdata[%d] = %d \n", i, rxdata[i]);
 	}
+	#endif
 	//analyze received data
 	if((rxdata[0] != STARTMSG) || (rxdata[i-1] != STOPMSG)) {
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"incorrect packet data: first byte 0x%X, last byte 0x%X\n", rxdata[0], rxdata[i-1]);
+		#endif
 		//report to host
 		return -1;
 	}
@@ -202,10 +215,14 @@ static int serial_data_processing (serial_t* s)
 	crc = gencrc(rxdata+1, rxdata[1] - 4); //calculate crc other than start/stop symbols & received crc
 	
 	crc_rx = rxdata[i-3] << 8 | rxdata[i-2];
-/*	fprintf(stdout,"RECEIVED crc=0x%X\n", crc_rx);
-	fprintf(stdout,"CALCULATED crc=0x%X\n",crc); */
+	#ifdef TPOLL_DBG
+	fprintf(stdout,"RECEIVED crc=0x%X\n", crc_rx);
+	fprintf(stdout,"CALCULATED crc=0x%X\n",crc); 
+	#endif
 	if(crc != crc_rx) {
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"incorrect packet crc: received 0x%X, calculated 0x%X\n", crc_rx, crc);
+		#endif
 		return -2;
 	}
 //fprintf(stdout,"%c %c i=%d\n", rxdata[0], rxdata[i-1], i);
@@ -225,25 +242,32 @@ static void cmd_code_processing (uint8_t* data)
 	struct sigaction act_chd;
 	char param[6];
 	uint8_t cmd = *(data+2);
-	
+	#ifdef TPOLL_DBG
 	fprintf(stdout,"command %c\n", *(data+2));
+	#endif
 	switch (cmd) {
 	int i;
 	
 	case CMD_GET_STATUS:
 	if(pid == -1) { 			//if does not have child
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"---%s: recorder ready\n", __func__);
+		#endif
 		send_response(CMD_REC_READY);
 	}
 	else {			//if record run
 		if(b_flag_translate) {
 			 send_response(CMD_START_TRANSL);
+			 #ifdef TPOLL_DBG
 			 fprintf(stdout,"---%s: status \"translate\" send\n", __func__);
+			 #endif
 			 }
 			 
 			 else {
-				 fprintf(stdout,"---%s: status \"record\" send\n", __func__);
 				 send_response(CMD_START_RECORD);
+				 #ifdef TPOLL_DBG
+				 fprintf(stdout,"---%s: status \"record\" send\n", __func__);
+				 #endif
 			}
 		
 	}
@@ -257,14 +281,20 @@ static void cmd_code_processing (uint8_t* data)
 				if (access("/dev/mmcblk0", R_OK) == 0) {
 					pid = fork();								//create new process
 					if (pid != 0) {												//parent proc
+						#ifdef TPOLL_DBG
 						fprintf(stdout,"child pid = %d\n", pid);
+						#endif
 						if(cmd == CMD_START_TRANSL)	{
 							b_flag_translate = true;
+							#ifdef TPOLL_DBG
 							fprintf(stdout,"%s: start translate\n", __func__);
+							#endif
 						}	
 						else {
 							b_flag_translate = false;
+							#ifdef TPOLL_DBG
 							fprintf(stdout,"%s: start record\n", __func__);
+							#endif
 						}			
 					}
 					else if (!pid) { 										//child proc: close all file desc & ignore SIGINT
@@ -302,7 +332,9 @@ static void cmd_code_processing (uint8_t* data)
 	
 	case CMD_STOP_RECORD:
 		if(pid != -1) {
+			#ifdef TPOLL_DBG
 			fprintf(stdout,"%s: stop record\n", __func__);
+			#endif
 			kill(pid, SIGTERM);
 			
 		}
@@ -310,8 +342,9 @@ static void cmd_code_processing (uint8_t* data)
 	
 	case CMD_GET_PHOTO:
 		//get foto
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"get_photo\n");
-		
+		#endif
 		if( system("pgrep akipcserver") == 0)  {
 			if(conn != 0) {
 				//create socket to send cmd to akipcserver
@@ -370,22 +403,49 @@ static void cmd_code_processing (uint8_t* data)
 				}
 				
 			}
+			#ifdef TPOLL_DBG
 			fprintf(stdout,"---%s: Adjust time success, status \"CMD_REC_READY\" send\n", __func__);
+			#endif
 			send_response(CMD_REC_READY);
 			
 		}
 		else fprintf(stdout,"packet size for adjust time incorrect.\n");
 	break;
 	
-	case CMD_USB_HOST_MODE:
+	case CMD_RES_ADJUST:
+		if (*(data+1) == 7){ 
+			i=3;
+			//take video resolution
+			t_resolution = data[i];
+			if(t_resolution != g_resolution) {
+				if(!write_video_ini()) {
+					g_resolution = t_resolution;
+				}
+				else {
+					perror("Adjust video resolution error\n");
+					break;
+				}
+			}
+			send_response(CMD_REC_READY);
+		}
+		else fprintf(stdout,"packet size for adjust video resolution incorrect.\n");
 	
+	break;
+	
+	case CMD_USB_HOST_MODE:
+			#ifdef TPOLL_DBG
 			fprintf(stdout,"---%s: Stop Udisk\n", __func__);
+			#endif
 			pid_ud = fork();
 			if (pid_ud != 0) {												//parent proc
+				#ifdef TPOLL_DBG
 				fprintf(stdout,"wait child usbpid = %d\n", pid_ud);
+				#endif
 				waitpid(pid_ud, NULL, 0);
 				pid_ud = -1;
+				#ifdef TPOLL_DBG
 				fprintf(stdout,"---%s: Change USB mode to HOST, status \"CMD_REC_READY\" send\n", __func__);
+				#endif
 				send_response(CMD_REC_READY);
 			}
 			else if (!pid_ud) { 										//child proc: close all file desc & ignore SIGINT
@@ -402,14 +462,19 @@ static void cmd_code_processing (uint8_t* data)
 	break;
 	
 	case CMD_USB_DEVICE_MODE:
-
+			#ifdef TPOLL_DBG
 			fprintf(stdout,"---%s: Start Udisk\n", __func__);
+			#endif
 			pid_ud = fork();
 			if (pid_ud != 0) {												//parent proc
+				#ifdef TPOLL_DBG
 				fprintf(stdout,"wait child usbpid = %d\n", pid_ud);
+				#endif
 				waitpid(pid_ud, NULL, 0);
 				pid_ud = -1;
+				#ifdef TPOLL_DBG
 				fprintf(stdout,"---%s: Change USB mode to DEVICE, status \"CMD_REC_READY\" send\n", __func__);
+				#endif
 				send_response(CMD_REC_READY);
 			}
 			else if (!pid_ud) { 										//child proc: close all file desc & ignore SIGINT
@@ -582,28 +647,38 @@ static void incoming_signal_processing (sig_atomic_t signal, int flag)
 	case S_RECORDER_RUN:
 	{
 	if(flag){
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"---Translate started, send response to MCU\n");
+		#endif
 		send_response(CMD_START_TRANSL); 
 	}
 	else {
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"---Record started, send response to MCU\n");
+		#endif
 		send_response(CMD_START_RECORD);
 	}
 	}
 	break;
 	
 	case S_RECORDER_STOP:
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"---Record stop, send to MCU\n");
+		#endif
 		send_response (CMD_STOP_RECORD);
 	break;
 	
 	case S_CAMERA_ERROR:
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"---akipcserver: CAMERA ERROR!\n");
+		#endif
 		send_response (CMD_REC_CAM_ERROR);
 	break;
 	
 	case S_KEY_INT:
+		#ifdef TPOLL_DBG
 		fprintf(stdout,"%s: signal SIGINT received\n", __func__);
+		#endif
 		exit(EXIT_SUCCESS);
 	break;
 	
@@ -622,9 +697,12 @@ static int read_osd_ini(void)
 	IniSetting_init();
 	//get pic info
 	picture = IniSetting_GetPictureInfo();
+	video = IniSetting_GetVideoResolution();
+	/*
 	fprintf(stdout,"-osd name from ini file: %s\n", picture->osd_name);
 	fprintf(stdout,"-osd place from ini file: %s\n", picture->osd_place);
 	fprintf(stdout,"-osd time from ini file: %s\n", picture->osd_time);
+	*/
 	if(strlen(picture->osd_name) == 0)
 	{
 		g_osd = HIDE;
@@ -660,13 +738,38 @@ static int read_osd_ini(void)
 	{
 		g_time_osd = false;
 	}
-	
-	
+	//////////////////////////////////////////////
+	if(!strcmp(video->dpi1, "720"))
+	{
+		g_resolution = VIDEO_MODE_720P;
+	}
+	else if (!strcmp(video->dpi1, "DVC"))
+	{
+		g_resolution = VIDEO_MODE_DVC;
+	}
+	else if (!strcmp(video->dpi1, "svga"))
+	{
+		g_resolution = VIDEO_MODE_SVGA;
+	}
+	else if (!strcmp(video->dpi1, "vga"))
+	{
+		g_resolution = VIDEO_MODE_VGA;
+	}	
+	else if (!strcmp(video->dpi1, "qvga"))
+	{
+		g_resolution = VIDEO_MODE_QVGA;
+	}
+	else if (!strcmp(video->dpi1, "d1"))
+	{
+		g_resolution = VIDEO_MODE_D1;
+	}	
+	else fprintf(stdout,"No support resolution\n");
+		
 	IniSetting_destroy();
 	return 0;
 }
 /**
- * @brief Write camera ini file
+ * @brief Write osd position camera ini file
  *
  */
 static int write_osd_ini()
@@ -674,7 +777,9 @@ static int write_osd_ini()
 	int ret = -1;
 	
 	IniSetting_init();
+	#ifdef TPOLL_DBG
 	fprintf(stdout,"Call %s\n", __func__);
+	#endif
 	//struct picture_info *picture;	// 
 	
 	if(t_osd != HIDE) {
@@ -724,12 +829,67 @@ static int write_osd_ini()
 }
 
 /**
+ * @brief Write videoformat camera ini file
+ *
+ */
+static int write_video_ini()
+{
+	int ret = -1;
+	
+	IniSetting_init();
+	#ifdef TPOLL_DBG
+	fprintf(stdout,"Call %s\n", __func__);
+	#endif
+	//struct picture_info *picture;	// 
+	
+		switch (t_resolution) {
+	
+			case VIDEO_MODE_QVGA: 
+				video->dpi1 = "qvga";
+			break;
+			
+			case VIDEO_MODE_VGA:
+				video->dpi1 = "vga";
+			break;
+			
+			case VIDEO_MODE_D1:
+				video->dpi1 = "d1";
+			break;
+			
+			case VIDEO_MODE_720P:
+				video->dpi1 = "720";
+			break;
+			
+			case VIDEO_MODE_DVC:
+				video->dpi1 = "DVC";
+			break;		
+			
+			case VIDEO_MODE_SVGA:
+				video->dpi1 = "svga";
+			break;					
+	
+			default:
+			perror("Receive videoformat error\n");
+			break;
+		}
+			
+	ret += IniSetting_SetVideoResolution(video); 	//return 0 if success, else -1
+	ret += IniSetting_save(); 					//return 1 if success
+	
+	IniSetting_destroy();
+	//fprintf(stdout,"%s: ret=%d\n", __func__, ret);
+	return ret;
+}
+
+/**
  * @brief Exit from the func
  * 
  */
 static void tpoll_exit(void)
 {
+	#ifdef TPOLL_DBG
 	fprintf(stdout,"--%s--\n", __func__);
+	#endif
 	if(pid != -1){		//if child process work, kill his
 		kill(pid, SIGTERM);
 		wait(NULL);

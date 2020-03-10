@@ -232,7 +232,6 @@ static T_S32 setHardwareParams( alsa_handle_t *handle )
 	snd_pcm_uframes_t bufferSize = handle->nBufferSize;
 	T_U32 requestedRate = handle->nSampleRate;
 	T_U32 latency = handle->nLatency;
-
 	
     T_BOOL validFormat = ( (int)(handle->nFormat) > SND_PCM_FORMAT_UNKNOWN ) && 
 						 ( (int)(handle->nFormat) <= SND_PCM_FORMAT_LAST );

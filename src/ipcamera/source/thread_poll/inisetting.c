@@ -159,6 +159,31 @@ int IniSetting_SetPictureInfo( struct picture_info *pic )
 	return ret;
 }
 
+struct video_info * IniSetting_GetVideoResolution()
+{
+	if(!nInit)
+		return NULL;
+	
+	setting.video.dpi1 = iniparser_getstring(setting.ini, "video:dpi1", NULL);
+		
+	settingDebug("setting.video.dpi1:%s\n", setting.video.dpi1);
+		
+	return &(setting.video);
+}	
+
+int IniSetting_SetVideoResolution( struct video_info *vid )
+{
+	int ret = 0; 
+	if(!nInit)
+		return 0;
+	ret += iniparser_set(setting.ini, "video:dpi1", vid->dpi1);
+	if (ret !=0) {
+		print_error("%s:iniparser video dpi set fail!", __func__);
+		return -1;
+	}
+
+	return ret;
+}
 
 #if 0
 struct system_info* IniSetting_GetSysInfo()

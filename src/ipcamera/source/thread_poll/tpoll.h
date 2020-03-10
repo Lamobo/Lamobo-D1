@@ -30,6 +30,7 @@ enum msg{
 	CMD_USB_DEVICE_MODE	= 	'D',
 	CMD_GET_PHOTO		= 	'P',
 	CMD_GET_STATUS		= 	'G',
+	CMD_RES_ADJUST		=	'L',
 	//--commands to MCU------//
 	CMD_REC_READY		=	'!',
 	CMD_REC_ERROR		= 	'E',
@@ -67,6 +68,7 @@ enum osd{
 	///////
 	END_POSITION,
 };
+
 
 /**
  *  Table for calculate CRC16	
@@ -174,10 +176,19 @@ static void incoming_signal_processing (sig_atomic_t signal, int flag);
 static int read_osd_ini(void);
 
 /**
- * @brief Write camera ini file
+ * @brief Write camera osd ini file
  *
  */
 static int write_osd_ini();
+
+
+ /**
+ * @brief Write videoformat camera  ini file
+ *
+ */
+ static int write_video_ini();
+
+
 
 /**
  * @brief Exit from the func
