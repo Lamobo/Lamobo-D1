@@ -32,7 +32,7 @@
 #define REC_PARAM_RTSP	"-sr"										 ///< Recorder send/receive signals & rtsp stream
 #define TXT_BUF	100													///< Buffer for text messages
 
-//#define TPOLL_DBG 
+//#define TPOLL_DBG 												///< Enable debug info
 
 //extern const char * const sys_siglist[];
 
@@ -432,6 +432,14 @@ static void cmd_code_processing (uint8_t* data)
 	
 	break;
 	
+	case CMD_DISK_FORMAT:
+		#ifdef TPOLL_DBG
+		fprintf(stdout,"---%s: Format sdcard\n", __func__);
+		#endif
+	system("mkfs.vfat /dev/mmcblk0p1");
+	send_response(CMD_REC_READY);
+	break;
+	
 	case CMD_USB_HOST_MODE:
 			#ifdef TPOLL_DBG
 			fprintf(stdout,"---%s: Stop Udisk\n", __func__);
@@ -738,6 +746,7 @@ static int read_osd_ini(void)
 	{
 		g_time_osd = false;
 	}
+	//read video resolution
 	//////////////////////////////////////////////
 	if(!strcmp(video->dpi1, "720"))
 	{
