@@ -158,7 +158,7 @@ void sig_hdl(int signal, siginfo_t* s_inf, void* ucontext)
 		case SIGCHLD:
 			if(!s_inf->si_errno) {
 				if	(s_inf->si_code == CLD_EXITED) //if child exit 
-					snprintf(sigmsg, TXT_BUF, "Exit with code = %d\n", s_inf->si_status);
+					snprintf(sigmsg, TXT_BUF, "Child proc exit with code = %d\n", s_inf->si_status);
 				else {
 					snprintf(sigmsg, TXT_BUF, "Child exited with signal %d (%s)\n", s_inf->si_code, 
 					(s_inf->si_code == CLD_KILLED) ? "CLD_KILLED":
@@ -168,7 +168,9 @@ void sig_hdl(int signal, siginfo_t* s_inf, void* ucontext)
 			else {
 				snprintf(sigmsg,TXT_BUF, "Child exited error: %d, %s\n", s_inf->si_errno, strerror(s_inf->si_errno));
 			}
+			#ifdef TPOLL_DBG
 			write(1, sigmsg, strlen(sigmsg)+1);
+			#endif
 			sig = S_CHILD_EXIT;
 		break;
 		
@@ -426,18 +428,43 @@ static void cmd_code_processing (uint8_t* data)
 					break;
 				}
 			}
+			#ifdef TPOLL_DBG
+			fprintf(stdout,"---%s: Adjust video resolution success.Send REC_READY\n", __func__);
+			#endif
 			send_response(CMD_REC_READY);
 		}
 		else fprintf(stdout,"packet size for adjust video resolution incorrect.\n");
 	
 	break;
 	
-	case CMD_DISK_FORMAT:
+	case CMD_DISK_FORMAT: {
 		#ifdef TPOLL_DBG
 		fprintf(stdout,"---%s: Format sdcard\n", __func__);
 		#endif
-	system("mkfs.vfat /dev/mmcblk0p1");
-	send_response(CMD_REC_READY);
+		pid_ud = fork();
+		if (pid_ud != 0) {												//parent proc
+				#ifdef TPOLL_DBG
+				fprintf(stdout,"wait child pid = %d\n", pid_ud);
+				#endif
+				waitpid(pid_ud, NULL, 0);
+				pid_ud = -1;
+				#ifdef TPOLL_DBG
+				fprintf(stdout,"---%s: format success, status \"CMD_REC_READY\" send\n", __func__);
+				#endif
+				send_response(CMD_REC_READY);
+		}
+		else if (!pid_ud) { 										//child proc: close all file desc & ignore SIGINT
+				memset (&act_chd, 0, sizeof(act_chd));
+				act_chd.sa_handler = SIG_IGN;
+				if (sigaction(SIGINT, &act_chd, NULL) < 0) 	//block SIGINT on child
+					perror ("failed sigaction block SIGINT");
+				serial_close(tty);
+				serial_destroy(tty);
+				if (execl("/bin/busybox", "mkfs.vfat", "/dev/mmcblk0p1", NULL) < 0)
+					perror("execl failed");
+		}
+		
+	}
 	break;
 	
 	case CMD_USB_HOST_MODE:
@@ -465,7 +492,6 @@ static void cmd_code_processing (uint8_t* data)
 				serial_destroy(tty);
 				if (execl("/etc/init.d/udisk.sh", "udisk.sh", "stop", NULL) < 0)
 					perror("execl failed");
-				else fprintf(stdout,"---%s: Stop Udisk\n", __func__);						
 				}
 	break;
 	
@@ -494,7 +520,6 @@ static void cmd_code_processing (uint8_t* data)
 				serial_destroy(tty);
 				if(execl("/etc/init.d/udisk.sh", "udisk.sh", "start", NULL) < 0)
 					perror("execl failed");
-				else fprintf(stdout,"---%s: Start Udisk end\n", __func__);						
 				}
 	break;			
 	
