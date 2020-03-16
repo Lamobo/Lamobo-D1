@@ -12,10 +12,6 @@
 #define DEFAULT_SAMPLE_RATE_AD	8000
 #define DEFAULT_RESAMPLE_UNIT	8	//can use 2,4,8
 
-#define SOURCE_DAC 			(0b001)
-#define SOURCE_LINEIN 		(0b010)
-#define SOURCE_MIC 			(0b100)
-#define SIGNAL_SRC_MUTE		(0b000)
 
 
 #define DECLARE_SAFE_SIZE	20
@@ -824,7 +820,7 @@ static T_S32 set_mixer_level_private( snd_mixer_t *mixer_handle, T_pCSTR name,
 		if ( snd_mixer_selem_has_capture_volume( mixer_element ) ) {
 			snd_mixer_selem_get_capture_volume_range( mixer_element, &volume_min, &volume_max );
 			new_level = (((volume_max- volume_min) * level) / 100) + volume_min;
-//			printf("set the volume new_level =%d \n", new_level);
+			printf("set the volume new_level =%ld \n", new_level);
 			err = snd_mixer_selem_set_capture_volume_all( mixer_element, new_level );
 			if (err < 0) {
 				loge( "failed to set %s volume %s!\n", name, snd_strerror(err) );
@@ -988,10 +984,11 @@ static T_S32 GetMixerLevel( alsa_handle_t * handle, volume_t type, T_S32 * level
 * @author hankejia
 * @date 2012-07-05
 * @param[in] handle  			the pointer point o the alsa_handle_t.
+* @param source 				used audio source for record
 * @return T_S32
 * @retval if return 0 success, otherwise failed 
 */
-static T_S32 SetMicIn( alsa_handle_t * handle )
+static T_S32 SetMicIn( alsa_handle_t * handle, T_U8 source)
 {
 	assert( handle );
 
@@ -1000,7 +997,7 @@ static T_S32 SetMicIn( alsa_handle_t * handle )
 		return 1;
 	}
 	
-	return SetCtrlVal( handle, CAPTURE_ROUTE_NAME, SIGNAL_SRC_MUTE, 0 );
+	return SetCtrlVal( handle, CAPTURE_ROUTE_NAME, source, 0 );
 }
 
 

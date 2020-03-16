@@ -8,6 +8,12 @@ extern "C" {
 #include "headers.h"
 #include <alsa/asoundlib.h>
 
+#define SOURCE_DAC 			(0b001)
+#define SOURCE_LINEIN 		(0b010)
+#define SOURCE_MIC 			(0b100)
+#define SIGNAL_SRC_MUTE		(0b000)
+
+
 typedef struct alsa_handle_t
 {
 	snd_pcm_t *				handle;
@@ -29,6 +35,7 @@ typedef struct alsa_handle_t
 	T_U32					nReSRDataLen;
 #endif
 }alsa_handle_t;
+
 typedef enum {
 	MASTER_VOLUME,
 	PCM_VOLUME,
@@ -80,10 +87,11 @@ typedef struct AkAlsaHardware
 	* @author hankejia
 	* @date 2012-07-05
 	* @param[in] handle  			the pointer point to the alsa_handle_t.
+	* @param source 				used audio source for record
 	* @return T_S32
 	* @retval if return 0 success, otherwise failed 
 	*/
-	T_S32 (*SetMicIn)( alsa_handle_t * handle );
+	 T_S32 (*SetMicIn)( alsa_handle_t * handle, T_U8 source);
 
 	/**
 	* @brief   set pcm input device is line

@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 
+#include "AkAlsaHardware.h"
 #include "anyka_types.h"
 #include "akuio.h"
 #include "camera.h"
@@ -44,10 +45,10 @@ Boolean iFramesOnly = False;
 T_MUX_INPUT mux_input;
 VIDEO_MODE vm[2] = {VIDEO_MODE_VGA, VIDEO_MODE_VGA};
 
-static int bHasAudio = 0;
+//static int bHasAudio = 0;
 volatile T_BOOL sig_flag = AK_FALSE;
 volatile T_BOOL   rtsp_flag = AK_FALSE;
-
+volatile T_BOOL   mic_flag = AK_FALSE;
 sig_atomic_t alrm_Flag;
 
 
@@ -80,12 +81,9 @@ static void startFTPSrv()
 static void appExit()
 {
 	printf("##appExit\n");
-	if (bHasAudio)
-	{
-		audio_stop();
-		audio_close();
-		printf("audio_close\n");
-	}
+	audio_stop();
+	audio_close();
+	printf("audio_close\n");
 	close_encode();
 	audio_dec_exit();
 	video_process_stop();
@@ -198,7 +196,7 @@ static void get_photo(void)
 static void parse_options( int argc, char **argv )
 {
 	int c;
-	while((c = getopt(argc, argv, "sr")) != -1) {
+	while((c = getopt(argc, argv, "sra")) != -1) {
 		switch (c) {
 			case 's':
 			printf("Possible send/receive signals from parent\n");
@@ -210,9 +208,14 @@ static void parse_options( int argc, char **argv )
 			printf("Possible rtsp stream\n");
 			rtsp_flag = AK_TRUE;
 			break;	
+			
+			case 'a':
+			mic_flag = AK_TRUE;
+			printf("Possible audio record, micflag=%d\n",mic_flag);
+			break;	
 					
 			default:
-			printf("Unknown option, use '-r' for rtsp stream, '-s' for possible receive/send signals\n");
+			printf("Unknown option, use '-r' for rtsp stream, '-s' for possible receive/send signals, '-a' for audio record\n");
 			exit(EXIT_FAILURE);
 			break;
 			
@@ -295,7 +298,7 @@ void config_RTSPserver (demo_setting* ext_gSettings)
 		subsMJPEGcam->setledstart = setled_view_start;
 		subsMJPEGcam->setledexit = setled_view_stop;
 		
-		if(bHasAudio)
+		//~ if(bHasAudio)
 			smsMJPEGcam->addSubsession(AKIPCAACAudioOnDemandMediaSubsession::createNew(*env,True,getAACBuf, vsIndex));
 
 		rtspServer->addServerMediaSession(smsMJPEGcam);
@@ -334,7 +337,7 @@ void config_RTSPserver (demo_setting* ext_gSettings)
 		ServerMediaSession* smscam = ServerMediaSession::createNew(*env, streamName1, 0, descriptionString);
 		AKIPCH264OnDemandMediaSubsession* subscam = AKIPCH264OnDemandMediaSubsession::createNew(*env,ipcSourcecam, 0, vsIndex);
 		smscam->addSubsession(subscam);
-		if(bHasAudio)
+		//~ if(bHasAudio)
 			smscam->addSubsession(AKIPCAACAudioOnDemandMediaSubsession::createNew(*env,True,getAACBuf, vsIndex));
 	
 		subscam->getframefunc = video_process_get_buf;
@@ -380,7 +383,7 @@ void config_RTSPserver (demo_setting* ext_gSettings)
 		ServerMediaSession* smscam = ServerMediaSession::createNew(*env, streamName2, 0, descriptionString);
 		AKIPCH264OnDemandMediaSubsession* subscam = AKIPCH264OnDemandMediaSubsession::createNew(*env,ipcSourcecam, 0, vsIndex);
 		smscam->addSubsession(subscam);
-		if(bHasAudio)
+		//~ if(bHasAudio)
 			smscam->addSubsession(AKIPCAACAudioOnDemandMediaSubsession::createNew(*env,True,getAACBuf, vsIndex));
 	
 		subscam->getframefunc = video_process_get_buf;
@@ -415,7 +418,7 @@ void config_RTSPserver (demo_setting* ext_gSettings)
 		subsMJPEGcam->setledstart = setled_view_start;
 		subsMJPEGcam->setledexit = setled_view_stop;
 		
-		if(bHasAudio)
+		//~ if(bHasAudio)
 			smsMJPEGcam->addSubsession(AKIPCAACAudioOnDemandMediaSubsession::createNew(*env,True,getAACBuf, vsIndex));
 
 		rtspServer->addServerMediaSession(smsMJPEGcam);
@@ -517,16 +520,17 @@ int main( int argc, char **argv )
 	mux_input.rec_path = ext_gSettings->rec_path;
 	mux_input.m_MediaRecType = MEDIALIB_REC_AVI_NORMAL;
 
-	if (ext_gSettings->bhasAudio)
-	{
-		bHasAudio = 1;
-		//mux_input.m_bCaptureAudio = 1;
-	}
-	else
-	{
-		bHasAudio = 0;
-		//mux_input.m_bCaptureAudio = 0;
-	}
+	//~ if (ext_gSettings->bhasAudio)
+	//~ {
+		//~ bHasAudio = 1;
+		//~ //mux_input.m_bCaptureAudio = 1;
+	//~ }
+	//~ else
+	//~ {
+		//~ bHasAudio = 0;
+		//~ //mux_input.m_bCaptureAudio = 0;
+	//~ }
+	
 	mux_input.m_bCaptureAudio = 1;
 	//mux video
 	if(parse.format2 == 0)
@@ -547,18 +551,19 @@ int main( int argc, char **argv )
 
 	printf("mux_open ok\n");
 
-	if (bHasAudio)
-	{
-		T_AUDIO_INPUT audioInput;
-		audioInput.enc_type = (AUDIO_ENCODE_TYPE_CC)ext_gSettings->audioType;
-		audioInput.nBitsRate = ext_gSettings->abitsrate;
-		audioInput.nBitsPerSample = 16;
-		audioInput.nChannels = 1;
-		audioInput.nSampleRate = ext_gSettings->aSamplerate;
-		audio_open(&audioInput);
-		printf("audio_open ok\n");
-		audio_start();
-	}
+	T_AUDIO_INPUT audioInput;
+	audioInput.enc_type = (AUDIO_ENCODE_TYPE_CC)ext_gSettings->audioType;
+	audioInput.nBitsRate = ext_gSettings->abitsrate;
+	audioInput.nBitsPerSample = 16;
+	audioInput.nChannels = 1;
+	audioInput.nSampleRate = ext_gSettings->aSamplerate;
+	audio_open(&audioInput);
+	printf("audio_open ok\n");
+	
+	if(mic_flag)
+		audio_start(SOURCE_MIC);
+	else audio_start(SIGNAL_SRC_MUTE);
+
 
 	//PTZControlInit();
 	
