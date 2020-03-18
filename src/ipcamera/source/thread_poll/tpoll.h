@@ -32,6 +32,7 @@ enum msg{
 	CMD_GET_STATUS		= 	'G',
 	CMD_RES_ADJUST		=	'L',
 	CMD_DISK_FORMAT		=	'F',
+	
 	//--commands to MCU------//
 	CMD_REC_READY		=	'!',
 	CMD_REC_ERROR		= 	'E',

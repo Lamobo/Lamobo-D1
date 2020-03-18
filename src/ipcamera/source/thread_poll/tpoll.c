@@ -24,13 +24,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "IPCameraCommand.h"
-#include <sys/mount.h>\
+#include <sys/mount.h>
 
-#define REC_PATH		/*"/mnt/akipcserver"*/ "/usr/bin/akipcserver"  ///< Path to recorder
-#define REC_NAME		"akipcserver"								 ///< Recorder name
-#define REC_PARAM		"-s"										 ///< Recorder send/receive signals
-#define REC_PARAM_RTSP	"-sr"										 ///< Recorder send/receive signals & rtsp stream
-#define TXT_BUF	100													///< Buffer for text messages
+#define REC_PATH		/*"/mnt/akipcserver"*/ "/usr/bin/akipcserver"  	///< Path to recorder
+#define REC_NAME		"akipcserver"									///< Recorder name
+#define REC_PARAM		"-s"											///< Recorder send/receive signals
+#define REC_PARAM_RTSP	"-sr"											///< Recorder send/receive signals & rtsp stream
+#define REC_PARAM_AUD	"-sa"											///< Recorder send/receive signals & audio record
+#define REC_PARAM_RTSP_AUD	"-sra"										///< Recorder send/receive signals & rtsp stream & audio record
+#define TXT_BUF	100														///< Buffer for text messages
 
 //#define TPOLL_DBG 												///< Enable debug info
 
@@ -49,13 +51,16 @@ int sock;													///<Socket descriptor
 struct sockaddr_in addr;									///<Socket address struct
 int conn = -1;												///<If connected to socket conn = 0
 bool b_flag_translate = true;								///<If rtsp stream enabled = true
+bool b_flag_audio = false;									///<If audio enabled = true
+
 uint8_t g_osd = HIDE;										///<Date string  position on osd from ini file
 uint8_t t_osd = RIGHT_UP;									///<Date string  position on osd from MCU
 uint8_t g_resolution = VIDEO_MODE_DVC;						///<Resolution from ini file
 uint8_t t_resolution = VIDEO_MODE_DVC;						///<Video resolution from MCU
 
+
 bool g_time_osd = false;									///<Display time on osd or not from ini file
-bool t_time_osd = true;									///<Display time on osd or not from MCU
+bool t_time_osd = true;										///<Display time on osd or not from MCU
 extern struct setting_info setting;
 struct picture_info *picture = &setting.picture;
 struct video_info *video = &setting.video; 
@@ -307,11 +312,13 @@ static void cmd_code_processing (uint8_t* data)
 						serial_close(tty);
 						serial_destroy(tty);
 						if (cmd == CMD_START_RECORD) {
-							strcpy(param, REC_PARAM);
+							if(b_flag_audio) strcpy(param, REC_PARAM_AUD);
+							else strcpy(param, REC_PARAM);
 							
 						}
 						else if (cmd == CMD_START_TRANSL) {
-							strcpy(param, REC_PARAM_RTSP);
+							if(b_flag_audio) strcpy(param, REC_PARAM_RTSP_AUD);
+							else strcpy(param, REC_PARAM_RTSP);
 						}
 						
 						if(execl(REC_PATH, REC_NAME, param, NULL) < 0) { //execute recorder on child proc
@@ -415,7 +422,7 @@ static void cmd_code_processing (uint8_t* data)
 	break;
 	
 	case CMD_RES_ADJUST:
-		if (*(data+1) == 7){ 
+		if (*(data+1) == 8){ 
 			i=3;
 			//take video resolution
 			t_resolution = data[i];
@@ -428,6 +435,10 @@ static void cmd_code_processing (uint8_t* data)
 					break;
 				}
 			}
+			i++;
+			if(data[i])	b_flag_audio = true; //get audio rec possibility
+			else b_flag_audio = false;
+			
 			#ifdef TPOLL_DBG
 			fprintf(stdout,"---%s: Adjust video resolution success.Send REC_READY\n", __func__);
 			#endif
