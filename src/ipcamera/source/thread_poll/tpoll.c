@@ -256,6 +256,15 @@ static void cmd_code_processing (uint8_t* data)
 	int i;
 	
 	case CMD_GET_STATUS:
+	
+	if (access("/dev/mmcblk0", R_OK) != 0) {
+	#ifdef TPOLL_DBG
+	fprintf(stdout, "---no SD card! CMD_REC_NOSDCARD send\n");
+	#endif
+	send_response (CMD_REC_NOSDCARD);
+	break;
+	}
+	
 	if(pid == -1) { 			//if does not have child
 		#ifdef TPOLL_DBG
 		fprintf(stdout,"---%s: recorder ready\n", __func__);
