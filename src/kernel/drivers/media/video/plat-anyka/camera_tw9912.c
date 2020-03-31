@@ -238,6 +238,12 @@ static T_VOID cam_tw9912_set_mode(T_CAMERA_MODE mode)
     case CAMERA_MODE_VGA:			 // 640x480
         camera_setup(VGA_MODE_TAB);
         break;
+    case CAMERA_MODE_SVGA:			 // 640x480
+        camera_setup(VGA_MODE_TAB);
+        break;
+	case CAMERA_MODE_DVC:			 // 640x480
+        camera_setup(VGA_MODE_TAB);
+        break;
     case CAMERA_MODE_CIF:
         camera_setup(CIF_MODE_TAB);
         break;
@@ -675,7 +681,15 @@ static T_BOOL cam_tw9912_set_to_cap(T_U32 srcWidth, T_U32 srcHeight)
     {
         Cammode = CAMERA_MODE_VGA;
     }
-    else if ((srcWidth <= 1024) && (srcHeight <= 768))
+    else if ((srcWidth <= 800) && (srcHeight <= 600))
+    {
+        Cammode = CAMERA_MODE_SVGA;
+    }
+    else if ((srcWidth <= 800) && (srcHeight <= 600))
+    {
+        Cammode = CAMERA_MODE_DVC;
+    }   
+    else if ((srcWidth <= 960) && (srcHeight <= 720))
     {
         Cammode = CAMERA_MODE_XGA;
     }
@@ -717,6 +731,14 @@ static T_BOOL cam_tw9912_set_to_record(T_U32 srcWidth, T_U32 srcHeight)
     if ((srcWidth <= 640) && (srcHeight <= 480))
     {
         Cammode = CAMERA_MODE_REC;
+    }
+    else if ((srcWidth <= 800) && (srcHeight <= 600))
+    {
+        Cammode = CAMERA_MODE_SVGA;
+    }
+    else if ((srcWidth <= 960) && (srcHeight <= 720))
+    {
+        Cammode = CAMERA_MODE_DVC;
     }
     else if ((srcWidth <= 1024) && (srcHeight <= 768))
     {
@@ -783,7 +805,7 @@ static T_CAMERA_FUNCTION_HANDLER tw9912_function_handler =
     cam_tw9912_set_to_record,
     cam_tw9912_get_type,
     cam_tw9912_set_sensor_param,
-    cam_tw9912_get_sensor_param
+    cam_tw9912_get_sensor_param,
 };
 
 #ifndef CONFIG_LINUX_AKSENSOR
@@ -831,6 +853,8 @@ static const char * resolution_menu[] = {
 	[1] = "1280x720",
 	[2] = "640x480",
 	[3] = "1024x768",
+	[4] = "800x600",
+	[5] = "960x720",
 };
 
 static const char * hflip_menu[] = {
@@ -1101,9 +1125,11 @@ static const struct aksensor_color_format tw9912_formats[] = {
 
 static const struct aksensor_win_size tw9912_win[] = {
 	{.name = "VGA",		.width = 640,	.height = 480},
+	{.name = "SVGA",	.width = 800,	.height = 600},
+	{.name = "DVC",		.width = 960,	.height = 720},
+	{.name = "XGA",		.width = 1024,	.height = 768},
 	{.name = "720P",	.width = 1280,	.height = 720},
 	{.name = "960P",	.width = 1280,	.height = 960},
-	{.name = "XGA",		.width = 1024,	.height = 768},
 };
 
 static struct sensor_info tw9912_sensor_info = {

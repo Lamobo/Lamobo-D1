@@ -65,6 +65,7 @@ int IniSetting_save()
 
 	iniparser_dump_ini(setting.ini, fp);
 	fclose(fp);
+	sync();
 	settingDebug("save camera ini file:%s success\n", INI_CAMERA);
 	return 1;
 }

@@ -40,8 +40,8 @@
 
 serial_t* tty;												///< Pointer to serial structure
 //char dev[]={"/dev/ttyUSB0"};
-char dev[]={"/dev/ttySAK1"}; 								///< Name of serial device
-int baud = 115200;											///< Default baudrate
+char dev[]={"/dev/ttySAK1"};							///< Name of serial device
+const int baud = 115200;									///< Default baudrate
 uint8_t rxdata[BUFF_SIZE];									///< Buffer for received data
 pid_t pid = -1;												///< Pid child recprocess
 pid_t pid_ud = -1;											///< Pid child usb disk process
@@ -55,8 +55,8 @@ bool b_flag_audio = false;									///<If audio enabled = true
 
 uint8_t g_osd = HIDE;										///<Date string  position on osd from ini file
 uint8_t t_osd = RIGHT_UP;									///<Date string  position on osd from MCU
-uint8_t g_resolution = VIDEO_MODE_DVC;						///<Resolution from ini file
-uint8_t t_resolution = VIDEO_MODE_DVC;						///<Video resolution from MCU
+uint8_t g_resolution = VIDEO_MODE_QVGA;						///<Resolution from ini file
+uint8_t t_resolution = VIDEO_MODE_VGA;						///<Video resolution from MCU
 
 
 bool g_time_osd = false;									///<Display time on osd or not from ini file
@@ -345,6 +345,10 @@ static void cmd_code_processing (uint8_t* data)
 					send_response (CMD_REC_NOSDCARD);
 				}
 			}
+			else {
+				if(b_flag_translate)  send_response(CMD_START_TRANSL);	 	 
+				else  send_response(CMD_START_RECORD);
+			}
 	
 	break;
 	
@@ -354,8 +358,8 @@ static void cmd_code_processing (uint8_t* data)
 			fprintf(stdout,"%s: stop record\n", __func__);
 			#endif
 			kill(pid, SIGTERM);
-			
 		}
+		else send_response (CMD_STOP_RECORD);
 	break;
 	
 	case CMD_GET_PHOTO:
@@ -383,6 +387,7 @@ static void cmd_code_processing (uint8_t* data)
 					}
 			}
 			send_to_socket(sock);
+			send_response (CMD_GET_PHOTO);
 		}
 		else fprintf(stdout,"No record process found!\n");
 		
@@ -422,9 +427,9 @@ static void cmd_code_processing (uint8_t* data)
 				
 			}
 			#ifdef TPOLL_DBG
-			fprintf(stdout,"---%s: Adjust time success, status \"CMD_REC_READY\" send\n", __func__);
+			fprintf(stdout,"---%s: Adjust time success, status \"CMD_CLK_ADJUST\" send\n", __func__);
 			#endif
-			send_response(CMD_REC_READY);
+			send_response(CMD_CLK_ADJUST);
 			
 		}
 		else fprintf(stdout,"packet size for adjust time incorrect.\n");
@@ -449,9 +454,9 @@ static void cmd_code_processing (uint8_t* data)
 			else b_flag_audio = false;
 			
 			#ifdef TPOLL_DBG
-			fprintf(stdout,"---%s: Adjust video resolution success.Send REC_READY\n", __func__);
+			fprintf(stdout,"---%s: Adjust video resolution success.Send CMD_RES_ADJUST\n", __func__);
 			#endif
-			send_response(CMD_REC_READY);
+			send_response(CMD_RES_ADJUST);
 		}
 		else fprintf(stdout,"packet size for adjust video resolution incorrect.\n");
 	
@@ -469,9 +474,9 @@ static void cmd_code_processing (uint8_t* data)
 				waitpid(pid_ud, NULL, 0);
 				pid_ud = -1;
 				#ifdef TPOLL_DBG
-				fprintf(stdout,"---%s: format success, status \"CMD_REC_READY\" send\n", __func__);
+				fprintf(stdout,"---%s: format success, status \"CMD_DISK_FORMAT\" send\n", __func__);
 				#endif
-				send_response(CMD_REC_READY);
+				send_response(CMD_DISK_FORMAT);
 		}
 		else if (!pid_ud) { 										//child proc: close all file desc & ignore SIGINT
 				memset (&act_chd, 0, sizeof(act_chd));
@@ -483,7 +488,6 @@ static void cmd_code_processing (uint8_t* data)
 				if (execl("/bin/busybox", "mkfs.vfat", "/dev/mmcblk0p1", NULL) < 0)
 					perror("execl failed");
 		}
-		
 	}
 	break;
 	
@@ -499,9 +503,9 @@ static void cmd_code_processing (uint8_t* data)
 				waitpid(pid_ud, NULL, 0);
 				pid_ud = -1;
 				#ifdef TPOLL_DBG
-				fprintf(stdout,"---%s: Change USB mode to HOST, status \"CMD_REC_READY\" send\n", __func__);
+				fprintf(stdout,"---%s: Change USB mode to HOST, status \"CMD_USB_HOST_MODE\" send\n", __func__);
 				#endif
-				send_response(CMD_REC_READY);
+				send_response(CMD_USB_HOST_MODE);
 			}
 			else if (!pid_ud) { 										//child proc: close all file desc & ignore SIGINT
 				memset (&act_chd, 0, sizeof(act_chd));
@@ -527,9 +531,9 @@ static void cmd_code_processing (uint8_t* data)
 				waitpid(pid_ud, NULL, 0);
 				pid_ud = -1;
 				#ifdef TPOLL_DBG
-				fprintf(stdout,"---%s: Change USB mode to DEVICE, status \"CMD_REC_READY\" send\n", __func__);
+				fprintf(stdout,"---%s: Change USB mode to DEVICE, status \"CMD_USB_DEVICE_MODE\" send\n", __func__);
 				#endif
-				send_response(CMD_REC_READY);
+				send_response(CMD_USB_DEVICE_MODE);
 			}
 			else if (!pid_ud) { 										//child proc: close all file desc & ignore SIGINT
 				memset (&act_chd, 0, sizeof(act_chd));
@@ -701,13 +705,13 @@ static void incoming_signal_processing (sig_atomic_t signal, int flag)
 	{
 	if(flag){
 		#ifdef TPOLL_DBG
-		fprintf(stdout,"---Translate started, send response to MCU\n");
+		fprintf(stdout,"---Translate started, send CMD_START_TRANSL to MCU\n");
 		#endif
 		send_response(CMD_START_TRANSL); 
 	}
 	else {
 		#ifdef TPOLL_DBG
-		fprintf(stdout,"---Record started, send response to MCU\n");
+		fprintf(stdout,"---Record started, send CMD_START_RECORD to MCU\n");
 		#endif
 		send_response(CMD_START_RECORD);
 	}
@@ -716,7 +720,7 @@ static void incoming_signal_processing (sig_atomic_t signal, int flag)
 	
 	case S_RECORDER_STOP:
 		#ifdef TPOLL_DBG
-		fprintf(stdout,"---Record stop, send to MCU\n");
+		fprintf(stdout,"---Record stop, send CMD_STOP_RECORD to MCU\n");
 		#endif
 		send_response (CMD_STOP_RECORD);
 	break;

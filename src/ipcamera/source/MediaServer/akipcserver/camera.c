@@ -2140,7 +2140,8 @@ int camera_close(void)
 				osd2_buff2 = AK_NULL;
 			}
 			osd2_buff = AK_NULL;
-			printf("close fd \n");
+							
+			printf("close cam fd \n");
 	        if (-1 == close(fd))
 	                printf("close");
 			printf("close fd exit \n");
