@@ -8,6 +8,8 @@ extern "C" {
 #include "audio_process.h"
 #include "audio_enc.h"
 
+
+
 typedef struct {
 	T_U32		nSampleRate;
 	T_U32		nBitsPerSample;
@@ -44,11 +46,11 @@ int audio_close(void);
 * 
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param source used input source for record 
 * @return T_S32
 * @retval if return 0 success, otherwise failed 
 */
-int audio_start(void);
+int audio_start(T_U8 source);
 
 /**
 * @brief stop to get pcm from ad

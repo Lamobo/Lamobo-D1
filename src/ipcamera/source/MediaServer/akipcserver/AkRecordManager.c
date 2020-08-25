@@ -13,11 +13,11 @@
 #include "Tool.h"
 #include "log.h"
 
-#define SIGN_FILE_NAME							".LMR_RecordManger_Sign"
+#define SIGN_FILE_NAME							"index"
 #define FILE_SUFFIZ								".avi"
 #define FILE_NAME_DIF							"(New)"
 #define DIR_SEPARATOR							'/'
-#define OUR_FILE_PREFIX							"REC_DV_"
+#define OUR_FILE_PREFIX							"REC_TVD_"
 #define INI_RECORDER                            "/etc/jffs2/camera.ini"
 
 static const T_U32 MAX_FILE_PATH_LEN			= 1024UL;
@@ -270,13 +270,15 @@ T_BOOL IsOurCycFile( T_pSTR pstrFileName )
 {
 	T_pSTR strPrefix = NULL;
 	T_pSTR strSuffiz = NULL;
+	/*
 	T_U32 len = 0;
-
+	
 	len = strlen( pstrFileName );
-	//名字固定长度为25不包括结束符.
+	//The fixed length of the name is 25 and does not include the terminator.
+	
 	if ( len != 17 )
 		return AK_FALSE;
-	
+	*/
 	if ( ( strPrefix = strstr( pstrFileName, OUR_FILE_PREFIX ) ) == NULL ) {
 		return AK_FALSE;
 	}
@@ -288,11 +290,12 @@ T_BOOL IsOurCycFile( T_pSTR pstrFileName )
 	if ( ( strSuffiz = strstr( pstrFileName, FILE_SUFFIZ ) ) == NULL ) {
 		return AK_FALSE;
 	}
-
+/*
+ * //does not calculate the possible suffix "(New)"
 	if ( ( strSuffiz - strPrefix ) != 13 ) {
 		return AK_FALSE;
 	}
-
+*/
 	return AK_TRUE;
 }
 
@@ -348,10 +351,10 @@ static T_S64 GetOldFilesSize( T_pSTR pstrRecPath )
 	return totalSize;
 }
 
-//删除循环录制目录中，最老的媒体文件。
-//返回: 0 没有删除任何文件
-//		   1 成功删除了最老的文件
-//		 -1 失败。
+// Delete the oldest media file in the loop recording directory.
+//Return: 0 did not delete any files
+// 1 successfully deleted the oldest file
+// -1 failed.
 static T_S32 RemoveOldestFile( T_BOOL bNeedLast )
 {
 	DIR 			*dirp = NULL;
@@ -408,7 +411,7 @@ static T_S32 RemoveOldestFile( T_BOOL bNeedLast )
 		loge( "close Directory %s Error:%s\n ", g_RecPath, strerror(errno) );
 	}
 
-	//如果需要则保留循环录制目录中的最后一个文件。
+	//If necessary, keep the last file in the loop recording directory.
 	if ( ( bNeedLast ) && ( nFileCnt < 2 ) ) {
 		return 0;
 	}
@@ -464,18 +467,21 @@ static char g_filename[1024];
 int ChangFileName( void )
 {
 	char filename[1024];
+	int ret = -1;
 	memset(filename, 0x00, 1024);
-	strncpy(filename, g_filename, strlen(g_filename)-5);
-	printf(" filename %s \n", filename);
-	rename(g_filename, filename);
-	return 0;
+	strncpy(filename, g_filename, strlen(g_filename)-9);
+	strcat(filename, FILE_SUFFIZ);
+	ret = rename(g_filename, filename);
+	printf("filename %s \n", filename);
+	sync();
+	return ret;
 }
 
 int rec_count = 0;
 
 static T_pSTR MakeFileName()
 {
-	T_CHR astrFileName[30];
+	T_CHR astrFileName[64];
 	T_pSTR strCompletePath = NULL;
 	T_pSTR strAdd = NULL;
 	T_S32 iPathLen = 0, iIndex = 0;
@@ -493,14 +499,15 @@ static T_pSTR MakeFileName()
     if(ini){
         rec_count = iniparser_getint(ini, "recoder:count", 0);
     }
-
+/*
+ *    ////////////    make filename without timestamp------- 
 	if ( g_bIsCyc ) {
 		sprintf( astrFileName,"%s%06d%s%s", OUR_FILE_PREFIX, rec_count,
-			 FILE_SUFFIZ, FILE_NAME_DIF );
+			 FILE_NAME_DIF, FILE_SUFFIZ );
 	}else {
 		sprintf( astrFileName,"%s%06d%s", "DV_", rec_count, FILE_SUFFIZ );
 	}
-
+*/
     rec_count++;
     if(rec_count > 999999)
         rec_count = 1;
@@ -516,18 +523,19 @@ static T_pSTR MakeFileName()
         iniparser_freedict(ini);
     }
 
-    /*      
+   ////////////    make filename with timestamp------- 
 	if ( g_bIsCyc ) {
-		sprintf( astrFileName,"%s%4d%02d%02d%02d%02d%02d%s%s", OUR_FILE_PREFIX,
+		sprintf( astrFileName,"%s%4d_%02d_%02d_%02d%02d%02d%s%s", OUR_FILE_PREFIX,
 			1900 + tnow->tm_year, tnow->tm_mon + 1, tnow->tm_mday, tnow->tm_hour, 
-			tnow->tm_min, tnow->tm_sec, FILE_SUFFIZ, FILE_NAME_DIF );
+			tnow->tm_min, tnow->tm_sec, FILE_NAME_DIF, FILE_SUFFIZ );
 	}else {
 		sprintf( astrFileName,"%s%02d%02d%02d%s", "DV_", tnow->tm_hour, tnow->tm_min,
 			tnow->tm_sec, FILE_SUFFIZ );
 	}
-    */
-	//加上结束位，和5个同名情况下要增加的字符."_1~1024"
-	iPathLen = strlen( g_RecPath ) + strlen( astrFileName ) + 6;
+    ///////////-------------------------------------
+	
+	//Add the ending bit, and the five characters to be added under the same name. "_1~1024"
+	iPathLen = strlen( g_RecPath ) + strlen( astrFileName ) + 9;
 	strCompletePath = (T_pSTR)malloc( iPathLen );
 	if ( NULL == strCompletePath ) {
 		loge( "MakeFileName::out of memory!\n" );
@@ -539,13 +547,16 @@ static T_pSTR MakeFileName()
 	strcpy( strCompletePath, g_RecPath );
 	strcat( strCompletePath, astrFileName );
 
-	strAdd = strrchr( strCompletePath, '.' );
+	strAdd = strrchr( strCompletePath, '(' );
 	while (IsExists(strCompletePath)) {
+		printf("This file exist! Rename..\n");
 		++iIndex;
 		bzero( strAdd, strlen( strAdd ) );
 		sprintf( strAdd, "_%d", (int)iIndex );
-		strcat( strCompletePath, FILE_SUFFIZ );
+		strcat( strAdd, FILE_NAME_DIF );
+		strcat( strAdd, FILE_SUFFIZ );
 		
+		printf("Renaming filename is %s \n", strCompletePath);
 		if ( iIndex > 1024 ) {
 			logi( "the dir is file full!\n" );
 			break;
@@ -602,7 +613,7 @@ static T_S32 InitManager( T_pSTR pstrRecPath, T_U32 nRecordDuration )
         // if cyc, enable time limit and space limit
         g_MaxDuration = nRecordDuration;
         
-        // 如果估算大小小于最小写数据长度
+        // If the estimated size is less than the minimum write data length
         if (g_EstimateFSize < MIN_DISK_SIZE_FOR_WRITE) {
             g_EstimateFSize = MIN_DISK_SIZE_FOR_WRITE;
         }
@@ -612,8 +623,8 @@ static T_S32 InitManager( T_pSTR pstrRecPath, T_U32 nRecordDuration )
 			return -1;
 		}
 
-		//有标志文件，证明当前文件夹和上次进行循环
-		//录制的文件夹是同一个。
+		//There is a flag file to prove the current folder and last cycle
+		//The recorded folder is the same。
 		if ( IsExists( strSignFile ) ) {
             isFirstTimes = AK_FALSE;
             // this directory record file is not  first times
@@ -648,8 +659,8 @@ static T_S32 InitManager( T_pSTR pstrRecPath, T_U32 nRecordDuration )
         g_MaxFileSize = iCompareTemp;
 
 //		printf("g_maxfilesize = %d \n", g_MaxFileSize);
-        //如果估算大小比空闲空间的一半还大
-        //使用的是剩余空间/2作为循环录制文件的大小。
+        //If the estimated size is larger than half of the free space
+        //The remaining space/2 is used as the size of the loop recording file.
         if (g_EstimateFSize > g_MaxFileSize) {
             g_EstimateFSize = g_MaxFileSize;
         }
@@ -699,9 +710,9 @@ static T_S32 MakeRecordPath( T_pSTR pstrRecPath, T_BOOL bIsCyc )
 	iPathLen = strlen( pstrRecPath );
 	iAddLen = 1;
 
-	//需求
-	//普通录像的录制路径为设置的路径下的yyyymmdd文件夹。
-	//循环录像的录制路径为设置的路径。
+	//demand
+	//The recording path of ordinary video is the yyyymmdd folder under the set path.
+	//The recording path of the loop recording is the set path.
 	if ( !bIsCyc ) {
 		tnow = GetCurTime();
 		if ( NULL == tnow ) {
@@ -732,7 +743,7 @@ static T_S32 MakeRecordPath( T_pSTR pstrRecPath, T_BOOL bIsCyc )
 	if ( !bIsCyc ) {
 		strcpy( g_RecPath + iPathLen, astrDate );
 
-		//创建普通录像的文件夹。
+		//Create a folder for normal recordings.
 		if ( !IsExists( g_RecPath ) ) {
 			if ( mkdir( g_RecPath, S_IRWXU | S_IRWXG | S_IRWXO ) != 0 ) {
 				loge( "MakeRecordPath::can't create dir %s, error = %s", g_RecPath, strerror(errno) );

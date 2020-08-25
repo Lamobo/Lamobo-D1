@@ -5,6 +5,7 @@
 
 #include "video_stream_lib.h"
 #include "muxer.h"
+#include "camera.h"
 #include "cgi_anyka.h"
 #include "Tool.h"
 #include "akuio.h"
@@ -35,31 +36,36 @@ static T_pSTR MakeFileName( )
 	T_pSTR	strFileName = NULL;
 	//T_pSTR	strNumer = NULL;
 	char 	name[20];
-	char 	file[20];
+	char 	file[64];
 	char 	num[5];
 	struct tm *tnow = GetCurTime();
 	//assert( handle );
 	
 	//strTime = GetCurTimeStr();
+	/*
 	memset(name, 0x00, 20);
 	sprintf( name, "/mnt/DC%4d%02d%02d/", 1900 + tnow->tm_year, tnow->tm_mon + 1, tnow->tm_mday );
 	CompleteCreateDirectory(name);
-	memset(file, 0x00, 20);
-	sprintf(file, "DC%02d%02d%02d", tnow->tm_hour, tnow->tm_min, tnow->tm_sec);
-	{
-		strFileName = (T_pSTR)malloc( strlen(file) + 30 );
-		if ( NULL == strFileName ) {
-			goto err;
-		}
-		memset(strFileName, 0x00, strlen(file) + 30);
-		strcat(strFileName, name);
-		strcat( strFileName, file );
-		
-		strcat( strFileName, ".jpeg" );
-
-		//free( strTime );
-		//strTime = NULL;
+	* */
+	memset(file, 0x00, 64);
+	sprintf(file,"/mnt/DC_%4d_%02d_%02d_%02d%02d%02d",
+			1900 + tnow->tm_year, tnow->tm_mon + 1, tnow->tm_mday, tnow->tm_hour, 
+			tnow->tm_min, tnow->tm_sec);
+	//sprintf(file, "/mnt/DC%02d%02d%02d", tnow->tm_hour, tnow->tm_min, tnow->tm_sec);
+	
+	strFileName = (T_pSTR)malloc( strlen(file) + 30 );
+	if ( NULL == strFileName ) {
+		return strFileName;
 	}
+	memset(strFileName, 0x00, strlen(file) + 30);
+	//strcat(strFileName, name);
+	strcat( strFileName, file );
+	
+	strcat( strFileName, ".jpeg" );
+
+	//free( strTime );
+	//strTime = NULL;
+	
 	while ( AK_TRUE ) 
 	{
 		if ( IsExists( strFileName ) ) 
@@ -67,7 +73,11 @@ static T_pSTR MakeFileName( )
 			++nFileIndex;
 			if ( nFileIndex > 99 ) {
 				printf( "MakeFileName::too many file have same name!\n" );
-				goto err;
+					if ( strFileName ) {
+						free( strFileName );
+						strFileName = NULL;
+					}
+					return strFileName;
 			}
 			memset(strFileName, 0x00, strlen(file) + 30);
 			sprintf(num, "_%02d", ( int )nFileIndex);
@@ -81,18 +91,6 @@ static T_pSTR MakeFileName( )
 		}
 
 		break;
-	}
-	
-	return strFileName;
-err:
-	/*
-	if ( strTime ) {
-		free( strTime );
-	}
-	*/
-	if ( strFileName ) {
-		free( strFileName );
-		strFileName = NULL;
 	}
 	
 	return strFileName;
@@ -138,10 +136,9 @@ static T_pVOID open_encode(int width, int height, int real_width, int real_heigh
 	temp = akuio_vaddr2paddr(outbuf) & 7;
 	//编码buffer 起始地址必须8字节对齐
 	encbuf = ((T_U8 *)outbuf) + ((8-temp)&7);
-
 	
 	open_input.encFlag = VIDEO_DRV_MJPEG;
-	open_input.encMJPEGPar.frameType = ENC_YUV420_PLANAR;//JPEGENC_YUV420_PLANAR;
+	open_input.encMJPEGPar.frameType = ENC_YUV420_PLANAR;	//JPEGENC_YUV420_PLANAR;
 	open_input.encMJPEGPar.format = ENC_THUMB_JPEG;
 	open_input.encMJPEGPar.thumbWidth = 0;
 	open_input.encMJPEGPar.thumbHeight = 0;
@@ -177,6 +174,7 @@ static void *photograph_thread(void *param)
 			continue;
 		
 		Condition_Unlock( g_conMangerPh );
+		/*
 		if(sd_mount == 0)
 		{
 			if (access(SDDEV, R_OK) < 0)
@@ -191,7 +189,7 @@ static void *photograph_thread(void *param)
 			}
 			//mount_falg =1;
 		}
-
+		*/
 		
 		DiskFreeSize( "/mnt", &bavail, &bsize);
 		DiskSize = (T_S64)(T_U32)(bavail) * (T_S64)(T_U32)(bsize);
@@ -210,7 +208,7 @@ static void *photograph_thread(void *param)
 			printf("filename is NULL \n");
 			goto err;
 		}
-
+		
 		long fid = open(filename, O_RDWR | O_CREAT | O_TRUNC);
 		if(fid <= 0)
 		{
@@ -255,14 +253,14 @@ void Init_photograph( void )
 	IniSetting_destroy();
 	int width, height, real_width, real_height;
 	
-	if( 2 == index_file )
+	if( index_file == 2 )	//stream #2
 	{
 		width = parse.width2;
 		height = parse.height2;
 		real_width = parse.real_width2;
 		real_height = parse.real_height2;
 	}
-	else 
+	else 					//stream #1
 	{
 		width = parse.width;
 		real_width = parse.width;
@@ -282,7 +280,12 @@ void Init_photograph( void )
 	}
 
 	pthread_create( &g_phid, NULL, photograph_thread, NULL);
-	
+	/*
+	void* *pbuf;
+	long size;
+	unsigned long ts;
+	camera_getframe((void**)&pbuf, &size, &ts); //get empty frame from camera 
+	*/
 }
 
 
@@ -311,7 +314,6 @@ int photograph( void *pbuf, int size)
 	}
 
 	VideoStream_Enc_Reset();
-	
 	return 0;
 }
 

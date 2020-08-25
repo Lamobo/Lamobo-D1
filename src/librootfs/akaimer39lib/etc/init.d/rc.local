@@ -1,10 +1,10 @@
 #!/bin/sh
 
-mount /dev/mmcblk0 /mnt
-mount /mnt/local /usr/local
+#mount /dev/mmcblk0p1 /mnt
+#mount /mnt/local /usr/local
 
 echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-0/new_device
-hwclock -s
+#hwclock -s
 ifconfig lo up
 
 /usr/bin/tcpsvd 0 21 ftpd -w /mnt &
@@ -16,9 +16,13 @@ if [ ! -f /etc/dropbear/dropbear_rsa_host_key ]; then
     dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key
 fi
 dropbear -B
-
-ntpd -q -p time.windows.com
-
+insmod /root/otg-hs.ko
+insmod /root/8188eu.ko
+#ntpd -q -p time.windows.com #what?!
+date 0101000017 --utc
 #/etc/init.d/wifi
-/etc/init.d/monitor.sh &
-/etc/jffs2/service.sh &
+#/etc/init.d/monitor.sh &
+init -q
+/etc/jffs2/service.sh 
+/usr/bin/tpolld & # start polling
+

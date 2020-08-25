@@ -25,18 +25,17 @@ stop_service()
 {
 	echo "stop boa service......"
 	killall boa
-	echo "stop key service......"
-	killall key
+	#echo "stop key service......"
+	#killall key
 }
 
 start_service ()
 {
-	echo "start key service......"
-	key &
+	#echo "start key service......"
+	#key &
 	echo "start boa service......"
-	boa
-	echo "start net service......"
-	/etc/init.d/net_demo.sh &
+	boa &
+	
 }
 
 restart_service ()

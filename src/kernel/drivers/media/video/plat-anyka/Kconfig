@@ -3,7 +3,11 @@ config SENSOR_GC0308
 	depends on LINUX_AKSENSOR
 	help
 	  This is a gc0308 sensor driver
-	  
+config SENSOR_TW9912
+	tristate "tw9912 sensor support"
+	depends on LINUX_AKSENSOR
+	help
+	  This is a tw9912 sensor driver	  
 config SENSOR_OV2643
 	tristate "ov2643 sensor support"
 	depends on LINUX_AKSENSOR

@@ -90,7 +90,7 @@ void mount_sd(void)
 	}
     printf("*** mount the sd to /mnt ***\n");
     
-#if 1
+#if 0
     system("mount /mnt/local /usr/local");
 #endif
 	

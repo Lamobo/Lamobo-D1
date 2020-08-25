@@ -10,6 +10,7 @@
 #include "audio.h"
 
 
+
 #define PER_AUDIO_DURATION		32		// 30ms
 
 #define DEFAULT_ALSA_HARDWARE	"default"
@@ -105,7 +106,7 @@ static T_pVOID thread_readAD( T_pVOID user )
 			//voerrunflag = 1;
 			continue;
 		}
-		#if 0
+#if 0
 		if( 1 == voerrunflag )
 		{
 			voerrunflag = 0;
@@ -116,7 +117,8 @@ static T_pVOID thread_readAD( T_pVOID user )
 			bytenum += time*bytems;
 			printf("add overrun time %d num %d\n", time, time*bytems);
 		}
-		#endif
+#endif
+
 #ifdef AUDIO_TEST_FILE
 		write( fid, pdata, gaudio.nOnceBufSize );
 #endif
@@ -178,11 +180,11 @@ int audio_close(void)
 * 
 * @author dengzhou
 * @date 2013-04-07
-* @param[in] 
+* @param source used input source for record 
 * @return T_S32
 * @retval if return 0 success, otherwise failed 
 */
-int audio_start(void)
+int audio_start(T_U8 source)
 {
 	T_S32	ret = 0;
 	T_U32 nBytesPerSample;
@@ -194,7 +196,7 @@ int audio_start(void)
 	}
 
 	
-	ret = stAlsaModule.SetMicIn(&stAlsaHandle);
+	ret = stAlsaModule.SetMicIn(&stAlsaHandle, source); //set input for record
 	if ( ret < 0 ) {
 		loge( "StartRec::can't set the audio in dev!\n" );
 		return -1;

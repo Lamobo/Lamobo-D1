@@ -56,12 +56,11 @@ int main(int argc, char *argv[]){
 
 
     struct gpio_info gpio;
-
+	
     //int gpios[]={1, 2, 4, 5, 6, 7, 27, 28, 29, 30, 37, 38, 56, 53};
-    int gpios[]={53};
-    int gpiosize = sizeof(gpios)/sizeof(int);
-
-    int i = 0;
+	//int gpios[]={53};
+    //int gpiosize = sizeof(gpios)/sizeof(int);
+	// int i = 0;
 
     memset(&gpio,0, sizeof(gpio));
     gpio.pulldown = -1;
@@ -69,27 +68,23 @@ int main(int argc, char *argv[]){
     gpio.dir = AK_GPIO_DIR_OUTPUT;
     gpio.int_pol = AK_GPIO_INT_DISABLE;
 
-
     int cnt = 0;
-    while(cnt++ < 3){
-        for(i = 0; i < gpiosize; i++){
-            gpio.pin = gpios[i];
-            gpio.value = AK_GPIO_OUT_LOW;
-            ret = ioctl(fd, SET_GPIO_FUNC, &gpio);
-            if(ret >= 0)
-                printf("gpio %d SET_GPIO_LEVEL %d returns %d\n",gpio.pin, gpio.value, ret);
-        }
-        sleep(2);
-        for(i = 0; i < gpiosize; i++){
-            gpio.pin = gpios[i];
-            gpio.value = AK_GPIO_OUT_HIGH;
-            ret = ioctl(fd, SET_GPIO_FUNC, &gpio);
-            if(ret >= 0)
-                printf("gpio %d SET_GPIO_LEVEL %d returns %d\n",gpio.pin, gpio.value, ret);
-        }
-        sleep(1);
-
-    }
+   
+     while(cnt++ < 3){
+		gpio.pin = 55;
+        gpio.value = AK_GPIO_OUT_LOW;
+        ret = ioctl(fd, SET_GPIO_FUNC, &gpio);
+        if(ret >= 0)
+			printf("gpio %d SET_GPIO_LEVEL %d returns %d\n",gpio.pin, gpio.value, ret); 
+		 
+		sleep(2);	
+		gpio.value = AK_GPIO_OUT_HIGH;
+        ret = ioctl(fd, SET_GPIO_FUNC, &gpio);
+        if(ret >= 0)
+			printf("gpio %d SET_GPIO_LEVEL %d returns %d\n",gpio.pin, gpio.value, ret); 
+		 sleep(1);
+	 }
+    
 
     close(fd);
     return 0;

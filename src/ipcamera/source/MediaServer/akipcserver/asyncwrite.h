@@ -14,7 +14,7 @@ typedef struct AkAsyncFileWriter
 	//declare the destructor fucntion is point
 	DECLARE_DESTRUCTOR_POINT( AkAsyncFileWriter );
 
-	/*
+	/**
 	 * @brief		create the file writer
 	 * @param	[in] pthis   			the pointer point to the AkAsyncFileWriter.
 	 * @param	[in] fd,				the file is descriptor
@@ -45,7 +45,7 @@ typedef struct AkAsyncFileWriter
 	* @param[in] pthis   			the pointer point to the AkAsyncFileWriter.
 	* @param[in] fd   	  			the file is descriptor
 	* @return T_S32
-	* @@retval	-1 for error,0 for success
+	* @retval	-1 for error,0 for success
 	*/
 	T_S32 (*ResetFd)( T_pVOID pthis, T_S32 fd );
 

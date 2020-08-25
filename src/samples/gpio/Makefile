@@ -1,12 +1,17 @@
 CC=arm-none-linux-gnueabi-gcc
 CFLAGS = -Wall -g
+ARCH=arm
 
-all: gpio-led
+all: gpio
 
-gpio-led: gpio-led.c
-	$(CC) $(CFLAGS) -I../../kernel/include -o $@ $^
+gpio: gpio.c
+	$(CC) $(CFLAGS) -I../../kernel/include/ \
+					-o $@ $^
+					
+					
+					
 
 .PHONY: clean
 
 clean:
-	-rm -f gpio-led $(OBJS)
+	-rm -f gpio $(OBJS)

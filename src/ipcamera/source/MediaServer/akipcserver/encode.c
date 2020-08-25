@@ -175,8 +175,8 @@ int encode_open(T_ENC_INPUT *pencInput)
 		open_input.encH264Par.fixedIntraQp = 30;	//为所有的intra帧设置QP
 		open_input.encH264Par.bitPerSecond = parse.kbps1;	//目标bps
 		open_input.encH264Par.streamType = 0;		//有startcode和没startcode两种
-		open_input.encH264Par.lumWidthSrc = 1280;
-		open_input.encH264Par.lumHeightSrc = 720;
+		open_input.encH264Par.lumWidthSrc = pencInput->width; //1280
+		open_input.encH264Par.lumHeightSrc = pencInput->height; //720
 		open_input.encH264Par.horOffsetSrc = 0;
 		open_input.encH264Par.verOffsetSrc = 0;
 

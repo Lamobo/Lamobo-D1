@@ -29,6 +29,7 @@ case "$1" in
 wireless)
 	#wireless mode
 	killall -9 wirenet_demo.sh
+	echo camera.sh stop from select_wire_mode.sh
 	#/etc/init.d/camera.sh stop
 	/etc/init.d/wirenet.sh stop
 	/etc/init.d/wifi_stop.sh all

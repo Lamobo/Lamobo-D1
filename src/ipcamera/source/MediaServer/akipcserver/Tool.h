@@ -140,6 +140,18 @@ T_U32 ColorConvert_RgbToYuv(T_U32 color888);
 T_S64 GetDiskSize( T_pSTR pstrRecPath );
 
 T_S32 DiskFreeSize( T_pSTR pstrRecPath, T_S32 *f_bavail, T_S32 *f_bsize );
+
+/**
+* @brief   send signal to parent proc
+*
+* @author amartol
+* @date 2018-01-30
+* @param signo - signal to send
+* @param sig_val - value signal 
+* @retval 0 if success, otherwise -1
+**/ 
+T_S32 SendSig_ToParent ( T_S32 signo, T_S32 sig_val );
+
 #ifdef __cplusplus
 }
 #endif

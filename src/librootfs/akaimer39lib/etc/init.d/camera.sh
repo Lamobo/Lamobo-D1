@@ -26,30 +26,42 @@ stop()
 {
 	echo "stop camera service......"
 	killall akipcserver
+	#killall -2 record_video
 	pid=`pgrep akipcserver`
 	while [ "$pid" != "" ]
 	do         
-	    sleep 0.5        
+		sleep 0.5        
 		pid=`pgrep akipcserver`
-   done
+	done	
+	
+	
+	#pid=`pgrep record_video`
+	#while [ "$pid" != "" ]
+	#do         
+	#    sleep 0.5        
+	#	pid=`pgrep record_video`
+  # done
 }
 
 start ()
 {
 	echo "start camera service......"
-	network=`pgrep hostapd`
-	if [ "$network" = "" ]
-	then
-		echo "LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300"
+#	/usr/bin/record_video -p /mnt/ -w 960 -h 720 -t 86400 &
+	akipcserver &
+	exit 0
+	#network=`pgrep hostapd`
+	#if [ "$network" = "" ]
+	#then
+#		echo "LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300"
 #		LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300 &
-		akipcserver &
-		exit 0
-	else
-		echo "LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300 -S"	
+	#	akipcserver &
+	#	exit 0
+	#else
+#		echo "LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300 -S"	
 #		LinuxMediaRecorder -a -r /sd_test -p udp -i 172.19.10.125 -d 5220 -C 300 -S &
-		akipcserver &
-		exit 1
-	fi
+	#	akipcserver &
+#		exit 1
+	#fi
 }
 
 restart ()

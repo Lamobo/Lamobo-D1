@@ -16,7 +16,7 @@ T_VOID log_write(T_S32 level, T_pCSTR fmt, ...);
 #define LOG_LEVEL_WARN    2
 #define LOG_LEVEL_ERROR   3
 
-#define LOG_DEFAULT_LEVEL   LOG_LEVEL_INFO
+#define LOG_DEFAULT_LEVEL   LOG_LEVEL_DEBUG
 
 #define  logd( fmt... )   log_write( LOG_LEVEL_DEBUG, fmt)
 #define  logi( fmt... )   log_write( LOG_LEVEL_INFO, fmt)

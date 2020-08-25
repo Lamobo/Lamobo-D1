@@ -600,8 +600,8 @@ void g_ak39_setgroup_attribute(T_GPIO_SHAREPIN_CFG mod_name)
                 g_ak39_gpio_pullup(pin, AK_FALSE);   
             }
             g_ak39_gpio_pullup(AK_GPIO_57, AK_FALSE);
-			g_ak39_gpio_pulldown(AK_GPIO_55, AK_FALSE);
-			g_ak39_gpio_pullup(AK_GPIO_55, AK_FALSE);
+			//g_ak39_gpio_pulldown(AK_GPIO_55, AK_FALSE);
+			//g_ak39_gpio_pullup(AK_GPIO_55, AK_FALSE);
             break;
             
         case ePIN_AS_UART1: 

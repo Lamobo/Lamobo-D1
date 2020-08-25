@@ -23,14 +23,17 @@
 #include "SDcard.h"
 #include "Tool.h"
 
-#define FILE_NAME_LEN 12
+#define FILE_NAME_LEN 1024
 #define MAX_WIDTH	1280
 #define MAX_HEIGHT	720
+
 int g_exit = 0;
 int g_width = 0;
 int g_height = 0;
 
-const char* avi_fname_1 = "test.avi";
+T_pSTR avi_fname_1;
+
+//const char* avi_fname_1 = "test.avi";
 const char* avi_fname_2 = "test_2.avi";
 
 const char* mp4_fname_1 = "test.mp4";
@@ -252,7 +255,7 @@ static void video_proc(demo_setting* ext_gSettings)
 			encode_frame(NULL, NULL, NULL, NULL, &frameLenB, pbuf+offset, &pencbuf2, &iframe2, ext_gSettings->vbr);
 #endif		
 			// Write 2nd Channel Data
-			mux_addVideo(eCHAN_DUAL, pencbuf2, frameLenB, timestamp, iframe2);
+			mux_addVideo(eCHAN_DUAL, pencbuf2, frameLenB, timestamp, iframe2); //-use osd
 		}
 		// Single Channle Mode
 		else {
@@ -265,7 +268,7 @@ static void video_proc(demo_setting* ext_gSettings)
 			printf("mux_addVideo err \n");
 			break;
 		}
-		
+	
 		if (!ext_gSettings->bhasAudio)
 		{
 			ts = timestamp;
@@ -273,12 +276,12 @@ static void video_proc(demo_setting* ext_gSettings)
 #if 1
 		timestamp = ++num * 1000 / DV_FPS;
 #else
-		timestamp = mux_getToltalTime(eCHAN_UNI) + 33;
+		timestamp = mux_getToltalTime(eCHAN_UNI	) + 33;
 #endif
 		
 	}while(t1 <= times && !g_exit);
 	g_exit = 1;
-	printf("video thread eixt \n");
+	printf("video thread exit \n");
 	printf("insert frame: %lu/%lu\n", insert_num, num);
 }
 
@@ -439,15 +442,19 @@ int main( int argc, char **argv )
 	//mux_open
 	T_MUX_INPUT mux_input1;
 	T_MUX_INPUT mux_input2;
-	char filename[FILE_NAME_LEN];
 	memset(&mux_input1, 0, sizeof(T_MUX_INPUT));
 	memset(&mux_input2, 0, sizeof(T_MUX_INPUT));	
+	
+	char filename[FILE_NAME_LEN];
 	memset(filename, 0, FILE_NAME_LEN);
 	
 	mux_initPara(&mux_input1, ext_gSettings, 0);
 	
 	if( ext_gSettings->filetype == 0)
+	{
+		avi_fname_1 = MakeFileName();			//	Get avi filename___________
 		memcpy(filename, avi_fname_1, strlen(avi_fname_1));
+	}
 	else
 		memcpy(filename, mp4_fname_1, strlen(mp4_fname_1));
 	
@@ -496,7 +503,7 @@ int main( int argc, char **argv )
 	}
 	
 	camera_start();	
-	
+	system("/etc/init.d/wifi_led.sh wps_led on");
 	//handle video encode and mux
 	video_proc(ext_gSettings);
 	
@@ -510,6 +517,7 @@ int main( int argc, char **argv )
 	camera_close();
 	encode_close(eCHAN_UNI);
 	mux_close(eCHAN_UNI);
+	
 	//close second channel
 	if (ext_gSettings->mode == 2)
 	{
@@ -520,7 +528,7 @@ int main( int argc, char **argv )
 	encode_destroy();
 	akuio_pmem_fini();
 	CloseListenSD();
-
+	system("/etc/init.d/wifi_led.sh wps_led off");
 	printf("Recorder Process Exit\n");
 
 	return 0;	

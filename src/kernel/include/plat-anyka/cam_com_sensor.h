@@ -54,6 +54,7 @@ typedef enum {
     CAMERA_MODE_UXGA,        // 1600 X 1200
     CAMERA_MODE_SXGA,       // 1280 X 1024
     CAMERA_MODE_XGA,        // 1024 X 768
+    CAMERA_MODE_DVC,        // 960 X 720
     CAMERA_MODE_SVGA,        // 800  X 600
     CAMERA_MODE_VGA,        // 640  X 480 
     CAMERA_MODE_QSVGA,      // 400  X 300

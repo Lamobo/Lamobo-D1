@@ -31,7 +31,7 @@ usage()
 
 start_wifi_service()
 {
-	/etc/init.d/wifi_led.sh wps_led blink 250 250
+#	/etc/init.d/wifi_led.sh wps_led blink 250 250
 	/etc/init.d/change_wifi_mode.sh station
 	insmod /root/8188eu.ko
 	wpa_supplicant -B -iwlan0 -Dwext -c /etc/jffs2/wpa_supplicant.conf
@@ -72,7 +72,8 @@ finish_station_connect()
 
 connet_wpa()
 {
-	/etc/init.d/camera.sh stop
+	echo "camera.sh stop from wifi_connect.sh (wpa)"
+#	/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	start_wifi_service
 	NET_ID=""
@@ -95,7 +96,8 @@ connet_wpa()
 
 connet_wep()
 {
-	/etc/init.d/camera.sh stop
+	echo "camera.sh stop from wifi_connect.sh (wep)"
+	#/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	start_wifi_service
 	NET_ID=""
@@ -118,7 +120,8 @@ connet_wep()
 
 connet_open()
 {
-	/etc/init.d/camera.sh stop
+	echo "camera.sh stop from wifi_connect.sh (connet_open)"
+	#/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	start_wifi_service
 	NET_ID=""
@@ -136,7 +139,8 @@ connet_open()
 
 connect_adhoc()
 {
-	/etc/init.d/camera.sh stop
+	echo "camera.sh stop from wifi_connect.sh (connect_adhoc)"
+	#/etc/init.d/camera.sh stop
 	/etc/init.d/wifi_stop.sh all
 	start_wifi_service
 	NET_ID=""

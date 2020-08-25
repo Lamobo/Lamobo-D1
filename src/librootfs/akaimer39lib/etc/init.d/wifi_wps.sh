@@ -18,10 +18,11 @@ mode=
 
 station_wps()
 {
-	/etc/init.d/wifi_led.sh wps_led blink 250 250
+#	/etc/init.d/wifi_led.sh wps_led blink 250 250
 	killall -9 finish_station.sh
 	wpa_cli -iwlan0 disconnect
-	/etc/init.d/camera.sh stop
+	echo "Camera stop by wifi_wps.sh (station_wps)"
+#	/etc/init.d/camera.sh stop
 	echo "Please press AP's WPS key in 2 minute!"
 	wpa_cli -iwlan0 wps_pbc any
 	/etc/init.d/finish_station.sh &

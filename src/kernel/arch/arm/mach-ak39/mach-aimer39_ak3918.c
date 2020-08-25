@@ -10,7 +10,7 @@
 #include <linux/i2c.h>
 #include <linux/i2c-gpio.h>
 
-#include <plat-anyka/wifi.h>
+//#include <plat-anyka/wifi.h>
 #include <plat-anyka/otg-hshcd.h>
 #include <plat-anyka/ak_camera.h>
 #include <plat-anyka/aksensor.h>
@@ -255,8 +255,8 @@ struct ak_crypto_plat_data akcrypto_pdata = {
 	.encrypt_mode = CRYPTO_MULTI_GROUP_MODE,
 };
 
-
-/* akwifi platform data */
+/*
+// akwifi platform data 
 struct akwifi_platform_data akwifi_pdata = {
 	.gpio_init = ak_gpio_set,
 	.gpio_on = {
@@ -286,7 +286,7 @@ struct platform_device anyka_wifi_device = {
 		.platform_data = &akwifi_pdata,
 	},
 };
-
+*/
 
 /**
  * @brief: usb bus device  platform data
@@ -338,7 +338,7 @@ static struct ak_mac_data ak39_mac_pdata = {
 		.int_pol	= -1,
 	},
 	.phy_rst_gpio = {
-		.pin		= AK_GPIO_53,
+		.pin		= -1,
 		.pulldown	= -1,
 		.pullup		= AK_PULLUP_DISABLE,
 		.value		= AK_GPIO_OUT_LOW,
@@ -476,6 +476,18 @@ static struct ak_led_data leds[] = {
 		.int_pol	= -1,
 		}
 	},
+	{
+	.name		= "red_led",
+	.def_trigger	= "none",
+	.gpio		= {
+		.pin		= AK_GPIO_53,
+		.pulldown	= -1,
+		.pullup 	= AK_PULLUP_DISABLE,
+		.value		= AK_GPIO_OUT_HIGH,
+		.dir		= AK_GPIO_DIR_OUTPUT,
+		.int_pol	= -1,
+		}
+	},
 };
 
 static struct ak_led_pdata led_pdata = {
@@ -545,19 +557,35 @@ static struct gpio_keys_button gpio_keys_button[] = {
 		.dir			= AK_GPIO_DIR_INPUT,
 		.int_pol		= AK_GPIO_INT_LOWLEVEL,
 	},
+	/*
 	{
 		.code			= KEY_1,
 		.type			= EV_KEY,
 		.gpio			= AK_GPIO_62,
 		.active_low		= 1,
 		.wakeup			= 0,
-		.debounce_interval	= 30, /* ms */
+		.debounce_interval	= 30, // ms 
 		.desc			= "wifi",
 		.pullup			= AK_PULLUP_ENABLE,
 		.pulldown		= -1,
 		.dir			= AK_GPIO_DIR_INPUT,
 		.int_pol		= AK_GPIO_INT_LOWLEVEL,
+	}, 
+	* */
+	{
+		.code			= KEY_DIRECTION,
+		.type			= EV_KEY,
+		.gpio			= AK_GPIO_55,
+		.active_low		= 0,
+		.wakeup			= 0,
+		.debounce_interval	= 30, /* ms */
+		.desc			= "usb_direction",
+		.pullup			= -1,
+		.pulldown		= AK_PULLDOWN_ENABLE,
+		.dir			= AK_GPIO_DIR_INPUT,
+		.int_pol		= AK_GPIO_INT_HIGHLEVEL,
 	},
+	
 };
 
 static struct akgpio_keys_platform_data gpio_keys_platform_data = {
@@ -577,25 +605,25 @@ static struct akgpio_keys_platform_data gpio_keys_platform_data = {
 	&akfha_char_device,
 	&ak39_uart0_device,
 	&ak39_uart1_device,
-	&ak39_motor0_device,
-	&ak39_motor1_device,
+	//&ak39_motor0_device,
+	//&ak39_motor1_device,
 	&ak39_spi1_device,
 	&ak39_mmc_device,
 	&ak39_i2c_device,
+	&ak39_rtc_device,
 	&ak39_custom_gpio,
 	&ak39_usb_udc_device,
 	&ak39_usb_otg_hcd_device,
-	&anyka_wifi_device,
+	//&anyka_wifi_device,
 	&soc_camera_interface,
 	&ak39_camera_interface,	
 	&ak39_ion_device,
 	&ak39_pcm_device,
 	&ak39_codec_device,
 	&ak39_mmx_device,
-	&ak39_mac_device, 
+	//&ak39_mac_device, 
 	&ak39_led_pdev,
 	&ak39_gpio_keys_device,
-	&ak39_rtc_device,
 	&ak39_crypto_device,
 };
 
@@ -656,7 +684,7 @@ static void __init ak3918_init_machine(void)
 }
 
 
-MACHINE_START(AK39XX, "Aimer39_AK3918_MB_V1.0.0")
+MACHINE_START(AK39XX, "AK3918_DIPOL_V0.0.2")
 /* Maintainer: */
 	.atag_offset = 0x100,
 	.fixup = NULL,

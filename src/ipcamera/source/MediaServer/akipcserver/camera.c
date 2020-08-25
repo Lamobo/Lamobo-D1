@@ -269,7 +269,7 @@ int Set_Zoom(int z)
 		stepheight = 60;
 	}
 	#endif
-	#if 0
+	#if 1
 	else if(parse.width == 640 && channel == 1 )
 	{
 		width = 640;
@@ -382,7 +382,7 @@ static int Zoom(int x, int y, int width, int heigth, int outw, int outh, int cha
 	CLEAR(parm);
 	parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	
-	struct isp_zoom_info *zoom = (struct isp_zoom_info *) parm.parm.raw_data;
+	struct isp_zoom_info *zoom = (void *) parm.parm.raw_data;
 	zoom->type = ISP_PARM_ZOOM;
 	zoom->channel = channel;
 	zoom->cut_xpos = x;
@@ -671,7 +671,7 @@ static int create_osd_picture2(void *pcdev, int size)
     time(&ta);
     static int sec=-1, min=-1, hour=-1;
     struct tm * tt = localtime( &ta );
-	if(5 != g_time )
+	if( g_time != 5)
 	{
 		draw(2, 10, g_size2, timefont2, osd2_buff);
 		draw(5, 10, g_size2, timefont2, osd2_buff);
@@ -782,7 +782,7 @@ static int create_osd_picture(void *pcdev, int size)
     time(&ta);
     static int sec=-1, min=-1, hour=-1;
     struct tm * tt = localtime( &ta );
-	if(5 != g_time )
+	if( g_time != 5 ) 
 	{
 		draw(2, 10, g_size, timefont, osd_buff);
 		draw(5, 10, g_size, timefont, osd_buff);
@@ -1307,6 +1307,7 @@ int SetOsd1( int size )
 
 	int width = size*10;
 	int height = size*2;
+	
 	#if 0
 	switch(size)
 	{
@@ -1318,7 +1319,7 @@ int SetOsd1( int size )
 			width = 256+fontnum*size;
 			height = 32;
 			break;
-		case 16:
+		case 16: 					//default
 			width = 128+fontnum*size;
 			height = 16;
 			break;
@@ -1326,39 +1327,39 @@ int SetOsd1( int size )
 	#endif
 	switch(g_time_osd)
 	{
-		case 0:
+		case 0:	//left_up
 		{
 			start_x = 26;
-			start_y = 26;
+			start_y = height+size;
 			end_x = width+26;
-			end_y = height+26;
+			end_y = 2*height+size;
 			break;
 		}
-		case 1:
+		case 1: //right_up
 		{
 			start_x = parse.width-width;
-			start_y = 1;
+			start_y = height+size;//1;
 			end_x = parse.width;
-			end_y = height;
+			end_y = 2*height+size;
 			break;
 		}
-		case 2:
+		case 2: //left_down
 		{
 			start_x = 0;
-			start_y = parse.height - height;
+			start_y = parse.height - 2*height-size;
 			end_x = width;
-			end_y = parse.height;
+			end_y = parse.height - height-size;
 			break;
 		}
-		case 3:
+		case 3: //right_down
 		{
 			start_x = parse.width-width;
-			start_y = parse.height - height;
+			start_y = parse.height - 2*height-size;
 			end_x = parse.width;
-			end_y = parse.height;
+			end_y = parse.height - height-size;
 			break;
 		}
-		case 4:
+		case 4: 
 		{
 			return 0;
 		}
@@ -1774,11 +1775,13 @@ int camera_open(unsigned long width, unsigned long height)
     if (-1 == stat(dev_name, &st)) {
         fprintf(stderr, "Cannot identify '%s': %d, %s\n",
                  dev_name, errno, strerror(errno));
+                 SendSig_ToParent (SIGUSR1, 2); //camerr
         exit(EXIT_FAILURE);
     }
 
     if (!S_ISCHR(st.st_mode)) {
         fprintf(stderr, "%s is no device\n", dev_name);
+        SendSig_ToParent (SIGUSR1, 2); //camerr
         exit(EXIT_FAILURE);
     }
 
@@ -1786,6 +1789,7 @@ int camera_open(unsigned long width, unsigned long height)
     if (-1 == fd) {
         fprintf(stderr, "Cannot open '%s': %d, %s\n",
                  dev_name, errno, strerror(errno));
+        SendSig_ToParent (SIGUSR1, 2); //camerr
         exit(EXIT_FAILURE);
     }
 
@@ -1800,6 +1804,7 @@ int camera_open(unsigned long width, unsigned long height)
 		if (EINVAL == errno) {
 			fprintf(stderr, "%s is no V4L2 device\n",
 					 dev_name);
+			SendSig_ToParent (SIGUSR1, 2); //camerr
 			exit(EXIT_FAILURE);
 		} else {
 			errno_exit("VIDIOC_QUERYCAP");
@@ -2135,7 +2140,8 @@ int camera_close(void)
 				osd2_buff2 = AK_NULL;
 			}
 			osd2_buff = AK_NULL;
-			printf("close fd \n");
+							
+			printf("close cam fd \n");
 	        if (-1 == close(fd))
 	                printf("close");
 			printf("close fd exit \n");

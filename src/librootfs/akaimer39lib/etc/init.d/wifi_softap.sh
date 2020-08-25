@@ -21,8 +21,8 @@ set_ssid_and_password()
 	ssid=`awk 'BEGIN {FS="="}/\[softap\]/{a=1} a==1&&$1~/s_ssid/{gsub(/\"/,"",$2);gsub(/\;.*/, "", $2);gsub(/^[[:blank:]]*/,"",$2);print $2}' $inifile`
 	password=`awk 'BEGIN {FS="="}/\[softap\]/{a=1} a==1&&$1~/s_password/{gsub(/\"/,"",$2);gsub(/\;.*/, "", $2);gsub(/^[[:blank:]]*/,"",$2);print $2}' $inifile`
 
-    suffix=`ifconfig wlan0  |grep HWaddr | awk  '{print $5}' |awk -F ":" '{print $4$5$6}'`
-    ssid=${ssid}_${suffix}
+ #   suffix=`ifconfig wlan0  |grep HWaddr | awk  '{print $5}' |awk -F ":" '{print $4$5$6}'`
+  #  ssid=${ssid}_${suffix}
 
 	/etc/init.d/device_save.sh all "$ssid" $password
 	echo "ssid=$ssid password=$password"
@@ -31,24 +31,24 @@ set_ssid_and_password()
 
 do_start () {
 	echo "start wifi soft ap......"
-	insmod /root/8188eu.ko
+#	insmod /root/8188eu.ko       #module is loaded on startup
 	set_ssid_and_password
-	hostapd /etc/jffs2/hostapd.conf -B
+	hostapd /etc/jffs2/hostapd.conf -B  # Detach from the controlling terminal and run as a daemon process in	the background.
 	test -f /var/run/udhcpd.pid && rm -f /var/run/udhcpd.pid
 	test -f /var/run/dhcpd.pid && rm -f /var/run/dhcpd.pid
-	ifconfig wlan0 192.168.0.1 #for busybox
-	route add default gw 192.168.0.1 #
-	udhcpd /etc/udhcpd.conf #for busybox
-	if [  -d "/sys/class/net/eth0" ]
-    then
-	      ifconfig eth0 down
-	      ifconfig eth0 up
-	 fi
-	/etc/init.d/wifi_led.sh wps_led on
+	ifconfig wlan0 192.168.0.110     #for busybox
+	route add default gw 192.168.0.110 #
+	udhcpd /etc/udhcpd.conf             #for busybox
+#	if [  -d "/sys/class/net/eth0" ]
+#    then
+#	      ifconfig eth0 down
+#	      ifconfig eth0 up
+#	 fi
+#	/etc/init.d/wifi_led.sh wps_led on
 }
 
 do_stop () {
-	/etc/init.d/wifi_stop.sh all
+	/etc/init.d/wifi_stop.sh softap
 }
 
 do_restart () {

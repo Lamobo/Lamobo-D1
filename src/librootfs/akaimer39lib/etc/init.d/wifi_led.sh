@@ -18,28 +18,29 @@ mode=$2
 brightness=$3
 delay_off=$3
 delay_on=$4
-default_br=1
+default_br=0
 default_blk=100
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin
 
 usage()
 {
-	echo "Usage: $0 led_device mode(on|off|blink)"
-	echo "Light on led: $0 wifi_wps on"
-	echo "Light off led: $0 wifi_wps off"
-	echo "Flash led in 200ms: $0 wifi_wps blink 100 100"
+	echo "Usage: $0 wps_led mode(on|off|blink)"
+	echo "Light on led: $0 wps_led on"
+	echo "Light off led: $0 wps_led off"
+	echo "Flash led in 200ms: $0 wps_led blink 100 100"
 	exit 3
 }
 
 light_on_led()
 {
-	echo 0 > ${led}/brightness
+	echo 1 > ${led}/brightness
+	
 }
 
 light_off_led()
 {
 	echo 0 > ${led}/brightness
-	echo 1 > ${led}/brightness
+	#echo 1 > ${led}/brightness
 }
 
 blink_led()

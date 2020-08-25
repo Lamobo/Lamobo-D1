@@ -20,7 +20,8 @@ check_and_start_wlan()
 	if [ "$mode" != "wlan" ]
 	then
 		mode=wlan
-		/etc/init.d/camera.sh stop
+	echo "camera.sh stop from net_demo.sh (wlan)"
+#		/etc/init.d/camera.sh stop
 		/etc/init.d/wirenet.sh stop
 		/etc/init.d/wifi_start.sh
 	fi
@@ -31,7 +32,8 @@ check_and_start_eth()
 	if [ "$mode" != "eth" ]
 	then
 		mode=eth
-		/etc/init.d/camera.sh stop
+	echo "camera.sh stop from net_demo.sh (eth)"
+#		/etc/init.d/camera.sh stop
 		/etc/init.d/wifi_stop.sh all
 		/etc/init.d/wirenet.sh start #up ethernet and wait for getting ip
 	fi

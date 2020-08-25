@@ -3,14 +3,14 @@
 build_tools()
 {
     echo Updating package list...
-    $APT_GET update
+  #  $APT_GET update
 
     echo Installing tools...
-    $APT_GET install lzop zip
+   # $APT_GET install lzop zip
 
     if [ `uname -m` == 'x86_64' ]; then
         echo Installing 32bit libraries...
-        $APT_GET install --force-yes ia32-libs ia32-libs-multiarch liblzo2-2:i386 liblzma5:i386
+    #    $APT_GET install --force-yes ia32-libs ia32-libs-multiarch liblzo2-2:i386 liblzma5:i386
     fi
 
     if [ ! -d $DEV_ROOT/compiler/arm-2009q3 ]; then
@@ -32,7 +32,7 @@ config_kernel()
     echo Configuring kernel...
     cd $DEV_ROOT/src/kernel
     $MKDIR $DEV_ROOT/output/kernel
-    $MAKE O=$DEV_ROOT/output/kernel aimer39_ak3918_D1_defconfig
+    $MAKE O=$DEV_ROOT/output/kernel aimer39_ak3918_Dipol_defconfig
     #$MAKE O=$DEV_ROOT/output/kernel menuconfig
 }
 
@@ -51,12 +51,17 @@ build_kernel()
     $MAKE -j$NCPU KSRC=$DEV_ROOT/output/kernel modules
     $MAKE -j$NCPU KSRC=$DEV_ROOT/output/kernel strip
     $CP 8188eu.ko $DEV_ROOT/src/librootfs/akwifilib/root
+    $CP $DEV_ROOT/output/kernel/drivers/usb/gadget/plat-anyka/udc.ko $DEV_ROOT/src/librootfs/akwifilib/root
+    $CP $DEV_ROOT/output/kernel/drivers/usb/gadget/g_mass_storage.ko $DEV_ROOT/src/librootfs/akwifilib/root
+    $CP $DEV_ROOT/output/kernel/drivers/usb/host/plat-anyka/otg-hs.ko $DEV_ROOT/src/librootfs/akwifilib/root
 }
 
 clean_kernel()
 {
     echo Cleaning kernel...
     $RM $DEV_ROOT/output/kernel
+    $RM $DEV_ROOT/output/zImage
+    $RM $DEV_ROOT/output/D1*
     cd $DEV_ROOT/src/kernel
     # restore kernel/lib/libakaec.a and kernel/lib/libfha.a
     git checkout lib
@@ -138,6 +143,8 @@ clean_rootfs()
     cd $DEV_ROOT/src/ipcamera
     $MAKE clean
     $RM $DEV_ROOT/src/ipcamera/rootfs/rootfs.tar.gz
+    $RM $DEV_ROOT/output/root*
+	$RM $DEV_ROOT/output/D1*
 }
 
 build_samples()
@@ -156,12 +163,12 @@ build_samples()
 
     cd $DEV_ROOT/src/samples/record_audio
     $MAKE
-    $STRIP record_audio
+    $STRIP ./BUILD_record_audio_EXEC/record_audio
     $CP ./BUILD_record_audio_EXEC/record_audio $DEV_ROOT/output/local/bin
 
     cd $DEV_ROOT/src/samples/record_video
     $MAKE
-    $STRIP record_video
+    $STRIP ./BUILD_record_video_EXEC/record_video
     $CP ./BUILD_record_video_EXEC/record_video $DEV_ROOT/output/local/bin
 }
 
@@ -252,7 +259,7 @@ pack_extra()
 {
     echo Packing TFCard...
     cd $DEV_ROOT/output
-    cat >local/readme.txt << EOF
+    cat > ../local/readme.txt << EOF
 Readme: D1 Extra Program
 ========================
 
@@ -262,47 +269,74 @@ To install these programs, just put bin folder to TFCard.
 To use these programs, just login to D1 termimal, and invoke them.
 EOF
     $RM D1_Extra_$REV_ID.zip
-    $ZIP D1_Extra_$REV_ID.zip local
+    $ZIP D1_Extra_$REV_ID.zip ../local
 }
 
 build_all()
 {
-    build_tools
-    $MKDIR $DEV_ROOT/output/local/bin
-    $MKDIR $DEV_ROOT/output/local/lib
-    config_kernel
-    build_kernel
-    config_busybox
-    build_busybox
+    #build_tools
+    #$MKDIR $DEV_ROOT/output/local/bin
+    #$MKDIR $DEV_ROOT/output/local/lib
+    #config_kernel
+    #build_kernel
+    #config_busybox
+    #build_busybox
     build_rootfs
-    build_samples
-    build_node
-    build_updater
+	#build_samples
+    #build_node
+    #build_updater
     pack_basic
     pack_extra
 }
 
 clean_all()
 {
-    clean_tools
-    clean_kernel
-    clean_busybox
+    #clean_tools
+    #clean_kernel
+    #clean_busybox
     clean_rootfs
-    clean_samples
-    clean_node
-    clean_updater
+    #clean_samples
+    #clean_node
+    #clean_updater
     cd $DEV_ROOT
-    $RM $DEV_ROOT/output
+    #$RM $DEV_ROOT/output
     git status -s --ignored
 }
 
 usage()
 {
-    echo Usage: $0 [-v] [clean]
-    echo Build Lamobo-D1 Firmware.
+    echo Usage: $0 [-vkbr] [clean]
+    echo Build Firmware.
+    echo "-v verbose; -k rebuild kernel; -b rebuild busybox; -r rebuild rootfs"
+}
+rebuild_kernel()
+{
+	echo "Rebuild kernel"
+	clean_kernel
+    config_kernel
+    build_kernel
+    pack_basic
+    pack_extra	
 }
 
+rebuild_rootfs()
+{
+	echo "Rebuild rootfs"
+	clean_rootfs
+    build_rootfs
+    pack_basic
+    pack_extra	
+}
 
+rebuild_busybox()
+{
+	echo "Rebuild busybox"
+	clean_busybox
+    config_busybox
+    build_busybox
+    pack_basic
+    pack_extra	
+}
 #
 # Main
 #
@@ -334,6 +368,18 @@ while :; do
             ACTION=clean
             break
             ;;
+        -k)
+            ACTION=kernel
+            break
+            ;;
+        -r)
+            ACTION=rootfs
+            break
+            ;;
+        -b)
+            ACTION=busybox
+            break
+            ;;                         
         '')
             ACTION=build
             break
@@ -378,4 +424,10 @@ if [ "$ACTION" == "build" ]; then
     build_all
 elif [ "$ACTION" == "clean" ]; then
     clean_all
+elif [ "$ACTION" == "kernel" ]; then
+    rebuild_kernel
+elif [ "$ACTION" == "rootfs" ]; then
+    rebuild_rootfs 
+elif [ "$ACTION" == "busybox" ]; then
+    rebuild_busybox 
 fi

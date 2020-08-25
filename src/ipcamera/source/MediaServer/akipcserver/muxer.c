@@ -408,6 +408,16 @@ int Get_Resolution(char *Res, int *width, int *height)
 		*width = 1280;
 		*height = 720;
 	}
+	else if( !strcmp(Res, "DVC"))
+	{
+		*width = 960;
+		*height = 720;
+	}
+	else if( !strcmp(Res, "svga") )
+	{
+		*width = 800;
+		*height = 600;
+	}
 	else if( !strcmp(Res, "vga") )
 	{
 		*width = 640;
@@ -429,6 +439,7 @@ int Get_Resolution(char *Res, int *width, int *height)
 		parse.real_width2 = 720;
 		parse.real_height2 = 576;
 	}
+	
 	else
 	{
 		printf(" no support Resolution \n ");
@@ -724,7 +735,9 @@ int start_record( int cycrecord )
 	
 	pthread_attr_destroy(&SchedAttr);
 	setled_record_start(video_index-1);
-	
+
+	//SEND SIGNAL TO PARENT PROCESS
+	SendSig_ToParent(SIGUSR1, 1); //rec start
 	return 0;
 }
 

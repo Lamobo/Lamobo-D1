@@ -51,21 +51,19 @@
 #define SELECT_WIFI_MODE	"/etc/init.d/select_wifi_mode.sh"
 #define WIRELESS_SWITCH		"/etc/init.d/select_wifi_mode.sh"
 #define WIRENET_SWITCH 		"/etc/init.d/select_wire_mode.sh"
+#define WIFI_ON		 		"/etc/init.d/wifi_softap.sh start"
+#define WIFI_OFF 			"/etc/init.d/wifi_softap.sh stop"
+#define WIFI_STATUS			"ifconfig wlan0 | grep UP"
+
 #define RECOVER_MODE		"/etc/init.d/wifi_recover.sh"
 #define WIFI_WPS_MODE		"/etc/init.d/wifi_wps.sh"
 #define UPDATE_IMAGE_MODE	"/etc/init.d/update.sh /mnt/zImage"
 #define SDP1_DEV_NAME       "/dev/mmcblk0p1"
 #define SD_DEV_NAME         "/dev/mmcblk0"
 
-#if 0
-#define MOUNT_SDP1			"/bin/mount -rw /dev/mmcblk0p1 /mnt"
-#define MOUNT_SD			"/bin/mount -rw /dev/mmcblk0 /mnt" 
-#define UMOUNT_SD			"/bin/umount /mnt"
-#else
 #define MOUNT_SDP1			"mount -rw /dev/mmcblk0p1 /mnt" 
 #define MOUNT_SD			"mount -rw /dev/mmcblk0 /mnt" 
 #define UMOUNT_SD			"umount /mnt"
-#endif
 
 #define KERNEL_ZIMAGE_FILE			"/mnt/zImage"
 #define SQSH_ZIMAGE_FILE			"/mnt/root.sqsh4"
@@ -80,15 +78,17 @@
 #define K_S_J_IMAGE		(KERNEL_ZIMAGE|SQSH_ZIMAGE|JFFS_ZIMAGE)
 
 
-#define WIFI_MODE			3
+#define WIFI_MODE			1
 #define UPDATE_IMAGE		10
 
 #define UEVENT_BUFFER_SIZE      2048
 
-#define KEY_DEBUG(fmt...)	 //printf(fmt)
+#define KEY_DEBUG(fmt, args...)	 printf(fmt, ## args)
 
 static int old_key = -1;
+static int rec_value = 0;
 static struct timeval start_time;
+
 
 /**
  * *  @brief       diff timeval
@@ -160,7 +160,7 @@ int check_file(void)
     return ret;
 }
 
-/* create the socket to recevie the uevent */
+/* create the socket to receive the uevent */
 static int init_hotplug_sock(void)
 {
     struct sockaddr_nl snl;
@@ -298,17 +298,21 @@ static inline __s32 i2c_smbus_write_byte_data(int file, __u8 command,
  * */
 static int __do_gpio_key_0(double period)
 {
-    char cmd[128];
-    int fd,ret;
-    int start;
+    //char cmd[128];
+   // int ret;
+    //int start;
 
     if (period < 0)
     {
         perror("Error period");
         return -1;
     }
-    else if (period < WIFI_MODE)
+    else /* if (period < WIFI_MODE)*/
     {
+		// start record
+		
+		
+		/*
         int mode = system("/etc/init.d/mode.sh");
         //station = 1
         //softap  = 2
@@ -325,7 +329,33 @@ static int __do_gpio_key_0(double period)
         }
 
         sprintf(cmd,"%s","/etc/init.d/wifi_start.sh keypress");
+        * */
+        
+        if (!rec_value || system("pgrep record_video") == 1) //if process record not found
+        {
+			if (access("/dev/mmcblk0", R_OK) < 0)
+			{
+				printf("Insert SD card!\n");
+			}
+			
+			else
+			{
+				rec_value = 1;
+				system("/etc/init.d/camera.sh start");
+				
+			}
+		}
+        
+        else 
+        {
+			rec_value = 0;
+			system("/etc/init.d/camera.sh stop");
+			
+		}
+    
     }
+
+    /*
     else if (period > UPDATE_IMAGE)
     {
         ret = check_file();
@@ -358,12 +388,13 @@ static int __do_gpio_key_0(double period)
                 break;
         }
     }
+    
     else
     {
         sprintf(cmd, "%s ", WIFI_WPS_MODE);
     }
-
-    system(cmd);
+	*/
+    //system(cmd);
     return 0;
 }
 
@@ -443,8 +474,6 @@ static int do_gpio_key_0(struct input_event *event)
 }
 
 
-
-
 static int do_gpio_key_1(struct input_event *event){
     printf("key_1 pressed.\n");
     int fd,ret;
@@ -455,10 +484,12 @@ static int do_gpio_key_1(struct input_event *event){
     //
 
     printf("code:%d,value:%d\n",event->code,event->value); 
-    system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
+    //system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
     sleep(1);
     system("/etc/init.d/wifi_start.sh keypress &");
     return 0;//cause of 0x34 error, we just start wifi and return.
+    
+    
     if(event->value==0)
         return -1;
     fd = open("/dev/i2c-0",O_RDWR);
@@ -518,7 +549,7 @@ static int do_gpio_key_1(struct input_event *event){
         }
         else{
             printf("Write 0x%04x to 0x%02x[0x%02x] successfully\n", end, i2c_addr, start);
-            system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
+            //system("/etc/init.d/wifi_led.sh wps_led blink 300 300");
             sleep(2);
             system("/etc/init.d/wifi_start.sh keypress &");
         }
@@ -533,7 +564,7 @@ static int do_gpio_key_1(struct input_event *event){
         else{
             printf("Write 0x%04x to 0x%02x[0x%02x] successfully\n", end, i2c_addr, start);
             system("killall -9 finish_station.sh hostapd udhcpd wpa_supplicant udhcpc");
-            system("/etc/init.d/wifi_led.sh wps_led off");
+           // system("/etc/init.d/wifi_led.sh wps_led off");
             printf("[##]wifi_led off\n");
         }
     }
@@ -542,6 +573,26 @@ static int do_gpio_key_1(struct input_event *event){
     return 0;
 
 }
+
+
+
+/**
+ * *  @brief       do_gpio_key_direction
+ * *  @author      A_T
+ * *  @date        28/09/17
+ * *  @param[in]   struct input_event *event, int key event count
+ * *  @return      0 on success
+ * */
+static int do_gpio_key_direction(struct input_event *event){
+	printf("usb direction changed\n");
+	
+	
+	return 0;
+}
+
+
+
+
 /**
  * *  @brief       do_key
  * *  @author      gao wangsheng
@@ -574,14 +625,6 @@ static int do_key(struct input_event *key_event, int key_cnt)
         printf("%s handler event:", __func__);
         switch(event->code)
         {
-            case KEY_UP:
-                printf(" KEY_UP\n");
-                ret = do_adkey_wireless(event);
-                break;
-            case KEY_DOWN:
-                printf(" KEY_DOWN\n");
-                ret = do_adkey_wirenet(event);
-                break;
             case KEY_0:
                 printf(" KEY_0\n");
                 ret = do_gpio_key_0(event);
@@ -590,6 +633,18 @@ static int do_key(struct input_event *key_event, int key_cnt)
                 printf(" KEY_1\n");
                 ret = do_gpio_key_1(event);
                 break;
+             case KEY_DIRECTION:
+                printf(" KEY_DIRECTION\n");
+                ret = do_gpio_key_direction(event);
+                break; 
+             case KEY_UP:
+                printf(" KEY_UP\n");
+                ret = do_adkey_wireless(event);
+                break;
+            case KEY_DOWN:
+                printf(" KEY_DOWN\n");
+                ret = do_adkey_wirenet(event);
+                break;              
             default:
                 printf("%s %s: Error key code!\n", __FILE__, __func__);
                 ret = -1;
@@ -639,7 +694,7 @@ int main (int argc, char **argv)
     struct input_event evt;
     evt.value = 1;
 
-    do_gpio_key_1(&evt);//shut down wifi module power..
+   // do_gpio_key_1(&evt);//shut down wifi module power..
 
     while (1) 
     {
@@ -658,13 +713,7 @@ int main (int argc, char **argv)
             rd = read(gpio_fd, key_event, sizeof(struct input_event) * sizeof(key_event));
             do_key(key_event, rd);
         }
-#if 0
-        if (FD_ISSET(ad_fd, &tempfds))
-        {
-            rd = read(ad_fd, key_event, sizeof(struct input_event) * sizeof(key_event));
-            do_key(key_event, rd);
-        }
-#endif
+
     }
 
     pthread_cancel(pth);
