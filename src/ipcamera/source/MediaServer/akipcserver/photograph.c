@@ -48,7 +48,7 @@ static T_pSTR MakeFileName( )
 	CompleteCreateDirectory(name);
 	* */
 	memset(file, 0x00, 20);
-	sprintf(file, "DC%02d%02d%02d", tnow->tm_hour, tnow->tm_min, tnow->tm_sec);
+	sprintf(file, "/mnt/DC%02d%02d%02d", tnow->tm_hour, tnow->tm_min, tnow->tm_sec);
 	{
 		strFileName = (T_pSTR)malloc( strlen(file) + 30 );
 		if ( NULL == strFileName ) {
@@ -213,7 +213,7 @@ static void *photograph_thread(void *param)
 			printf("filename is NULL \n");
 			goto err;
 		}
-
+		
 		long fid = open(filename, O_RDWR | O_CREAT | O_TRUNC);
 		if(fid <= 0)
 		{

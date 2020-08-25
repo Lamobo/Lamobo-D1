@@ -34,7 +34,7 @@
 #define REC_PARAM_RTSP_AUD	"-sra"										///< Recorder send/receive signals & rtsp stream & audio record
 #define TXT_BUF	100														///< Buffer for text messages
 
-//#define TPOLL_DBG 												///< Enable debug info
+#define TPOLL_DBG 												///< Enable debug info
 
 //extern const char * const sys_siglist[];
 
@@ -367,7 +367,7 @@ static void cmd_code_processing (uint8_t* data)
 		#ifdef TPOLL_DBG
 		fprintf(stdout,"get_photo\n");
 		#endif
-		if( system("pgrep akipcserver") == 0)  {
+		if( pid != -1)  {
 			if(conn != 0) {
 				//create socket to send cmd to akipcserver
 			sock = socket(AF_INET, SOCK_STREAM, 0);
