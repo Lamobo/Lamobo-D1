@@ -34,7 +34,7 @@
 #define REC_PARAM_RTSP_AUD	"-sra"										///< Recorder send/receive signals & rtsp stream & audio record
 #define TXT_BUF	100														///< Buffer for text messages
 
-#define TPOLL_DBG 												///< Enable debug info
+//#define TPOLL_DBG 												///< Enable debug info
 
 //extern const char * const sys_siglist[];
 

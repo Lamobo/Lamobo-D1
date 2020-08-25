@@ -36,7 +36,7 @@ static T_pSTR MakeFileName( )
 	T_pSTR	strFileName = NULL;
 	//T_pSTR	strNumer = NULL;
 	char 	name[20];
-	char 	file[20];
+	char 	file[64];
 	char 	num[5];
 	struct tm *tnow = GetCurTime();
 	//assert( handle );
@@ -47,22 +47,25 @@ static T_pSTR MakeFileName( )
 	sprintf( name, "/mnt/DC%4d%02d%02d/", 1900 + tnow->tm_year, tnow->tm_mon + 1, tnow->tm_mday );
 	CompleteCreateDirectory(name);
 	* */
-	memset(file, 0x00, 20);
-	sprintf(file, "/mnt/DC%02d%02d%02d", tnow->tm_hour, tnow->tm_min, tnow->tm_sec);
-	{
-		strFileName = (T_pSTR)malloc( strlen(file) + 30 );
-		if ( NULL == strFileName ) {
-			goto err;
-		}
-		memset(strFileName, 0x00, strlen(file) + 30);
-		strcat(strFileName, name);
-		strcat( strFileName, file );
-		
-		strcat( strFileName, ".jpeg" );
-
-		//free( strTime );
-		//strTime = NULL;
+	memset(file, 0x00, 64);
+	sprintf(file,"/mnt/DC_%4d_%02d_%02d_%02d%02d%02d",
+			1900 + tnow->tm_year, tnow->tm_mon + 1, tnow->tm_mday, tnow->tm_hour, 
+			tnow->tm_min, tnow->tm_sec);
+	//sprintf(file, "/mnt/DC%02d%02d%02d", tnow->tm_hour, tnow->tm_min, tnow->tm_sec);
+	
+	strFileName = (T_pSTR)malloc( strlen(file) + 30 );
+	if ( NULL == strFileName ) {
+		return strFileName;
 	}
+	memset(strFileName, 0x00, strlen(file) + 30);
+	//strcat(strFileName, name);
+	strcat( strFileName, file );
+	
+	strcat( strFileName, ".jpeg" );
+
+	//free( strTime );
+	//strTime = NULL;
+	
 	while ( AK_TRUE ) 
 	{
 		if ( IsExists( strFileName ) ) 
@@ -70,7 +73,11 @@ static T_pSTR MakeFileName( )
 			++nFileIndex;
 			if ( nFileIndex > 99 ) {
 				printf( "MakeFileName::too many file have same name!\n" );
-				goto err;
+					if ( strFileName ) {
+						free( strFileName );
+						strFileName = NULL;
+					}
+					return strFileName;
 			}
 			memset(strFileName, 0x00, strlen(file) + 30);
 			sprintf(num, "_%02d", ( int )nFileIndex);
@@ -84,18 +91,6 @@ static T_pSTR MakeFileName( )
 		}
 
 		break;
-	}
-	
-	return strFileName;
-err:
-	/*
-	if ( strTime ) {
-		free( strTime );
-	}
-	*/
-	if ( strFileName ) {
-		free( strFileName );
-		strFileName = NULL;
 	}
 	
 	return strFileName;
