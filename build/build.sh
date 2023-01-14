@@ -7,11 +7,8 @@ build_tools()
 
     echo Installing tools...
     $APT_GET install lzop zip
-
-    if [ `uname -m` == 'x86_64' ]; then
-        echo Installing 32bit libraries...
-        $APT_GET install --force-yes ia32-libs ia32-libs-multiarch liblzo2-2:i386 liblzma5:i386
-    fi
+    echo Installing libraries...
+    $APT_GET install mtd-utils liblzo2-dev liblzo2-2 liblzma5
 
     if [ ! -d $DEV_ROOT/compiler/arm-2009q3 ]; then
         $MKDIR $DEV_ROOT/compiler
@@ -302,6 +299,34 @@ usage()
     echo Build Lamobo-D1 Firmware.
 }
 
+help() 
+{
+    echo Help:
+    echo "    clean"
+    echo "    build"
+    echo "    build_tools"
+    echo "    clean_tools"
+    echo "    config_kernel"
+    echo "    build_kernel"
+    echo "    clean_kernel"
+    echo "    config_busybox"
+    echo "    build_busybox"
+    echo "    clean_busybox"
+    echo "    build_rootfs"
+    echo "    clean_rootfs"
+    echo "    build_samples"
+    echo "    clean_samples"
+    echo "    build_node"
+    echo "    clean_node"
+    echo "    build_updater"
+    echo "    clean_updater"
+    echo "    pack_basic"
+    echo "    pack_extra"
+    echo "    build_all"
+    echo "    clean_all"
+    echo "    usage"
+    echo "    help"
+}
 
 #
 # Main
@@ -332,6 +357,98 @@ while :; do
             ;;
         clean)
             ACTION=clean
+            break
+            ;;
+        build)
+            ACTION=build
+            break
+            ;;
+        build_tools)
+            ACTION=build_tools
+            break
+            ;;
+        clean_tools)
+            ACTION=clean_tools
+            break
+            ;;
+        config_kernel)
+            ACTION=config_kernel
+            break
+            ;;
+        build_kernel)
+            ACTION=build_kernel
+            break
+            ;;
+        clean_kernel)
+            ACTION=clean_kernel
+            break
+            ;;
+        config_busybox)
+            ACTION=config_busybox
+            break
+            ;;
+        build_busybox)
+            ACTION=build_busybox
+            break
+            ;;
+        clean_busybox)
+            ACTION=clean_busybox
+            break
+            ;;
+        build_rootfs)
+            ACTION=build_rootfs
+            break
+            ;;
+        clean_rootfs)
+            ACTION=clean_rootfs
+            break
+            ;;
+        build_samples)
+            ACTION=build_samples
+            break
+            ;;
+        clean_samples)
+            ACTION=clean_samples
+            break
+            ;;
+        build_node)
+            ACTION=build_node
+            break
+            ;;
+        clean_node)
+            ACTION=clean_node
+            break
+            ;;
+        build_updater)
+            ACTION=build_updater
+            break
+            ;;
+        clean_updater)
+            ACTION=clean_updater
+            break
+            ;;
+        pack_basic)
+            ACTION=pack_basic
+            break
+            ;;
+        pack_extra)
+            ACTION=pack_extra
+            break
+            ;;
+        build_all)
+            ACTION=build_all
+            break
+            ;;
+        clean_all)
+            ACTION=clean_all
+            break
+            ;;
+        usage)
+            ACTION=usage
+            break
+            ;;
+        help)
+            ACTION=help
             break
             ;;
         '')
@@ -374,8 +491,78 @@ fi
 #
 # Perform build actions
 #
-if [ "$ACTION" == "build" ]; then
-    build_all
-elif [ "$ACTION" == "clean" ]; then
-    clean_all
-fi
+case $ACTION in 
+    "build")
+        build_all
+        ;;
+    "clean")
+        clean_all
+        ;;
+    "build_tools")
+        build_tools
+        ;;
+    "clean_tools")
+        clean_tools
+        ;;
+    "config_kernel")
+        config_kernel
+        ;;
+    "build_kernel")
+        build_kernel
+        ;;
+    "clean_kernel")
+        clean_kernel
+        ;;
+    "config_busybox")
+        config_busybox
+        ;;
+    "build_busybox")
+        build_busybox
+        ;;
+    "clean_busybox")
+        clean_busybox
+        ;;
+    "build_rootfs")
+        build_rootfs
+        ;;
+    "clean_rootfs")
+        clean_rootfs
+        ;;
+    "build_samples")
+        build_samples
+        ;;
+    "clean_samples")
+        clean_samples
+        ;;
+    "build_node")
+        build_node
+        ;;
+    "clean_node")
+        clean_node
+        ;;
+    "build_updater")
+        build_updater
+        ;;
+    "clean_updater")
+        clean_updater
+        ;;
+    "pack_basic")
+        pack_basic
+        ;;
+    "pack_extra")
+        pack_extra
+        ;;
+    "build_all")
+        build_all
+        ;;
+    "clean_all")
+        clean_all
+        ;;
+    "usage")
+        usage
+        ;;
+    "help")
+        help
+        ;;
+
+esac
