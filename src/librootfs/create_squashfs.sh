@@ -14,7 +14,7 @@ cd ..
 
 # packing
 rm -f root.sqsh4
-./mksquashfs rootfs root.sqsh4 -noappend -comp xz -no-progress -e _etc
+mksquashfs rootfs root.sqsh4 -noappend -comp xz -no-progress -e _etc
 
 # recover rootfs/etc
 cd rootfs
